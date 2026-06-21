@@ -1,0 +1,14 @@
+# Dev: Vite com hot-reload dentro do container
+FROM node:22-alpine
+
+WORKDIR /app
+
+# Instala deps primeiro (cache de camada)
+COPY package.json package-lock.json* ./
+RUN npm install
+
+# O código é montado via volume no docker-compose
+COPY . .
+
+EXPOSE 5173
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

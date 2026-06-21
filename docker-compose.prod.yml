@@ -1,0 +1,9 @@
+services:
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: encyclobol-web
+    ports:
+      - "8080:80"
+    restart: unless-stopped
