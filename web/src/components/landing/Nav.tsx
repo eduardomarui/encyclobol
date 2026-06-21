@@ -4,10 +4,12 @@ import { BallMark } from './Icons'
 
 type NavLink = { label: string; to?: string; href?: string }
 
+const BASE = import.meta.env.BASE_URL
+
 const links: NavLink[] = [
   { label: 'Os jogos', to: '/jogos' },
-  { label: 'Como se joga', href: '/#como-funciona' },
-  { label: 'Assine', href: '/#planos' },
+  { label: 'Como se joga', href: `${BASE}#como-funciona` },
+  { label: 'Assine', href: `${BASE}#planos` },
 ]
 
 function NavItem({ link, onClick }: { link: NavLink; onClick?: () => void }) {

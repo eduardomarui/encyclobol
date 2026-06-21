@@ -10,7 +10,7 @@ import Misterioso from './pages/Misterioso'
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/jogos" element={<Jogos />} />
