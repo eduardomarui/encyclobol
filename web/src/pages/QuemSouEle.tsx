@@ -148,7 +148,7 @@ export default function QuemSouEle() {
   }
 
   function compartilhar() {
-    const head = `Encyclobol · Quem sou ele? #${dayNumber()} — ${
+    const head = `Encyclobol · Tira-Teima #${dayNumber()} — ${
       won ? `${guesses.length}/${MAX_ATTEMPTS}` : `X/${MAX_ATTEMPTS}`
     }`
     const grid = guesses
@@ -190,7 +190,7 @@ export default function QuemSouEle() {
       <main className="container-page flex flex-1 flex-col items-center py-8">
         <p className="kicker">Adivinhação · jogo 01</p>
         <h1 className="mt-1 font-display text-4xl uppercase tracking-tight text-ink-900 sm:text-5xl">
-          Quem sou ele?
+          Tira-Teima
         </h1>
 
         <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
