@@ -31,6 +31,11 @@ export default {
           600: '#a83823',
           500: '#c8472b',
         },
+        // Amarelo de marca-texto (feedback "letra existe")
+        corn: {
+          600: '#a8862a',
+          500: '#c9a227',
+        },
       },
       fontFamily: {
         // Manchete pesada condensada

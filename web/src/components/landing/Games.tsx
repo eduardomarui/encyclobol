@@ -1,4 +1,5 @@
 import type { ComponentType } from 'react'
+import { Link } from 'react-router-dom'
 import {
   PlayerIcon,
   TimerIcon,
@@ -17,6 +18,7 @@ type Game = {
   title: string
   desc: string
   status: Status
+  to?: string
 }
 
 const games: Game[] = [
@@ -27,6 +29,7 @@ const games: Game[] = [
     title: 'Quem sou ele?',
     desc: 'Seis tentativas pra cravar o sobrenome do craque. Errou? O alfabeto vai pintando de verde e amarelo até você acertar.',
     status: 'Edição de hoje',
+    to: '/jogos/quem-sou-ele',
   },
   {
     n: '02',
@@ -102,15 +105,13 @@ export default function Games() {
         </header>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3">
-          {games.map((g, i) => {
+          {games.map((g) => {
             const soon = g.status === 'Em breve'
-            return (
-              <article
-                key={g.title}
-                className={`group relative flex flex-col border-ink-900/15 p-6 sm:[&:nth-child(odd)]:border-r lg:[&:nth-child(3n+1)]:border-r lg:[&:nth-child(3n+2)]:border-r lg:[&:nth-child(3n)]:border-r-0 ${
-                  i >= 3 ? 'border-t' : 'border-t'
-                } ${soon ? 'opacity-70' : 'transition-colors hover:bg-paper'}`}
-              >
+            const cls = `group relative flex flex-col border-t border-ink-900/15 p-6 sm:[&:nth-child(odd)]:border-r lg:[&:nth-child(3n+1)]:border-r lg:[&:nth-child(3n+2)]:border-r lg:[&:nth-child(3n)]:border-r-0 ${
+              soon ? 'opacity-70' : 'transition-colors hover:bg-paper'
+            }`
+            const inner = (
+              <>
                 <div className="flex items-start justify-between">
                   <span className="font-display text-3xl text-ink-900/20">{g.n}</span>
                   <g.Icon className="h-9 w-9 text-grass-600" />
@@ -132,6 +133,15 @@ export default function Games() {
                     </span>
                   )}
                 </div>
+              </>
+            )
+            return g.to ? (
+              <Link key={g.title} to={g.to} className={cls}>
+                {inner}
+              </Link>
+            ) : (
+              <article key={g.title} className={cls}>
+                {inner}
               </article>
             )
           })}

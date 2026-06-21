@@ -1,0 +1,21 @@
+import Nav from '../components/landing/Nav'
+import Hero from '../components/landing/Hero'
+import Games from '../components/landing/Games'
+import HowItWorks from '../components/landing/HowItWorks'
+import Pricing from '../components/landing/Pricing'
+import Footer from '../components/landing/Footer'
+
+export default function Landing() {
+  return (
+    <div className="min-h-screen bg-paper">
+      <Nav />
+      <main>
+        <Hero />
+        <Games />
+        <HowItWorks />
+        <Pricing />
+      </main>
+      <Footer />
+    </div>
+  )
+}

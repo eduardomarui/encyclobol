@@ -1,21 +1,14 @@
-import Nav from './components/landing/Nav'
-import Hero from './components/landing/Hero'
-import Games from './components/landing/Games'
-import HowItWorks from './components/landing/HowItWorks'
-import Pricing from './components/landing/Pricing'
-import Footer from './components/landing/Footer'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import Landing from './pages/Landing'
+import QuemSouEle from './pages/QuemSouEle'
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-paper">
-      <Nav />
-      <main>
-        <Hero />
-        <Games />
-        <HowItWorks />
-        <Pricing />
-      </main>
-      <Footer />
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/jogos/quem-sou-ele" element={<QuemSouEle />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
