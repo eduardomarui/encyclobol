@@ -1,41 +1,82 @@
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { BallMark } from './Icons'
 
-const links = [
-  { href: '#jogos', label: 'Os jogos' },
-  { href: '#como-funciona', label: 'Como se joga' },
-  { href: '#planos', label: 'Assine' },
+type NavLink = { label: string; to?: string; href?: string }
+
+const links: NavLink[] = [
+  { label: 'Os jogos', to: '/jogos' },
+  { label: 'Como se joga', href: '/#como-funciona' },
+  { label: 'Assine', href: '/#planos' },
 ]
 
+function NavItem({ link, onClick }: { link: NavLink; onClick?: () => void }) {
+  const cls =
+    'font-cond text-sm font-500 uppercase tracking-wider text-ink-700 transition-colors hover:text-ochre-600'
+  return link.to ? (
+    <Link to={link.to} className={cls} onClick={onClick}>
+      {link.label}
+    </Link>
+  ) : (
+    <a href={link.href} className={cls} onClick={onClick}>
+      {link.label}
+    </a>
+  )
+}
+
 export default function Nav() {
+  const [open, setOpen] = useState(false)
+
   return (
     <header className="sticky top-0 z-50 border-b-2 border-ink-900 bg-paper/95 backdrop-blur-sm">
       <nav className="container-page flex h-14 items-center justify-between">
-        <a href="#" className="flex items-center gap-2 text-ink-900">
+        <Link to="/" className="flex items-center gap-2 text-ink-900">
           <BallMark className="h-7 w-7 text-grass-600" />
           <span className="font-display text-2xl uppercase tracking-tight">
             Encyclobol
           </span>
-        </a>
+        </Link>
 
         <div className="hidden items-center gap-7 md:flex">
           {links.map((l) => (
-            <a
-              key={l.href}
-              href={l.href}
-              className="font-cond text-sm font-500 uppercase tracking-wider text-ink-700 transition-colors hover:text-ochre-600"
-            >
-              {l.label}
-            </a>
+            <NavItem key={l.label} link={l} />
           ))}
         </div>
 
-        <a
-          href="#jogos"
-          className="btn-stamp bg-ink-900 px-4 py-2 text-paper hover:bg-grass-600"
-        >
-          Edição de hoje
-        </a>
+        <div className="flex items-center gap-2">
+          <Link
+            to="/jogos"
+            className="btn-stamp bg-ink-900 px-4 py-2 text-paper hover:bg-grass-600"
+          >
+            Edição de hoje
+          </Link>
+          <button
+            onClick={() => setOpen((o) => !o)}
+            className="flex h-9 w-9 items-center justify-center border-2 border-ink-900 text-ink-900 md:hidden"
+            aria-label="Abrir menu"
+            aria-expanded={open}
+          >
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+              {open ? (
+                <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
+              ) : (
+                <path d="M4 7h16M4 12h16M4 17h16" strokeLinecap="round" />
+              )}
+            </svg>
+          </button>
+        </div>
       </nav>
+
+      {/* Menu mobile */}
+      {open && (
+        <div className="border-t border-ink-900/15 bg-paper md:hidden">
+          <div className="container-page flex flex-col gap-4 py-4">
+            {links.map((l) => (
+              <NavItem key={l.label} link={l} onClick={() => setOpen(false)} />
+            ))}
+          </div>
+        </div>
+      )}
     </header>
   )
 }

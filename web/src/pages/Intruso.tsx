@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { intruso } from '../data/intruso'
 import { dailySequence, dayNumber, seededShuffle } from '../lib/daily'
@@ -17,23 +17,36 @@ type Round = { players: string[]; intruderIdx: number; rule: string }
 
 const saved = loadIntrusoDaily()
 
-function buildDaily(): { picks: number[]; rounds: Round[] } {
-  const picks = saved?.picks ?? dailySequence(intruso.length, COUNT)
-  const day = dayNumber()
-  const rounds = picks.map((bi, qi) => {
+function makeRounds(picks: number[], seedBase: number): Round[] {
+  return picks.map((bi, qi) => {
     const base = intruso[bi]
-    const players = seededShuffle(base.players, day * 131 + qi * 17 + 1)
+    const players = seededShuffle(base.players, seedBase + qi * 17)
     return {
       players,
       intruderIdx: players.indexOf(base.intruder),
       rule: base.rule,
     }
   })
-  return { picks, rounds }
+}
+
+function dailyGame() {
+  const picks = saved?.picks ?? dailySequence(intruso.length, COUNT)
+  return { picks, rounds: makeRounds(picks, dayNumber() * 131 + 1) }
+}
+
+function practiceGame() {
+  const seed = Math.floor(Math.random() * 1e9) + 1
+  const picks = seededShuffle(
+    intruso.map((_, i) => i),
+    seed,
+  ).slice(0, COUNT)
+  return { picks, rounds: makeRounds(picks, seed) }
 }
 
 export default function Intruso() {
-  const { picks, rounds } = useMemo(buildDaily, [])
+  const [mode, setMode] = useState<'daily' | 'practice'>('daily')
+  const [game, setGame] = useState(dailyGame)
+  const { picks, rounds } = game
   const total = rounds.length
 
   const [index, setIndex] = useState(saved ? total : 0)
@@ -63,18 +76,27 @@ export default function Intruso() {
   }, [phase, index])
 
   useEffect(() => {
-    if (finished && !recorded && answers.length === total) {
+    if (mode === 'daily' && finished && !recorded && answers.length === total) {
       setStats(recordIntruso(score, total))
       saveIntrusoDaily({ day: dayNumber(), picks, answers, score })
       setRecorded(true)
     }
-  }, [finished, recorded, answers, total, score, picks])
+  }, [mode, finished, recorded, answers, total, score, picks])
 
   function answer(i: number) {
     if (phase !== 'answering') return
     setSelected(i)
     setAnswers((a) => [...a, i])
     setPhase('revealed')
+  }
+
+  function treinar() {
+    setMode('practice')
+    setGame(practiceGame())
+    setIndex(0)
+    setAnswers([])
+    setSelected(null)
+    setPhase('answering')
   }
 
   function compartilhar() {
@@ -106,7 +128,7 @@ export default function Intruso() {
             </span>
           </Link>
           <span className="font-cond text-xs font-500 uppercase tracking-[0.16em] text-ink-600">
-            Edição diária
+            {mode === 'daily' ? 'Edição diária' : 'Modo treino'}
           </span>
         </div>
       </header>
@@ -163,7 +185,7 @@ export default function Intruso() {
 
         {finished && (
           <div className="mt-8 w-full max-w-md border-2 border-ink-900 bg-paper-100 p-6 text-center">
-            <p className="kicker">Fim de jogo</p>
+            <p className="kicker">Fim de jogo{mode === 'practice' && ' · treino'}</p>
             <p className="mt-1 font-display text-6xl text-ink-900">
               {score}
               <span className="text-3xl text-ink-500">/{total}</span>
@@ -176,27 +198,37 @@ export default function Intruso() {
                   : 'As pistas falsas te pegaram. Amanhã tem mais.'}
             </p>
 
-            <div className="mt-5 grid grid-cols-4 gap-px overflow-hidden border-2 border-ink-900 bg-ink-900/15">
-              {[
-                ['Jogos', stats.played],
-                ['Recorde', stats.best],
-                ['Média', avg],
-                ['Sequência', stats.currentStreak],
-              ].map(([k, v]) => (
-                <div key={k} className="bg-paper-100 px-1 py-2">
-                  <div className="font-display text-2xl text-ink-900">{v}</div>
-                  <div className="font-cond text-[9px] font-500 uppercase tracking-wide text-ink-600">
-                    {k}
+            {mode === 'daily' && (
+              <div className="mt-5 grid grid-cols-4 gap-px overflow-hidden border-2 border-ink-900 bg-ink-900/15">
+                {[
+                  ['Jogos', stats.played],
+                  ['Recorde', stats.best],
+                  ['Média', avg],
+                  ['Sequência', stats.currentStreak],
+                ].map(([k, v]) => (
+                  <div key={k} className="bg-paper-100 px-1 py-2">
+                    <div className="font-display text-2xl text-ink-900">{v}</div>
+                    <div className="font-cond text-[9px] font-500 uppercase tracking-wide text-ink-600">
+                      {k}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
 
+            {mode === 'daily' && (
+              <button
+                onClick={compartilhar}
+                className="btn-stamp mt-5 w-full bg-ink-900 px-6 py-2.5 text-paper hover:bg-grass-600"
+              >
+                {copied ? 'Copiado!' : 'Compartilhar resultado'}
+              </button>
+            )}
             <button
-              onClick={compartilhar}
-              className="btn-stamp mt-5 w-full bg-ink-900 px-6 py-2.5 text-paper hover:bg-grass-600"
+              onClick={treinar}
+              className="btn-stamp mt-2 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700"
             >
-              {copied ? 'Copiado!' : 'Compartilhar resultado'}
+              Treinar com outras rodadas
             </button>
             <Link
               to="/"

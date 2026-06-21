@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { quiz } from '../data/quiz'
 import { dailySequence, dayNumber, seededShuffle } from '../lib/daily'
@@ -18,15 +18,12 @@ type Prepared = { q: string; cat: string; options: string[]; correct: number }
 
 const saved = loadQuizDaily()
 
-// Set de perguntas do dia, com alternativas embaralhadas de forma determinística.
-function buildDaily(): { picks: number[]; questions: Prepared[] } {
-  const picks = saved?.picks ?? dailySequence(quiz.length, COUNT)
-  const day = dayNumber()
-  const questions = picks.map((bi, qi) => {
+function makeRounds(picks: number[], seedBase: number): Prepared[] {
+  return picks.map((bi, qi) => {
     const base = quiz[bi]
     const order = seededShuffle(
       base.options.map((_, i) => i),
-      day * 101 + qi * 7 + 1,
+      seedBase + qi * 7,
     )
     return {
       q: base.q,
@@ -35,11 +32,26 @@ function buildDaily(): { picks: number[]; questions: Prepared[] } {
       correct: order.indexOf(base.correct),
     }
   })
-  return { picks, questions }
+}
+
+function dailyGame() {
+  const picks = saved?.picks ?? dailySequence(quiz.length, COUNT)
+  return { picks, questions: makeRounds(picks, dayNumber() * 101 + 1) }
+}
+
+function practiceGame() {
+  const seed = Math.floor(Math.random() * 1e9) + 1
+  const picks = seededShuffle(
+    quiz.map((_, i) => i),
+    seed,
+  ).slice(0, COUNT)
+  return { picks, questions: makeRounds(picks, seed) }
 }
 
 export default function QuizRelampago() {
-  const { picks, questions } = useMemo(buildDaily, [])
+  const [mode, setMode] = useState<'daily' | 'practice'>('daily')
+  const [game, setGame] = useState(dailyGame)
+  const { picks, questions } = game
   const total = questions.length
 
   const [index, setIndex] = useState(saved ? total : 0)
@@ -57,7 +69,6 @@ export default function QuizRelampago() {
     0,
   )
 
-  // Reinicia o estado a cada nova pergunta.
   useEffect(() => {
     if (finished) return
     setSelected(null)
@@ -65,7 +76,6 @@ export default function QuizRelampago() {
     setTimeLeft(SECONDS)
   }, [index, finished])
 
-  // Cronômetro.
   useEffect(() => {
     if (finished || phase !== 'answering') return
     if (timeLeft <= 0) {
@@ -77,27 +87,35 @@ export default function QuizRelampago() {
     return () => clearTimeout(t)
   }, [timeLeft, phase, finished])
 
-  // Avança após revelar a resposta.
   useEffect(() => {
     if (phase !== 'revealed') return
     const t = setTimeout(() => setIndex((i) => i + 1), 1300)
     return () => clearTimeout(t)
   }, [phase, index])
 
-  // Registra resultado e persiste, uma vez.
   useEffect(() => {
-    if (finished && !recorded && answers.length === total) {
+    if (mode === 'daily' && finished && !recorded && answers.length === total) {
       setStats(recordQuiz(score, total))
       saveQuizDaily({ day: dayNumber(), picks, answers, score })
       setRecorded(true)
     }
-  }, [finished, recorded, answers, total, score, picks])
+  }, [mode, finished, recorded, answers, total, score, picks])
 
   function answer(i: number) {
     if (phase !== 'answering') return
     setSelected(i)
     setAnswers((a) => [...a, i])
     setPhase('revealed')
+  }
+
+  function treinar() {
+    setMode('practice')
+    setGame(practiceGame())
+    setIndex(0)
+    setAnswers([])
+    setSelected(null)
+    setPhase('answering')
+    setTimeLeft(SECONDS)
   }
 
   function compartilhar() {
@@ -130,7 +148,7 @@ export default function QuizRelampago() {
             </span>
           </Link>
           <span className="font-cond text-xs font-500 uppercase tracking-[0.16em] text-ink-600">
-            Edição diária
+            {mode === 'daily' ? 'Edição diária' : 'Modo treino'}
           </span>
         </div>
       </header>
@@ -143,7 +161,6 @@ export default function QuizRelampago() {
 
         {!finished && current && (
           <div className="mt-8 w-full max-w-xl">
-            {/* Barra de progresso + cronômetro */}
             <div className="flex items-center justify-between font-cond text-xs font-600 uppercase tracking-wider text-ink-600">
               <span>
                 Pergunta {index + 1} de {total}
@@ -196,7 +213,7 @@ export default function QuizRelampago() {
 
         {finished && (
           <div className="mt-8 w-full max-w-md border-2 border-ink-900 bg-paper-100 p-6 text-center">
-            <p className="kicker">Fim de jogo</p>
+            <p className="kicker">Fim de jogo{mode === 'practice' && ' · treino'}</p>
             <p className="mt-1 font-display text-6xl text-ink-900">
               {score}
               <span className="text-3xl text-ink-500">/{total}</span>
@@ -209,21 +226,23 @@ export default function QuizRelampago() {
                   : 'Bola pra frente — amanhã tem revanche.'}
             </p>
 
-            <div className="mt-5 grid grid-cols-4 gap-px overflow-hidden border-2 border-ink-900 bg-ink-900/15">
-              {[
-                ['Jogos', stats.played],
-                ['Recorde', stats.best],
-                ['Média', avg],
-                ['Sequência', stats.currentStreak],
-              ].map(([k, v]) => (
-                <div key={k} className="bg-paper-100 px-1 py-2">
-                  <div className="font-display text-2xl text-ink-900">{v}</div>
-                  <div className="font-cond text-[9px] font-500 uppercase tracking-wide text-ink-600">
-                    {k}
+            {mode === 'daily' && (
+              <div className="mt-5 grid grid-cols-4 gap-px overflow-hidden border-2 border-ink-900 bg-ink-900/15">
+                {[
+                  ['Jogos', stats.played],
+                  ['Recorde', stats.best],
+                  ['Média', avg],
+                  ['Sequência', stats.currentStreak],
+                ].map(([k, v]) => (
+                  <div key={k} className="bg-paper-100 px-1 py-2">
+                    <div className="font-display text-2xl text-ink-900">{v}</div>
+                    <div className="font-cond text-[9px] font-500 uppercase tracking-wide text-ink-600">
+                      {k}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
 
             {/* Gabarito */}
             <div className="mt-4 space-y-1.5 text-left">
@@ -243,11 +262,19 @@ export default function QuizRelampago() {
               })}
             </div>
 
+            {mode === 'daily' && (
+              <button
+                onClick={compartilhar}
+                className="btn-stamp mt-5 w-full bg-ink-900 px-6 py-2.5 text-paper hover:bg-grass-600"
+              >
+                {copied ? 'Copiado!' : 'Compartilhar resultado'}
+              </button>
+            )}
             <button
-              onClick={compartilhar}
-              className="btn-stamp mt-5 w-full bg-ink-900 px-6 py-2.5 text-paper hover:bg-grass-600"
+              onClick={treinar}
+              className="btn-stamp mt-2 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700"
             >
-              {copied ? 'Copiado!' : 'Compartilhar resultado'}
+              Treinar com outras perguntas
             </button>
             <Link
               to="/"
