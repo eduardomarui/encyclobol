@@ -4,7 +4,7 @@ import {
   PlayerIcon,
   TimerIcon,
   GridIcon,
-  TrophyIcon,
+  TimelineIcon,
   ChainIcon,
   JerseyIcon,
 } from './Icons'
@@ -51,11 +51,12 @@ const games: Game[] = [
   },
   {
     n: '04',
-    Icon: TrophyIcon,
-    category: 'Campanha',
-    title: 'Montador de Lendas',
-    desc: 'Garimpe o elenco perfeito, era por era, posição por posição, e vá atrás do caneco numa Copa do Mundo virtual.',
-    status: 'No ar',
+    Icon: TimelineIcon,
+    category: 'Cronologia',
+    title: 'Linha do Tempo',
+    desc: 'Encaixe cada craque na ordem certa da história. Uma carta fora de época e a sua sequência morre.',
+    status: 'Edição de hoje',
+    to: '/jogos/linha-do-tempo',
   },
   {
     n: '05',

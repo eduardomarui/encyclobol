@@ -3,7 +3,7 @@ import { BallMark } from './Icons'
 const cols = [
   {
     title: 'O caderno',
-    links: ['Tira-Teima', 'Quiz Relâmpago', 'Conexões', 'Montador de Lendas'],
+    links: ['Tira-Teima', 'Quiz Relâmpago', 'Conexões', 'Linha do Tempo'],
   },
   {
     title: 'A casa',

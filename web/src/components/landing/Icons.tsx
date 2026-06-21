@@ -72,6 +72,18 @@ export function JerseyIcon({ className }: IconProps) {
   )
 }
 
+export function TimelineIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className} aria-hidden>
+      <path d="M4 16h24" />
+      <circle cx="8" cy="16" r="2.5" fill="currentColor" />
+      <circle cx="16" cy="16" r="2.5" />
+      <circle cx="24" cy="16" r="2.5" fill="currentColor" />
+      <path d="M16 10v3M16 19v3" opacity="0.5" />
+    </svg>
+  )
+}
+
 export function GridIcon({ className }: IconProps) {
   return (
     <svg {...base} className={className} aria-hidden>
