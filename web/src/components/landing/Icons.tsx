@@ -72,6 +72,23 @@ export function JerseyIcon({ className }: IconProps) {
   )
 }
 
+export function IntruderIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className} aria-hidden>
+      <rect x="3" y="13" width="6" height="6" rx="1" />
+      <rect x="13" y="13" width="6" height="6" rx="1" />
+      <rect
+        x="23.5"
+        y="13"
+        width="6"
+        height="6"
+        rx="1"
+        transform="rotate(45 26.5 16)"
+      />
+    </svg>
+  )
+}
+
 export function TimelineIcon({ className }: IconProps) {
   return (
     <svg {...base} className={className} aria-hidden>

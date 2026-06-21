@@ -5,7 +5,7 @@ import {
   TimerIcon,
   GridIcon,
   TimelineIcon,
-  ChainIcon,
+  IntruderIcon,
   JerseyIcon,
 } from './Icons'
 
@@ -60,11 +60,12 @@ const games: Game[] = [
   },
   {
     n: '05',
-    Icon: ChainIcon,
-    category: 'Memória',
-    title: 'Cadeia de Passes',
-    desc: 'Ligue jogadores que dividiram o mesmo vestiário. Quanto tempo sua memória aguenta antes de quebrar a corrente?',
-    status: 'Em breve',
+    Icon: IntruderIcon,
+    category: 'Dedução',
+    title: 'O Intruso',
+    desc: 'Quatro craques, três com algo em comum e um infiltrado. Ache quem não pertence — cuidado com as pistas falsas.',
+    status: 'Edição de hoje',
+    to: '/jogos/o-intruso',
   },
   {
     n: '06',
