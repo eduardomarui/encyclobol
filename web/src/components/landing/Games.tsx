@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import {
   PlayerIcon,
   TimerIcon,
-  PitchIcon,
+  GridIcon,
   TrophyIcon,
   ChainIcon,
   JerseyIcon,
@@ -42,12 +42,12 @@ const games: Game[] = [
   },
   {
     n: '03',
-    Icon: PitchIcon,
-    category: 'Tática',
-    title: 'Escalação Rápida',
-    desc: 'Monte o time no 4-4-2 com craques de todo tempo, escolha o estilo e mande pra campo. O motor simula o resto.',
-    status: 'No ar',
-    to: '/jogos/escalacao-rapida',
+    Icon: GridIcon,
+    category: 'Lógica',
+    title: 'Conexões',
+    desc: 'Dezesseis craques, quatro grupos secretos. Ache o que liga cada quarteto antes de queimar as quatro tentativas.',
+    status: 'Edição de hoje',
+    to: '/jogos/conexoes',
   },
   {
     n: '04',

@@ -72,6 +72,17 @@ export function JerseyIcon({ className }: IconProps) {
   )
 }
 
+export function GridIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className} aria-hidden>
+      <rect x="5" y="5" width="9" height="9" rx="1" />
+      <rect x="18" y="5" width="9" height="9" rx="1" />
+      <rect x="5" y="18" width="9" height="9" rx="1" />
+      <rect x="18" y="18" width="9" height="9" rx="1" />
+    </svg>
+  )
+}
+
 // Marca: bola com gomos clássicos
 export function BallMark({ className }: IconProps) {
   return (
