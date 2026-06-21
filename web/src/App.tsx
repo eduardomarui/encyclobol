@@ -5,6 +5,7 @@ import QuizRelampago from './pages/QuizRelampago'
 import Conexoes from './pages/Conexoes'
 import LinhaDoTempo from './pages/LinhaDoTempo'
 import Intruso from './pages/Intruso'
+import Misterioso from './pages/Misterioso'
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
         <Route path="/jogos/conexoes" element={<Conexoes />} />
         <Route path="/jogos/linha-do-tempo" element={<LinhaDoTempo />} />
         <Route path="/jogos/o-intruso" element={<Intruso />} />
+        <Route path="/jogos/craque-misterioso" element={<Misterioso />} />
       </Routes>
     </BrowserRouter>
   )

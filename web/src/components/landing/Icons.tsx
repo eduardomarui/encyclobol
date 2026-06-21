@@ -72,6 +72,16 @@ export function JerseyIcon({ className }: IconProps) {
   )
 }
 
+export function MysteryIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className} aria-hidden>
+      <circle cx="16" cy="16" r="13" />
+      <path d="M12 12.5a4 4 0 1 1 5.2 3.8c-1 .4-1.2 1-1.2 2" />
+      <circle cx="16" cy="23" r="0.6" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+
 export function IntruderIcon({ className }: IconProps) {
   return (
     <svg {...base} className={className} aria-hidden>

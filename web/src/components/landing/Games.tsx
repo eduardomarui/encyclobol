@@ -6,7 +6,7 @@ import {
   GridIcon,
   TimelineIcon,
   IntruderIcon,
-  JerseyIcon,
+  MysteryIcon,
 } from './Icons'
 
 type Status = 'Edição de hoje' | 'No ar' | 'Em breve'
@@ -69,11 +69,12 @@ const games: Game[] = [
   },
   {
     n: '06',
-    Icon: JerseyIcon,
-    category: 'Visual',
-    title: 'Camisa Mistério',
-    desc: 'Só a camisa na tela. Acerte o clube — das listradas encardidas dos anos 70 aos mantos de hoje.',
-    status: 'Em breve',
+    Icon: MysteryIcon,
+    category: 'Detetive',
+    title: 'Craque Misterioso',
+    desc: 'Há um craque secreto. Chute nomes e use as pistas — seleção, posição e época — pra desvendar quem é.',
+    status: 'Edição de hoje',
+    to: '/jogos/craque-misterioso',
   },
 ]
 
