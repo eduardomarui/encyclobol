@@ -96,7 +96,7 @@ export default function Games() {
         <header className="flex flex-col items-baseline justify-between gap-3 border-b border-ink-900/15 pb-5 sm:flex-row">
           <div>
             <p className="kicker">O caderno de jogos</p>
-            <h2 className="mt-1 font-display text-4xl uppercase tracking-tight text-ink-900 sm:text-5xl">
+            <h2 className="mt-2 font-display text-4xl uppercase leading-[1.05] tracking-tight text-ink-900 sm:text-5xl">
               Escolha sua peneira
             </h2>
           </div>
@@ -120,7 +120,7 @@ export default function Games() {
                 </div>
 
                 <p className="mt-5 kicker text-ink-500">{g.category}</p>
-                <h3 className="mt-1 font-display text-2xl uppercase tracking-tight text-ink-900">
+                <h3 className="mt-1.5 font-display text-2xl uppercase leading-[1.1] tracking-tight text-ink-900">
                   {g.title}
                 </h3>
                 <p className="mt-2 flex-1 font-serif text-[15px] leading-relaxed text-ink-700">

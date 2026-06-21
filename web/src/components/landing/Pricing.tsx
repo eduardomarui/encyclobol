@@ -42,7 +42,7 @@ export default function Pricing() {
       <div className="container-page py-16 sm:py-20">
         <header className="mx-auto max-w-2xl text-center">
           <p className="kicker">Faça sua assinatura</p>
-          <h2 className="mt-1 font-display text-4xl uppercase tracking-tight text-ink-900 sm:text-5xl">
+          <h2 className="mt-2 font-display text-4xl uppercase leading-[1.05] tracking-tight text-ink-900 sm:text-5xl">
             Assine a edição
           </h2>
           <p className="mt-4 font-serif text-lg italic text-ink-600">

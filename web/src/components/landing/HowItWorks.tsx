@@ -29,7 +29,7 @@ export default function HowItWorks() {
           <p className="font-cond text-xs font-600 uppercase tracking-[0.18em] text-grass-400">
             As regras da casa
           </p>
-          <h2 className="mt-1 font-display text-4xl uppercase tracking-tight sm:text-5xl">
+          <h2 className="mt-2 font-display text-4xl uppercase leading-[1.05] tracking-tight sm:text-5xl">
             Como se joga
           </h2>
         </header>

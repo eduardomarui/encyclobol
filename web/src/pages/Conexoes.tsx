@@ -163,7 +163,7 @@ export default function Conexoes() {
 
       <main className="container-page flex flex-1 flex-col items-center py-8">
         <p className="kicker">Lógica · jogo 03</p>
-        <h1 className="mt-1 font-display text-4xl uppercase tracking-tight text-ink-900 sm:text-5xl">
+        <h1 className="mt-3 font-display text-4xl uppercase leading-[1.05] tracking-tight text-ink-900 sm:text-5xl">
           Conexões
         </h1>
         <p className="mt-3 max-w-md text-center font-serif text-base italic text-ink-600">

@@ -137,7 +137,7 @@ export default function QuizRelampago() {
 
       <main className="container-page flex flex-1 flex-col items-center py-8">
         <p className="kicker">Quiz · jogo 02</p>
-        <h1 className="mt-1 font-display text-4xl uppercase tracking-tight text-ink-900 sm:text-5xl">
+        <h1 className="mt-3 font-display text-4xl uppercase leading-[1.05] tracking-tight text-ink-900 sm:text-5xl">
           Quiz Relâmpago
         </h1>
 
