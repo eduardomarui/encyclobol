@@ -1,103 +1,113 @@
 const plans = [
   {
-    name: 'Torcedor',
+    name: 'Avulso',
     price: 'Grátis',
     period: '',
-    desc: 'Pra quem joga de vez em quando.',
+    desc: 'Pra quem passa na banca de vez em quando.',
     features: [
-      '3 minigames por dia',
+      'Três jogos por dia',
       'Desafio diário',
       'Ranking semanal',
       'Com anúncios',
     ],
-    cta: 'Começar grátis',
-    highlight: false,
+    cta: 'Começar de graça',
+    featured: false,
   },
   {
-    name: 'Craque',
+    name: 'Assinante',
     price: 'R$ 9,90',
     period: '/mês',
-    desc: 'Pra quem vive de futebol.',
+    desc: 'Pra quem não perde uma edição.',
     features: [
       'Jogos ilimitados',
-      'Todos os minigames',
+      'Todos os modos liberados',
       'Sem anúncios',
       'Histórico e estatísticas',
       'Ranking global',
     ],
-    cta: 'Virar Craque',
-    highlight: true,
+    cta: 'Assinar a edição',
+    featured: true,
   },
 ]
 
-function Check() {
+function Bullet() {
   return (
-    <svg viewBox="0 0 20 20" className="mt-0.5 h-5 w-5 flex-none text-field-400" aria-hidden>
-      <path
-        fill="currentColor"
-        d="M16.7 5.3a1 1 0 0 1 0 1.4l-7.5 7.5a1 1 0 0 1-1.4 0l-3.5-3.5a1 1 0 1 1 1.4-1.4l2.8 2.8 6.8-6.8a1 1 0 0 1 1.4 0Z"
-      />
-    </svg>
+    <span className="mt-1.5 h-1.5 w-1.5 flex-none rotate-45 bg-grass-600" aria-hidden />
   )
 }
 
 export default function Pricing() {
   return (
-    <section id="planos" className="container-page py-20 sm:py-24">
-      <div className="mx-auto max-w-2xl text-center">
-        <h2 className="font-display text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-          Escolha seu plano
-        </h2>
-        <p className="mt-4 text-lg text-white/70">
-          Comece de graça. Vire Craque quando quiser jogar sem limites.
-        </p>
-      </div>
+    <section id="planos" className="border-t-2 border-ink-900 halftone">
+      <div className="container-page py-16 sm:py-20">
+        <header className="mx-auto max-w-2xl text-center">
+          <p className="kicker">Faça sua assinatura</p>
+          <h2 className="mt-1 font-display text-4xl uppercase tracking-tight text-ink-900 sm:text-5xl">
+            Assine a edição
+          </h2>
+          <p className="mt-4 font-serif text-lg italic text-ink-600">
+            Comece de graça. Vire assinante quando bater a vontade de jogar sem
+            olhar pro relógio.
+          </p>
+        </header>
 
-      <div className="mx-auto mt-14 grid max-w-3xl gap-6 sm:grid-cols-2">
-        {plans.map((p) => (
-          <div
-            key={p.name}
-            className={`relative flex flex-col rounded-3xl border p-8 ${
-              p.highlight
-                ? 'border-field-500/50 bg-gradient-to-b from-field-500/10 to-ink-800'
-                : 'border-white/10 bg-ink-800'
-            }`}
-          >
-            {p.highlight && (
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gold-500 px-3 py-1 text-xs font-bold uppercase tracking-wide text-ink-900">
-                Mais popular
-              </span>
-            )}
-            <h3 className="font-display text-xl font-bold text-white">{p.name}</h3>
-            <p className="mt-1 text-sm text-white/60">{p.desc}</p>
-            <div className="mt-5 flex items-end gap-1">
-              <span className="font-display text-4xl font-extrabold text-white">
-                {p.price}
-              </span>
-              {p.period && <span className="mb-1 text-white/50">{p.period}</span>}
-            </div>
-
-            <ul className="mt-7 flex-1 space-y-3">
-              {p.features.map((f) => (
-                <li key={f} className="flex gap-3 text-sm text-white/80">
-                  <Check />
-                  {f}
-                </li>
-              ))}
-            </ul>
-
-            <a
-              href="#jogos"
-              className={`mt-8 rounded-full px-6 py-3 text-center text-base font-semibold transition-all ${
-                p.highlight
-                  ? 'bg-field-500 text-ink-900 hover:-translate-y-0.5 hover:bg-field-400'
-                  : 'border border-white/15 text-white hover:bg-white/5'
+        <div className="mx-auto mt-12 grid max-w-3xl gap-px overflow-hidden border-2 border-ink-900 bg-ink-900/15 sm:grid-cols-2">
+          {plans.map((p) => (
+            <div
+              key={p.name}
+              className={`relative flex flex-col p-8 ${
+                p.featured ? 'bg-grass-600 text-paper' : 'bg-paper text-ink-900'
               }`}
             >
-              {p.cta}
-            </a>
-          </div>
-        ))}
+              {p.featured && (
+                <span className="absolute right-6 top-6 rotate-3 border-2 border-paper px-2 py-0.5 font-cond text-[11px] font-700 uppercase tracking-widest">
+                  Edição completa
+                </span>
+              )}
+              <h3 className="font-display text-2xl uppercase tracking-tight">{p.name}</h3>
+              <p
+                className={`mt-1 font-serif text-[15px] italic ${
+                  p.featured ? 'text-paper/80' : 'text-ink-600'
+                }`}
+              >
+                {p.desc}
+              </p>
+
+              <div className="mt-6 flex items-end gap-1">
+                <span className="font-display text-5xl tracking-tight">{p.price}</span>
+                {p.period && (
+                  <span
+                    className={`mb-1.5 font-cond text-sm uppercase ${
+                      p.featured ? 'text-paper/80' : 'text-ink-500'
+                    }`}
+                  >
+                    {p.period}
+                  </span>
+                )}
+              </div>
+
+              <ul className="mt-7 flex-1 space-y-3">
+                {p.features.map((f) => (
+                  <li key={f} className="flex gap-3 font-serif text-[15px]">
+                    <Bullet />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+
+              <a
+                href="#jogos"
+                className={`btn-stamp mt-8 px-6 py-3.5 text-base ${
+                  p.featured
+                    ? 'bg-paper text-ink-900 hover:bg-paper-200'
+                    : 'bg-ink-900 text-paper hover:bg-grass-600'
+                }`}
+              >
+                {p.cta}
+              </a>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   )

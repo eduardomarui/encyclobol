@@ -1,46 +1,39 @@
-const links = [
-  { href: '#jogos', label: 'Jogos' },
-  { href: '#como-funciona', label: 'Como funciona' },
-  { href: '#planos', label: 'Planos' },
-]
+import { BallMark } from './Icons'
 
-function Logo() {
-  return (
-    <a href="#" className="flex items-center gap-2.5">
-      <svg viewBox="0 0 64 64" className="h-8 w-8" aria-hidden>
-        <rect width="64" height="64" rx="14" fill="#054f31" />
-        <circle cx="32" cy="32" r="18" fill="none" stroke="#32d583" strokeWidth="3" />
-        <path d="M32 18 l4.2 3 -1.6 4.9 -5.2 0 -1.6 -4.9 z" fill="#fbbf24" />
-        <circle cx="32" cy="32" r="3.4" fill="#fbbf24" />
-      </svg>
-      <span className="font-display text-xl font-extrabold tracking-tight text-white">
-        Encyclo<span className="text-field-400">bol</span>
-      </span>
-    </a>
-  )
-}
+const links = [
+  { href: '#jogos', label: 'Os jogos' },
+  { href: '#como-funciona', label: 'Como se joga' },
+  { href: '#planos', label: 'Assine' },
+]
 
 export default function Nav() {
   return (
-    <header className="sticky top-0 z-50 border-b border-white/5 bg-ink-900/80 backdrop-blur-md">
-      <nav className="container-page flex h-16 items-center justify-between">
-        <Logo />
-        <div className="hidden items-center gap-8 md:flex">
+    <header className="sticky top-0 z-50 border-b-2 border-ink-900 bg-paper/95 backdrop-blur-sm">
+      <nav className="container-page flex h-14 items-center justify-between">
+        <a href="#" className="flex items-center gap-2 text-ink-900">
+          <BallMark className="h-7 w-7 text-grass-600" />
+          <span className="font-display text-2xl uppercase tracking-tight">
+            Encyclobol
+          </span>
+        </a>
+
+        <div className="hidden items-center gap-7 md:flex">
           {links.map((l) => (
             <a
               key={l.href}
               href={l.href}
-              className="text-sm font-medium text-white/70 transition-colors hover:text-white"
+              className="font-cond text-sm font-500 uppercase tracking-wider text-ink-700 transition-colors hover:text-ochre-600"
             >
               {l.label}
             </a>
           ))}
         </div>
+
         <a
           href="#jogos"
-          className="rounded-full bg-field-500 px-5 py-2 text-sm font-semibold text-ink-900 transition-colors hover:bg-field-400"
+          className="btn-stamp bg-ink-900 px-4 py-2 text-paper hover:bg-grass-600"
         >
-          Jogar agora
+          Edição de hoje
         </a>
       </nav>
     </header>

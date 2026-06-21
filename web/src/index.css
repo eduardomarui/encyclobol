@@ -7,7 +7,12 @@
     scroll-behavior: smooth;
   }
   body {
-    @apply bg-ink-900 text-white font-sans antialiased;
+    @apply bg-paper text-ink-900 font-serif antialiased;
+  }
+  /* Seleção de texto com cara de marca-texto */
+  ::selection {
+    background-color: #2c6e49;
+    color: #f2eee2;
   }
 }
 
@@ -15,15 +20,31 @@
   .container-page {
     @apply mx-auto w-full max-w-6xl px-5 sm:px-8;
   }
-  .pitch-lines {
-    background-image:
-      radial-gradient(circle at 50% -10%, rgba(50, 213, 131, 0.18), transparent 55%),
-      repeating-linear-gradient(
-        180deg,
-        rgba(255, 255, 255, 0.02) 0px,
-        rgba(255, 255, 255, 0.02) 2px,
-        transparent 2px,
-        transparent 56px
-      );
+
+  /* Rótulo/kicker editorial */
+  .kicker {
+    @apply font-cond text-xs font-600 uppercase tracking-[0.18em] text-ochre-600;
+  }
+
+  /* Réguas de jornal */
+  .rule {
+    @apply border-t border-ink-900/15;
+  }
+  .rule-strong {
+    @apply border-t-2 border-ink-900;
+  }
+  .rule-double {
+    border-top: 3px double rgba(22, 19, 13, 0.55);
+  }
+
+  /* Trama de meio-tom (halftone) bem sutil sobre o papel */
+  .halftone {
+    background-image: radial-gradient(rgba(22, 19, 13, 0.06) 1px, transparent 1.4px);
+    background-size: 7px 7px;
+  }
+
+  /* Botão "carimbo" editorial */
+  .btn-stamp {
+    @apply inline-flex items-center justify-center font-cond text-sm font-600 uppercase tracking-wider transition-colors;
   }
 }

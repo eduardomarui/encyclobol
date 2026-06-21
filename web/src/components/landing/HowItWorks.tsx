@@ -1,52 +1,52 @@
-const steps = [
+const rules = [
   {
     n: '01',
-    title: 'Escolha um desafio',
-    desc: 'Quiz, escalação, adivinhação — tem jogo pra todo tipo de torcedor.',
+    title: 'Escolha um jogo',
+    desc: 'Tem quiz, tem escalação, tem adivinhação. Todo dia entra coisa nova no caderno.',
   },
   {
     n: '02',
-    title: 'Teste seu conhecimento',
-    desc: 'Da Copa de 1950 ao elenco de 2026. Memória e história valem pontos.',
+    title: 'Confie na memória',
+    desc: 'Da Copa de 50 ao time de 2026. Aqui vale o que está na cabeça, não no buscador.',
   },
   {
     n: '03',
-    title: 'Some pontos e jogue de novo',
-    desc: 'Cada acerto soma. Volte todo dia pra um desafio inédito.',
+    title: 'Some os pontos',
+    desc: 'Cada acerto conta. Travou hoje? Amanhã tem revanche com edição nova.',
   },
   {
     n: '04',
-    title: 'Dispute o ranking',
-    desc: 'Compare sua pontuação com torcedores do Brasil e do mundo.',
+    title: 'Encare o ranking',
+    desc: 'Veja onde você para entre os almanaques ambulantes do Brasil e do mundo.',
   },
 ]
 
 export default function HowItWorks() {
   return (
-    <section id="como-funciona" className="border-y border-white/5 bg-ink-800/40">
-      <div className="container-page py-20 sm:py-24">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="font-display text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-            Como funciona
-          </h2>
-          <p className="mt-4 text-lg text-white/70">
-            Simples, rápido e viciante. Em quatro passos você já está jogando.
+    <section id="como-funciona" className="border-t-2 border-ink-900 bg-ink-900 text-paper">
+      <div className="container-page py-16 sm:py-20">
+        <header className="border-b border-paper/20 pb-5">
+          <p className="font-cond text-xs font-600 uppercase tracking-[0.18em] text-grass-400">
+            As regras da casa
           </p>
-        </div>
+          <h2 className="mt-1 font-display text-4xl uppercase tracking-tight sm:text-5xl">
+            Como se joga
+          </h2>
+        </header>
 
-        <div className="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {steps.map((s) => (
-            <div key={s.n} className="relative">
-              <span className="font-display text-5xl font-extrabold text-field-500/30">
-                {s.n}
-              </span>
-              <h3 className="mt-3 font-display text-lg font-bold text-white">
-                {s.title}
+        <ol className="grid gap-px overflow-hidden bg-paper/20 sm:grid-cols-2 lg:grid-cols-4">
+          {rules.map((r) => (
+            <li key={r.n} className="bg-ink-900 px-6 py-8">
+              <span className="font-display text-5xl text-grass-400">{r.n}</span>
+              <h3 className="mt-3 font-display text-xl uppercase tracking-tight">
+                {r.title}
               </h3>
-              <p className="mt-2 text-sm leading-relaxed text-white/60">{s.desc}</p>
-            </div>
+              <p className="mt-2 font-serif text-[15px] leading-relaxed text-paper/70">
+                {r.desc}
+              </p>
+            </li>
           ))}
-        </div>
+        </ol>
       </div>
     </section>
   )

@@ -1,48 +1,78 @@
 const stats = [
-  { value: '5.700+', label: 'jogadores' },
-  { value: '250', label: 'seleções e clubes' },
-  { value: '8', label: 'jogos e minigames' },
+  { value: '5.729', label: 'jogadores catalogados' },
+  { value: '250', label: 'elencos históricos' },
+  { value: '52', label: 'seleções' },
+  { value: '8', label: 'modos de jogo' },
 ]
+
+function dateline() {
+  const fmt = new Intl.DateTimeFormat('pt-BR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
+  return fmt.format(new Date()).toUpperCase()
+}
 
 export default function Hero() {
   return (
-    <section className="pitch-lines relative overflow-hidden">
-      <div className="container-page relative flex flex-col items-center py-20 text-center sm:py-28">
-        <span className="animate-fade-up rounded-full border border-field-500/30 bg-field-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-field-300">
-          ⚽ Copa do Mundo 2026 · jogue todos os dias
-        </span>
+    <section className="halftone relative overflow-hidden">
+      {/* Tarja de cabeçalho — metadados de edição */}
+      <div className="border-b border-ink-900/15">
+        <div className="container-page flex flex-wrap items-center justify-center gap-x-3 gap-y-1 py-2 text-center">
+          <span className="font-cond text-[11px] font-500 uppercase tracking-[0.2em] text-ink-600">
+            São Paulo · {dateline()}
+          </span>
+          <span className="hidden text-ink-900/30 sm:inline">|</span>
+          <span className="font-cond text-[11px] font-500 uppercase tracking-[0.2em] text-ink-600">
+            Edição diária · PT · ES · EN
+          </span>
+        </div>
+      </div>
 
-        <h1 className="animate-fade-up mt-6 max-w-3xl font-display text-4xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-6xl">
-          A enciclopédia <span className="text-field-400">jogável</span> do futebol
-        </h1>
+      <div className="container-page py-16 sm:py-24">
+        <div className="mx-auto max-w-4xl text-center">
+          <p className="kicker">Desafio diário · desde a Copa de 1950</p>
 
-        <p className="animate-fade-up mt-6 max-w-xl text-lg leading-relaxed text-white/70">
-          Quizzes, escalações de lendas e desafios diários sobre toda a história do
-          futebol mundial. Teste o quanto você realmente sabe.
-        </p>
+          <h1 className="mt-5 font-display text-5xl uppercase leading-[0.92] tracking-tight text-ink-900 sm:text-7xl md:text-8xl">
+            Você acha que sabe
+            <br />
+            <span className="text-grass-600">de futebol?</span>
+          </h1>
 
-        <div className="animate-fade-up mt-9 flex flex-col gap-3 sm:flex-row">
-          <a
-            href="#jogos"
-            className="rounded-full bg-field-500 px-7 py-3.5 text-base font-semibold text-ink-900 shadow-lg shadow-field-500/20 transition-all hover:-translate-y-0.5 hover:bg-field-400"
-          >
-            Começar a jogar
-          </a>
-          <a
-            href="#como-funciona"
-            className="rounded-full border border-white/15 px-7 py-3.5 text-base font-semibold text-white transition-colors hover:bg-white/5"
-          >
-            Como funciona
-          </a>
+          <p className="mx-auto mt-7 max-w-2xl font-serif text-xl italic leading-relaxed text-ink-700 sm:text-2xl">
+            Prove sem chutar e sem Google. Aqui vale só o que está guardado na
+            memória — do escrete de 70 ao elenco de 2026.
+          </p>
+
+          <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <a
+              href="#jogos"
+              className="btn-stamp bg-grass-600 px-7 py-3.5 text-base text-paper hover:bg-grass-700"
+            >
+              Começar a edição de hoje
+            </a>
+            <a
+              href="#jogos"
+              className="btn-stamp border-2 border-ink-900 px-7 py-3.5 text-base text-ink-900 hover:bg-ink-900 hover:text-paper"
+            >
+              Ver os jogos
+            </a>
+          </div>
         </div>
 
-        <dl className="animate-fade-up mt-16 grid w-full max-w-2xl grid-cols-3 gap-4 border-t border-white/10 pt-8">
+        {/* Linha de estatísticas — como um placar de almanaque */}
+        <dl className="mx-auto mt-16 grid max-w-4xl grid-cols-2 gap-px overflow-hidden rule-double bg-ink-900/15 sm:grid-cols-4">
           {stats.map((s) => (
-            <div key={s.label} className="flex flex-col items-center">
-              <dt className="font-display text-3xl font-extrabold text-white sm:text-4xl">
+            <div
+              key={s.label}
+              className="flex flex-col items-center bg-paper px-3 py-6 text-center"
+            >
+              <dt className="font-display text-4xl text-ink-900 sm:text-5xl">
                 {s.value}
               </dt>
-              <dd className="mt-1 text-xs uppercase tracking-wide text-white/50 sm:text-sm">
+              <dd className="mt-2 font-cond text-[11px] font-500 uppercase tracking-[0.14em] text-ink-600">
                 {s.label}
               </dd>
             </div>

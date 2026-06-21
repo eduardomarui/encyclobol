@@ -1,107 +1,141 @@
-type Badge = 'diário' | 'novo' | 'em breve'
+import type { ComponentType } from 'react'
+import {
+  PlayerIcon,
+  TimerIcon,
+  PitchIcon,
+  TrophyIcon,
+  ChainIcon,
+  JerseyIcon,
+} from './Icons'
+
+type Status = 'Edição de hoje' | 'No ar' | 'Em breve'
 
 type Game = {
-  icon: string
+  n: string
+  Icon: ComponentType<{ className?: string }>
+  category: string
   title: string
   desc: string
-  badge?: Badge
+  status: Status
 }
 
 const games: Game[] = [
   {
-    icon: '🕵️',
-    title: 'Quem sou eu?',
-    desc: 'Adivinhe o sobrenome do craque em 6 tentativas. Estilo Wordle, novo a cada dia.',
-    badge: 'diário',
+    n: '01',
+    Icon: PlayerIcon,
+    category: 'Adivinhação',
+    title: 'Quem sou ele?',
+    desc: 'Seis tentativas pra cravar o sobrenome do craque. Errou? O alfabeto vai pintando de verde e amarelo até você acertar.',
+    status: 'Edição de hoje',
   },
   {
-    icon: '🧠',
+    n: '02',
+    Icon: TimerIcon,
+    category: 'Quiz',
     title: 'Quiz Relâmpago',
-    desc: '15 segundos por pergunta. Responda o máximo que conseguir antes do apito final.',
-    badge: 'diário',
+    desc: 'Quinze segundos por pergunta. O cronômetro não tem dó de quem trava na hora de lembrar o artilheiro daquela Copa.',
+    status: 'Edição de hoje',
   },
   {
-    icon: '⚽',
+    n: '03',
+    Icon: PitchIcon,
+    category: 'Tática',
     title: 'Escalação Rápida',
-    desc: 'Monte um time de lendas no esquema 4-4-2 e simule a partida.',
-    badge: 'novo',
+    desc: 'Monte o time no 4-4-2 com craques de todo tempo, escolha o estilo e mande pra campo. O motor simula o resto.',
+    status: 'No ar',
   },
   {
-    icon: '🏆',
+    n: '04',
+    Icon: TrophyIcon,
+    category: 'Campanha',
     title: 'Montador de Lendas',
-    desc: 'Construa o elenco perfeito com craques de todas as eras e vença a Copa.',
+    desc: 'Garimpe o elenco perfeito, era por era, posição por posição, e vá atrás do caneco numa Copa do Mundo virtual.',
+    status: 'No ar',
   },
   {
-    icon: '🔗',
+    n: '05',
+    Icon: ChainIcon,
+    category: 'Memória',
     title: 'Cadeia de Passes',
-    desc: 'Conecte jogadores que atuaram juntos no mesmo time. Quanto você lembra?',
-    badge: 'em breve',
+    desc: 'Ligue jogadores que dividiram o mesmo vestiário. Quanto tempo sua memória aguenta antes de quebrar a corrente?',
+    status: 'Em breve',
   },
   {
-    icon: '👕',
+    n: '06',
+    Icon: JerseyIcon,
+    category: 'Visual',
     title: 'Camisa Mistério',
-    desc: 'Reconheça o clube pela camisa histórica. Dos anos 70 até hoje.',
-    badge: 'em breve',
+    desc: 'Só a camisa na tela. Acerte o clube — das listradas encardidas dos anos 70 aos mantos de hoje.',
+    status: 'Em breve',
   },
 ]
 
-const badgeStyles: Record<Badge, string> = {
-  diário: 'bg-field-500/15 text-field-300 border-field-500/30',
-  novo: 'bg-gold-500/15 text-gold-400 border-gold-500/30',
-  'em breve': 'bg-white/5 text-white/50 border-white/10',
+function StatusTag({ status }: { status: Status }) {
+  const styles: Record<Status, string> = {
+    'Edição de hoje': 'text-ochre-600',
+    'No ar': 'text-grass-600',
+    'Em breve': 'text-ink-500',
+  }
+  return (
+    <span className={`font-cond text-[11px] font-600 uppercase tracking-[0.16em] ${styles[status]}`}>
+      {status === 'Edição de hoje' && '● '}
+      {status}
+    </span>
+  )
 }
 
 export default function Games() {
   return (
-    <section id="jogos" className="container-page py-20 sm:py-24">
-      <div className="mx-auto max-w-2xl text-center">
-        <h2 className="font-display text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-          Um jogo novo a cada dia
-        </h2>
-        <p className="mt-4 text-lg text-white/70">
-          Minigames rápidos para matar a saudade do futebol e provar que você é o
-          verdadeiro almanaque ambulante.
-        </p>
-      </div>
+    <section id="jogos" className="border-t-2 border-ink-900 bg-paper-100">
+      <div className="container-page py-16 sm:py-20">
+        <header className="flex flex-col items-baseline justify-between gap-3 border-b border-ink-900/15 pb-5 sm:flex-row">
+          <div>
+            <p className="kicker">O caderno de jogos</p>
+            <h2 className="mt-1 font-display text-4xl uppercase tracking-tight text-ink-900 sm:text-5xl">
+              Escolha sua peneira
+            </h2>
+          </div>
+          <p className="max-w-sm font-serif text-base italic text-ink-600">
+            Seis modos pra matar a saudade do futebol e provar que você é mesmo um
+            almanaque ambulante.
+          </p>
+        </header>
 
-      <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {games.map((g) => {
-          const soon = g.badge === 'em breve'
-          return (
-            <div
-              key={g.title}
-              className={`group relative flex flex-col rounded-2xl border border-white/10 bg-ink-800 p-6 transition-all ${
-                soon ? 'opacity-70' : 'hover:-translate-y-1 hover:border-field-500/40'
-              }`}
-            >
-              <div className="flex items-start justify-between">
-                <span className="text-4xl">{g.icon}</span>
-                {g.badge && (
-                  <span
-                    className={`rounded-full border px-2.5 py-1 text-xs font-semibold uppercase tracking-wide ${badgeStyles[g.badge]}`}
-                  >
-                    {g.badge}
-                  </span>
-                )}
-              </div>
-              <h3 className="mt-5 font-display text-xl font-bold text-white">
-                {g.title}
-              </h3>
-              <p className="mt-2 flex-1 text-sm leading-relaxed text-white/60">
-                {g.desc}
-              </p>
-              <span
-                className={`mt-5 text-sm font-semibold ${
-                  soon
-                    ? 'text-white/40'
-                    : 'text-field-400 transition-colors group-hover:text-field-300'
-                }`}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3">
+          {games.map((g, i) => {
+            const soon = g.status === 'Em breve'
+            return (
+              <article
+                key={g.title}
+                className={`group relative flex flex-col border-ink-900/15 p-6 sm:[&:nth-child(odd)]:border-r lg:[&:nth-child(3n+1)]:border-r lg:[&:nth-child(3n+2)]:border-r lg:[&:nth-child(3n)]:border-r-0 ${
+                  i >= 3 ? 'border-t' : 'border-t'
+                } ${soon ? 'opacity-70' : 'transition-colors hover:bg-paper'}`}
               >
-                {soon ? 'Em breve' : 'Jogar →'}
-              </span>
-            </div>
-          )
-        })}
+                <div className="flex items-start justify-between">
+                  <span className="font-display text-3xl text-ink-900/20">{g.n}</span>
+                  <g.Icon className="h-9 w-9 text-grass-600" />
+                </div>
+
+                <p className="mt-5 kicker text-ink-500">{g.category}</p>
+                <h3 className="mt-1 font-display text-2xl uppercase tracking-tight text-ink-900">
+                  {g.title}
+                </h3>
+                <p className="mt-2 flex-1 font-serif text-[15px] leading-relaxed text-ink-700">
+                  {g.desc}
+                </p>
+
+                <div className="mt-5 flex items-center justify-between">
+                  <StatusTag status={g.status} />
+                  {!soon && (
+                    <span className="font-cond text-sm font-600 uppercase tracking-wider text-ink-900 transition-transform group-hover:translate-x-1">
+                      Jogar →
+                    </span>
+                  )}
+                </div>
+              </article>
+            )
+          })}
+        </div>
       </div>
     </section>
   )
