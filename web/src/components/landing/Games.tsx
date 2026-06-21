@@ -38,6 +38,7 @@ const games: Game[] = [
     title: 'Quiz Relâmpago',
     desc: 'Quinze segundos por pergunta. O cronômetro não tem dó de quem trava na hora de lembrar o artilheiro daquela Copa.',
     status: 'Edição de hoje',
+    to: '/jogos/quiz-relampago',
   },
   {
     n: '03',
