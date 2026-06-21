@@ -117,4 +117,23 @@ export const conexoes: Puzzle[] = [
       { color: 'ink', label: 'Argentinos', members: ['Messi', 'Maradona', 'Agüero', 'Di María'] },
     ],
   },
+  // 12 — Inter e PSG (armadilha: Ibrahimović jogou nos dois; Buffon também
+  // passou pelo PSG mas fecha nos goleiros).
+  {
+    groups: [
+      { color: 'corn', label: 'Jogaram na Inter de Milão', members: ['Zanetti', 'Sneijder', 'Ibrahimović', 'Crespo'] },
+      { color: 'grass', label: 'Jogaram no PSG', members: ['Mbappé', 'Neymar', 'Cavani', 'Di María'] },
+      { color: 'ochre', label: 'Goleiros', members: ['Buffon', 'Casillas', 'Yashin', 'Neuer'] },
+      { color: 'ink', label: 'Ingleses', members: ['Rooney', 'Lampard', 'Terry', 'Gerrard'] },
+    ],
+  },
+  // 13 — quatro seleções de lendas (posições misturadas de propósito).
+  {
+    groups: [
+      { color: 'corn', label: 'Alemães', members: ['Matthäus', 'Ballack', 'Kahn', 'Klose'] },
+      { color: 'grass', label: 'Italianos', members: ['Baggio', 'Del Piero', 'Totti', 'Pirlo'] },
+      { color: 'ochre', label: 'Franceses', members: ['Zidane', 'Henry', 'Vieira', 'Cantona'] },
+      { color: 'ink', label: 'Brasileiros', members: ['Sócrates', 'Bebeto', 'Adriano', 'Coutinho'] },
+    ],
+  },
 ]

@@ -40,4 +40,10 @@ export const quiz: QuizQuestion[] = [
   { q: 'Qual seleção venceu a Copa América de 2021?', options: ['Argentina', 'Brasil', 'Uruguai', 'Chile'], correct: 0, cat: 'Seleções' },
   { q: 'Em qual país foi disputada a Copa do Mundo de 2018?', options: ['Rússia', 'Catar', 'Brasil', 'Alemanha'], correct: 0, cat: 'Copas' },
   { q: 'Qual clube inglês é apelidado de "Os Diabos Vermelhos"?', options: ['Manchester United', 'Liverpool', 'Arsenal', 'Chelsea'], correct: 0, cat: 'Clubes' },
+  { q: 'Quem foi o capitão da Argentina campeã da Copa de 2022?', options: ['Lionel Messi', 'Ángel Di María', 'Sergio Agüero', 'Emiliano Martínez'], correct: 0, cat: 'Seleções' },
+  { q: 'Qual clube é o maior campeão da Bundesliga (liga alemã)?', options: ['Bayern de Munique', 'Borussia Dortmund', 'Schalke 04', 'Hamburgo'], correct: 0, cat: 'Clubes' },
+  { q: 'Em que país nasceu Lionel Messi?', options: ['Argentina', 'Espanha', 'Uruguai', 'Brasil'], correct: 0, cat: 'Lendas' },
+  { q: 'Qual seleção africana chegou às semifinais da Copa de 2022, fato inédito?', options: ['Marrocos', 'Senegal', 'Gana', 'Camarões'], correct: 0, cat: 'Copas' },
+  { q: 'Quem é o maior artilheiro da história da seleção brasileira?', options: ['Neymar', 'Pelé', 'Ronaldo', 'Romário'], correct: 0, cat: 'Brasil' },
+  { q: 'Qual atacante brasileiro era apelidado de "O Imperador"?', options: ['Adriano', 'Ronaldo', 'Romário', 'Bebeto'], correct: 0, cat: 'Lendas' },
 ]

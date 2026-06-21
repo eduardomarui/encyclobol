@@ -172,4 +172,12 @@ export const players: Player[] = [
   { answer: 'JAMES', display: 'James Rodríguez', nat: 'Colômbia', pos: 'Meia', era: '2009–presente' },
   { answer: 'SANCHEZ', display: 'Hugo Sánchez', nat: 'México', pos: 'Atacante', era: '1976–1997' },
   { answer: 'BALE', display: 'Gareth Bale', nat: 'País de Gales', pos: 'Ponta', era: '2006–2023' },
+
+  // Geração atual
+  { answer: 'BENZEMA', display: 'Karim Benzema', nat: 'França', pos: 'Atacante', era: '2004–presente' },
+  { answer: 'KANTE', display: "N'Golo Kanté", nat: 'França', pos: 'Meia', era: '2012–presente' },
+  { answer: 'KROOS', display: 'Toni Kroos', nat: 'Alemanha', pos: 'Meia', era: '2007–2024' },
+  { answer: 'CASEMIRO', display: 'Casemiro', nat: 'Brasil', pos: 'Meia', era: '2010–presente' },
+  { answer: 'VINICIUS', display: 'Vinícius Júnior', nat: 'Brasil', pos: 'Ponta', era: '2017–presente' },
+  { answer: 'HAALAND', display: 'Erling Haaland', nat: 'Noruega', pos: 'Atacante', era: '2016–presente' },
 ]
