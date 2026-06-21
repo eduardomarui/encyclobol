@@ -10,7 +10,7 @@ import {
   type QuizStats,
 } from '../lib/quizStats'
 import { BallMark } from '../components/landing/Icons'
-import { confetti, buzz } from '../lib/juice'
+import { confetti } from '../lib/juice'
 
 const COUNT = 8
 const SECONDS = 15
@@ -106,7 +106,6 @@ export default function QuizRelampago() {
   useEffect(() => {
     if (finished && !celebrated) {
       if (score >= total / 2) confetti()
-      buzz(score >= total / 2 ? [20, 40, 20] : 15)
       setCelebrated(true)
     }
   }, [finished, celebrated, score, total])
@@ -116,7 +115,6 @@ export default function QuizRelampago() {
     setSelected(i)
     setAnswers((a) => [...a, i])
     setPhase('revealed')
-    buzz(i === current.correct ? 30 : [0, 40])
   }
 
   function treinar() {

@@ -10,7 +10,7 @@ import {
   type ConStats,
 } from '../lib/conexoesStats'
 import { BallMark } from '../components/landing/Icons'
-import { confetti, buzz } from '../lib/juice'
+import { confetti } from '../lib/juice'
 
 const MAX_MISTAKES = 4
 
@@ -81,7 +81,6 @@ export default function Conexoes() {
     setStatus(won ? 'won' : 'lost')
     if (won) {
       confetti()
-      buzz([20, 40, 20])
     }
     if (mode === 'daily' && !recorded) {
       setStats(recordCon(won))
@@ -100,7 +99,6 @@ export default function Conexoes() {
       const g = puzzle.groups.find((x) => x.color === colors[0])!
       const nextSolved = [...solved, g]
       setSelected([])
-      buzz(30)
       if (nextSolved.length === 4) finish(true, mistakes, nextRows)
       else setSolved(nextSolved)
       return
@@ -115,7 +113,6 @@ export default function Conexoes() {
     setMessage(oneAway ? 'Faltou um!' : 'Não foi dessa vez')
     setWrong(true)
     setTimeout(() => setWrong(false), 450)
-    buzz([0, 40, 30, 40])
     if (m >= MAX_MISTAKES) finish(false, m, nextRows)
   }
 

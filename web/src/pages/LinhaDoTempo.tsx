@@ -10,7 +10,7 @@ import {
   type TLStats,
 } from '../lib/timelineStats'
 import { BallMark } from '../components/landing/Icons'
-import { confetti, buzz } from '../lib/juice'
+import { confetti } from '../lib/juice'
 
 const LIVES = 3
 
@@ -84,12 +84,10 @@ export default function LinhaDoTempo() {
       newScore = score + 1
       setScore(newScore)
       setFlash('Na mosca!')
-      buzz(30)
     } else {
       newLives = lives - 1
       setLives(newLives)
       setFlash(`Fora de época — estreou em ${current.year}`)
-      buzz([0, 50, 30, 50])
     }
 
     const nextCursor = cursor + 1

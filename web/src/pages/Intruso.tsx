@@ -10,7 +10,7 @@ import {
   type IntrusoStats,
 } from '../lib/intrusoStats'
 import { BallMark } from '../components/landing/Icons'
-import { confetti, buzz } from '../lib/juice'
+import { confetti } from '../lib/juice'
 
 const COUNT = 5
 
@@ -88,7 +88,6 @@ export default function Intruso() {
   useEffect(() => {
     if (finished && !celebrated) {
       if (score >= total / 2) confetti()
-      buzz(score >= total / 2 ? [20, 40, 20] : 15)
       setCelebrated(true)
     }
   }, [finished, celebrated, score, total])
@@ -98,7 +97,6 @@ export default function Intruso() {
     setSelected(i)
     setAnswers((a) => [...a, i])
     setPhase('revealed')
-    buzz(i === current.intruderIdx ? 30 : [0, 40])
   }
 
   function treinar() {

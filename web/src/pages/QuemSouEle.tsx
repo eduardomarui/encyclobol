@@ -10,7 +10,7 @@ import {
   type Stats,
 } from '../lib/stats'
 import { BallMark } from '../components/landing/Icons'
-import { confetti, buzz } from '../lib/juice'
+import { confetti } from '../lib/juice'
 
 const MAX_ATTEMPTS = 6
 const ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM']
@@ -89,7 +89,6 @@ export default function QuemSouEle() {
   useEffect(() => {
     if (won && !celebrated) {
       confetti()
-      buzz([20, 40, 20])
       setCelebrated(true)
     }
   }, [won, celebrated])

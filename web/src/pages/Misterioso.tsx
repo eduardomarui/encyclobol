@@ -10,7 +10,7 @@ import {
   type MystStats,
 } from '../lib/misteriosoStats'
 import { BallMark } from '../components/landing/Icons'
-import { confetti, buzz } from '../lib/juice'
+import { confetti } from '../lib/juice'
 
 const MAX_GUESSES = 8
 
@@ -76,7 +76,6 @@ export default function Misterioso() {
     setStatus(won ? 'won' : 'lost')
     if (won) {
       confetti()
-      buzz([20, 40, 20])
     }
     if (mode === 'daily' && !recorded) {
       setStats(recordMyst(won))
@@ -117,7 +116,6 @@ export default function Misterioso() {
 
     if (p.answer === secret.answer) finish(true, nextShare)
     else if (nextRows.length >= MAX_GUESSES) finish(false, nextShare)
-    else buzz(15)
   }
 
   function praticar() {

@@ -35,11 +35,3 @@ export function confetti(amount = 70) {
   }
   setTimeout(() => layer.remove(), 3500)
 }
-
-export function buzz(pattern: number | number[] = 25) {
-  try {
-    navigator.vibrate?.(pattern)
-  } catch {
-    /* sem vibração */
-  }
-}
