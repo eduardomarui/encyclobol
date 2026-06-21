@@ -37,6 +37,16 @@ docker compose -f docker-compose.prod.yml up --build
 
 Abra **http://localhost:8080**.
 
+## Deploy (GitHub Pages)
+
+O deploy é automático: todo push no `master` dispara o workflow
+`.github/workflows/deploy.yml`, que builda e publica.
+
+**Passo único (uma vez):** em **Settings → Pages → Build and deployment →
+Source**, selecione **GitHub Actions**. Depois é só fazer push.
+
+No ar em: **https://eduardo-marui-journey.github.io/encyclobol/**
+
 ## Estrutura
 
 ```
