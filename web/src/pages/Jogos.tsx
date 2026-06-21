@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react'
+import { useState, type ComponentType } from 'react'
 import { Link } from 'react-router-dom'
 import Nav from '../components/landing/Nav'
 import Footer from '../components/landing/Footer'
@@ -10,6 +10,7 @@ import {
   IntruderIcon,
   MysteryIcon,
 } from '../components/landing/Icons'
+import { dayNumber } from '../lib/daily'
 import { loadDailyState, loadStats } from '../lib/stats'
 import { loadQuizDaily, loadQuizStats } from '../lib/quizStats'
 import { loadConDaily, loadConStats } from '../lib/conexoesStats'
@@ -17,13 +18,15 @@ import { loadTLDaily, loadTLStats } from '../lib/timelineStats'
 import { loadIntrusoDaily, loadIntrusoStats } from '../lib/intrusoStats'
 import { loadMystDaily, loadMystStats } from '../lib/misteriosoStats'
 
+type Result = { played: boolean; streak: number; detail: string; good: boolean }
+
 type GameInfo = {
   n: string
   title: string
   category: string
   route: string
   Icon: ComponentType<{ className?: string }>
-  status: () => { played: boolean; streak: number }
+  result: () => Result
 }
 
 const games: GameInfo[] = [
@@ -33,7 +36,15 @@ const games: GameInfo[] = [
     category: 'Adivinhação',
     route: '/jogos/quem-sou-ele',
     Icon: PlayerIcon,
-    status: () => ({ played: !!loadDailyState(), streak: loadStats().currentStreak }),
+    result: () => {
+      const d = loadDailyState()
+      return {
+        played: !!d,
+        streak: loadStats().currentStreak,
+        detail: d ? (d.status === 'won' ? `${d.guesses.length}/6` : 'X/6') : '—',
+        good: d?.status === 'won',
+      }
+    },
   },
   {
     n: '02',
@@ -41,7 +52,15 @@ const games: GameInfo[] = [
     category: 'Quiz',
     route: '/jogos/quiz-relampago',
     Icon: TimerIcon,
-    status: () => ({ played: !!loadQuizDaily(), streak: loadQuizStats().currentStreak }),
+    result: () => {
+      const d = loadQuizDaily()
+      return {
+        played: !!d,
+        streak: loadQuizStats().currentStreak,
+        detail: d ? `${d.score}/8` : '—',
+        good: !!d && d.score >= 4,
+      }
+    },
   },
   {
     n: '03',
@@ -49,7 +68,15 @@ const games: GameInfo[] = [
     category: 'Lógica',
     route: '/jogos/conexoes',
     Icon: GridIcon,
-    status: () => ({ played: !!loadConDaily(), streak: loadConStats().currentStreak }),
+    result: () => {
+      const d = loadConDaily()
+      return {
+        played: !!d,
+        streak: loadConStats().currentStreak,
+        detail: d ? (d.won ? `${d.mistakes} erro${d.mistakes === 1 ? '' : 's'}` : 'X') : '—',
+        good: !!d && d.won,
+      }
+    },
   },
   {
     n: '04',
@@ -57,7 +84,15 @@ const games: GameInfo[] = [
     category: 'Cronologia',
     route: '/jogos/linha-do-tempo',
     Icon: TimelineIcon,
-    status: () => ({ played: !!loadTLDaily(), streak: loadTLStats().currentStreak }),
+    result: () => {
+      const d = loadTLDaily()
+      return {
+        played: !!d,
+        streak: loadTLStats().currentStreak,
+        detail: d ? `${d.score} cartas` : '—',
+        good: !!d && d.score >= 5,
+      }
+    },
   },
   {
     n: '05',
@@ -65,7 +100,15 @@ const games: GameInfo[] = [
     category: 'Dedução',
     route: '/jogos/o-intruso',
     Icon: IntruderIcon,
-    status: () => ({ played: !!loadIntrusoDaily(), streak: loadIntrusoStats().currentStreak }),
+    result: () => {
+      const d = loadIntrusoDaily()
+      return {
+        played: !!d,
+        streak: loadIntrusoStats().currentStreak,
+        detail: d ? `${d.score}/5` : '—',
+        good: !!d && d.score >= 3,
+      }
+    },
   },
   {
     n: '06',
@@ -73,13 +116,42 @@ const games: GameInfo[] = [
     category: 'Detetive',
     route: '/jogos/craque-misterioso',
     Icon: MysteryIcon,
-    status: () => ({ played: !!loadMystDaily(), streak: loadMystStats().currentStreak }),
+    result: () => {
+      const d = loadMystDaily()
+      return {
+        played: !!d,
+        streak: loadMystStats().currentStreak,
+        detail: d ? (d.won ? `${d.guesses} chutes` : 'X') : '—',
+        good: !!d && d.won,
+      }
+    },
   },
 ]
 
 export default function Jogos() {
-  const total = games.length
-  const jogadosHoje = games.filter((g) => g.status().played).length
+  const [copied, setCopied] = useState(false)
+  const entries = games.map((g) => ({ ...g, ...g.result() }))
+  const total = entries.length
+  const jogadosHoje = entries.filter((g) => g.played).length
+  const fechou = jogadosHoje === total
+
+  function compartilharDia() {
+    const head = fechou
+      ? `Encyclobol · Fechei o dia! (Edição #${dayNumber()})`
+      : `Encyclobol · Edição #${dayNumber()} — ${jogadosHoje}/${total} jogos`
+    const lines = entries.map((g) => {
+      const mark = !g.played ? '⬜' : g.good ? '🟩' : '🟥'
+      return `${mark} ${g.title}: ${g.detail}`
+    })
+    const text = `${head}\n${lines.join('\n')}\nencyclobol.com.br`
+    navigator.clipboard?.writeText(text).then(
+      () => {
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      },
+      () => {},
+    )
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-paper">
@@ -91,48 +163,79 @@ export default function Jogos() {
             O caderno de jogos
           </h1>
           <p className="mt-3 font-serif text-lg italic text-ink-600">
-            {jogadosHoje === total
+            {fechou
               ? 'Você fechou todas as edições de hoje. Volte amanhã para mais.'
               : `Você jogou ${jogadosHoje} de ${total} hoje. Bora completar o caderno?`}
           </p>
         </header>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3">
-          {games.map((g) => {
-            const { played, streak } = g.status()
-            return (
-              <Link
-                key={g.route}
-                to={g.route}
-                className="group relative flex flex-col border-t border-ink-900/15 p-6 transition-colors hover:bg-paper-100 sm:[&:nth-child(odd)]:border-r lg:[&:nth-child(3n+1)]:border-r lg:[&:nth-child(3n+2)]:border-r"
-              >
-                <div className="flex items-start justify-between">
-                  <span className="font-display text-3xl text-ink-900/20">{g.n}</span>
-                  <g.Icon className="h-9 w-9 text-grass-600" />
-                </div>
+        {/* Resumo do dia */}
+        <section className="mt-6 border-2 border-ink-900 bg-paper-100 p-5 sm:p-6">
+          <div className="flex items-center justify-between">
+            <p className="kicker">{fechou ? 'Fechei o dia' : 'Meu dia'}</p>
+            <span className="font-cond text-xs font-600 uppercase tracking-wider text-ink-600">
+              {jogadosHoje}/{total}
+            </span>
+          </div>
 
-                <p className="mt-5 kicker text-ink-500">{g.category}</p>
-                <h2 className="mt-1.5 font-display text-2xl uppercase leading-[1.1] tracking-tight text-ink-900">
+          <div className="mt-4 grid gap-1.5 sm:grid-cols-2">
+            {entries.map((g) => (
+              <div key={g.route} className="flex items-center gap-2.5">
+                <span
+                  className={`h-3 w-3 flex-none ${
+                    !g.played ? 'bg-ink-900/15' : g.good ? 'bg-grass-600' : 'bg-ochre-500'
+                  }`}
+                />
+                <span className="font-cond text-sm font-600 uppercase tracking-wide text-ink-800">
                   {g.title}
-                </h2>
+                </span>
+                <span className="ml-auto font-serif text-sm text-ink-600">{g.detail}</span>
+              </div>
+            ))}
+          </div>
 
-                <div className="mt-5 flex items-center justify-between border-t border-ink-900/10 pt-3">
-                  <span
-                    className={`font-cond text-[11px] font-600 uppercase tracking-[0.16em] ${
-                      played ? 'text-grass-600' : 'text-ochre-600'
-                    }`}
-                  >
-                    {played ? '✓ Jogado hoje' : '● Edição de hoje'}
+          <button
+            onClick={compartilharDia}
+            disabled={jogadosHoje === 0}
+            className="btn-stamp mt-5 w-full bg-ink-900 px-6 py-3 text-paper hover:bg-grass-600 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {copied ? 'Copiado!' : fechou ? 'Compartilhar o dia' : 'Compartilhar meu progresso'}
+          </button>
+        </section>
+
+        <div className="mt-2 grid sm:grid-cols-2 lg:grid-cols-3">
+          {entries.map((g) => (
+            <Link
+              key={g.route}
+              to={g.route}
+              className="group relative flex flex-col border-t border-ink-900/15 p-6 transition-colors hover:bg-paper-100 sm:[&:nth-child(odd)]:border-r lg:[&:nth-child(3n+1)]:border-r lg:[&:nth-child(3n+2)]:border-r"
+            >
+              <div className="flex items-start justify-between">
+                <span className="font-display text-3xl text-ink-900/20">{g.n}</span>
+                <g.Icon className="h-9 w-9 text-grass-600" />
+              </div>
+
+              <p className="mt-5 kicker text-ink-500">{g.category}</p>
+              <h2 className="mt-1.5 font-display text-2xl uppercase leading-[1.1] tracking-tight text-ink-900">
+                {g.title}
+              </h2>
+
+              <div className="mt-5 flex items-center justify-between border-t border-ink-900/10 pt-3">
+                <span
+                  className={`font-cond text-[11px] font-600 uppercase tracking-[0.16em] ${
+                    g.played ? 'text-grass-600' : 'text-ochre-600'
+                  }`}
+                >
+                  {g.played ? '✓ Jogado hoje' : '● Edição de hoje'}
+                </span>
+                {g.streak > 0 && (
+                  <span className="font-cond text-[11px] font-500 uppercase tracking-wide text-ink-500">
+                    Sequência: {g.streak}
                   </span>
-                  {streak > 0 && (
-                    <span className="font-cond text-[11px] font-500 uppercase tracking-wide text-ink-500">
-                      Sequência: {streak}
-                    </span>
-                  )}
-                </div>
-              </Link>
-            )
-          })}
+                )}
+              </div>
+            </Link>
+          ))}
         </div>
       </main>
       <Footer />
