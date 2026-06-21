@@ -10,6 +10,7 @@ import {
   type IntrusoStats,
 } from '../lib/intrusoStats'
 import { BallMark } from '../components/landing/Icons'
+import { confetti, buzz } from '../lib/juice'
 
 const COUNT = 5
 
@@ -56,6 +57,7 @@ export default function Intruso() {
   const [stats, setStats] = useState<IntrusoStats>(() => loadIntrusoStats())
   const [recorded, setRecorded] = useState(() => !!saved)
   const [copied, setCopied] = useState(false)
+  const [celebrated, setCelebrated] = useState(() => !!saved)
 
   const finished = index >= total
   const score = answers.reduce(
@@ -83,11 +85,20 @@ export default function Intruso() {
     }
   }, [mode, finished, recorded, answers, total, score, picks])
 
+  useEffect(() => {
+    if (finished && !celebrated) {
+      if (score >= total / 2) confetti()
+      buzz(score >= total / 2 ? [20, 40, 20] : 15)
+      setCelebrated(true)
+    }
+  }, [finished, celebrated, score, total])
+
   function answer(i: number) {
     if (phase !== 'answering') return
     setSelected(i)
     setAnswers((a) => [...a, i])
     setPhase('revealed')
+    buzz(i === current.intruderIdx ? 30 : [0, 40])
   }
 
   function treinar() {
@@ -97,6 +108,7 @@ export default function Intruso() {
     setAnswers([])
     setSelected(null)
     setPhase('answering')
+    setCelebrated(false)
   }
 
   function compartilhar() {
@@ -157,7 +169,7 @@ export default function Intruso() {
                 let cls = 'border-ink-900/25 bg-paper hover:border-ink-900 hover:bg-paper-100'
                 if (phase === 'revealed') {
                   if (i === current.intruderIdx)
-                    cls = 'border-grass-700 bg-grass-600 text-paper'
+                    cls = 'animate-pop border-grass-700 bg-grass-600 text-paper'
                   else if (i === selected)
                     cls = 'border-ochre-600 bg-ochre-500 text-paper'
                   else cls = 'border-ink-900/15 bg-paper opacity-60'

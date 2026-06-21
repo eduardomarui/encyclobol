@@ -10,6 +10,7 @@ import {
   type Stats,
 } from '../lib/stats'
 import { BallMark } from '../components/landing/Icons'
+import { confetti, buzz } from '../lib/juice'
 
 const MAX_ATTEMPTS = 6
 const ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM']
@@ -62,6 +63,7 @@ export default function QuemSouEle() {
   const [stats, setStats] = useState<Stats>(() => loadStats())
   const [recorded, setRecorded] = useState(() => !!saved)
   const [copied, setCopied] = useState(false)
+  const [celebrated, setCelebrated] = useState(() => !!saved)
 
   const player = players[pick]
   const answer = player.answer
@@ -82,6 +84,15 @@ export default function QuemSouEle() {
     }
     return map
   }, [guesses, answer])
+
+  // Comemora a vitória (uma vez).
+  useEffect(() => {
+    if (won && !celebrated) {
+      confetti()
+      buzz([20, 40, 20])
+      setCelebrated(true)
+    }
+  }, [won, celebrated])
 
   // Registra resultado e persiste — apenas na edição diária, uma vez.
   useEffect(() => {
@@ -136,6 +147,7 @@ export default function QuemSouEle() {
     setPick(next)
     setGuesses([])
     setCurrent('')
+    setCelebrated(false)
   }
 
   function voltarParaHoje() {
@@ -145,6 +157,7 @@ export default function QuemSouEle() {
     setGuesses(s?.guesses ?? [])
     setCurrent('')
     setRecorded(!!s)
+    setCelebrated(!!s)
   }
 
   function compartilhar() {
@@ -228,7 +241,8 @@ export default function QuemSouEle() {
                   return (
                     <div
                       key={c}
-                      className={`flex h-11 w-11 items-center justify-center border-2 font-display text-2xl uppercase sm:h-12 sm:w-12 ${state}`}
+                      style={ev ? { animationDelay: `${c * 60}ms` } : undefined}
+                      className={`flex h-11 w-11 items-center justify-center border-2 font-display text-2xl uppercase sm:h-12 sm:w-12 ${state} ${ev ? 'animate-pop' : ''}`}
                     >
                       {ch}
                     </div>

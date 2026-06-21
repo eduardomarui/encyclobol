@@ -10,6 +10,7 @@ import {
   type QuizStats,
 } from '../lib/quizStats'
 import { BallMark } from '../components/landing/Icons'
+import { confetti, buzz } from '../lib/juice'
 
 const COUNT = 8
 const SECONDS = 15
@@ -62,6 +63,7 @@ export default function QuizRelampago() {
   const [stats, setStats] = useState<QuizStats>(() => loadQuizStats())
   const [recorded, setRecorded] = useState(() => !!saved)
   const [copied, setCopied] = useState(false)
+  const [celebrated, setCelebrated] = useState(() => !!saved)
 
   const finished = index >= total
   const score = answers.reduce(
@@ -101,11 +103,20 @@ export default function QuizRelampago() {
     }
   }, [mode, finished, recorded, answers, total, score, picks])
 
+  useEffect(() => {
+    if (finished && !celebrated) {
+      if (score >= total / 2) confetti()
+      buzz(score >= total / 2 ? [20, 40, 20] : 15)
+      setCelebrated(true)
+    }
+  }, [finished, celebrated, score, total])
+
   function answer(i: number) {
     if (phase !== 'answering') return
     setSelected(i)
     setAnswers((a) => [...a, i])
     setPhase('revealed')
+    buzz(i === current.correct ? 30 : [0, 40])
   }
 
   function treinar() {
@@ -116,6 +127,7 @@ export default function QuizRelampago() {
     setSelected(null)
     setPhase('answering')
     setTimeLeft(SECONDS)
+    setCelebrated(false)
   }
 
   function compartilhar() {
@@ -188,7 +200,7 @@ export default function QuizRelampago() {
                 let cls = 'border-ink-900/25 bg-paper hover:border-ink-900 hover:bg-paper-100'
                 if (phase === 'revealed') {
                   if (i === current.correct)
-                    cls = 'border-grass-700 bg-grass-600 text-paper'
+                    cls = 'animate-pop border-grass-700 bg-grass-600 text-paper'
                   else if (i === selected)
                     cls = 'border-ochre-600 bg-ochre-500 text-paper'
                   else cls = 'border-ink-900/15 bg-paper opacity-60'

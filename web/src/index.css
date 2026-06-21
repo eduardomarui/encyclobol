@@ -45,6 +45,29 @@
 
   /* Botão "carimbo" editorial */
   .btn-stamp {
-    @apply inline-flex items-center justify-center font-cond text-sm font-600 uppercase tracking-wider transition-colors;
+    @apply inline-flex items-center justify-center font-cond text-sm font-600 uppercase tracking-wider transition-all active:scale-[0.97];
   }
+}
+
+/* === Juice: micro-animações === */
+@keyframes pop {
+  0% { transform: scale(0.55); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
+}
+@keyframes riseIn {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-pop { animation: pop 0.36s cubic-bezier(0.2, 0.8, 0.3, 1) both; }
+.animate-shake { animation: shake 0.4s ease; }
+.animate-rise { animation: riseIn 0.3s ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pop, .animate-shake, .animate-rise { animation: none; }
 }

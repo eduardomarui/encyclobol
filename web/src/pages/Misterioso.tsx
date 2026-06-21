@@ -10,6 +10,7 @@ import {
   type MystStats,
 } from '../lib/misteriosoStats'
 import { BallMark } from '../components/landing/Icons'
+import { confetti, buzz } from '../lib/juice'
 
 const MAX_GUESSES = 8
 
@@ -73,6 +74,10 @@ export default function Misterioso() {
 
   function finish(won: boolean, finalShare: string[][]) {
     setStatus(won ? 'won' : 'lost')
+    if (won) {
+      confetti()
+      buzz([20, 40, 20])
+    }
     if (mode === 'daily' && !recorded) {
       setStats(recordMyst(won))
       saveMystDaily({ day: dayNumber(), won, guesses: finalShare.length, rows: finalShare })
@@ -112,6 +117,7 @@ export default function Misterioso() {
 
     if (p.answer === secret.answer) finish(true, nextShare)
     else if (nextRows.length >= MAX_GUESSES) finish(false, nextShare)
+    else buzz(15)
   }
 
   function praticar() {
@@ -190,7 +196,7 @@ export default function Misterioso() {
           {/* Linhas de palpite */}
           <div className="space-y-1.5">
             {rows.map((r, i) => (
-              <div key={i} className="grid grid-cols-[1fr_auto_auto_auto] gap-1.5">
+              <div key={i} className="animate-rise grid grid-cols-[1fr_auto_auto_auto] gap-1.5">
                 <div className="flex items-center border-2 border-ink-900/20 bg-paper px-3 font-cond text-sm font-600 uppercase text-ink-900">
                   {r.player.display}
                 </div>

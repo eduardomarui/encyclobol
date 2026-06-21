@@ -10,6 +10,7 @@ import {
   type ConStats,
 } from '../lib/conexoesStats'
 import { BallMark } from '../components/landing/Icons'
+import { confetti, buzz } from '../lib/juice'
 
 const MAX_MISTAKES = 4
 
@@ -56,6 +57,7 @@ export default function Conexoes() {
   const [message, setMessage] = useState('')
   const [recorded, setRecorded] = useState(!!saved)
   const [copied, setCopied] = useState(false)
+  const [wrong, setWrong] = useState(false)
   const [stats, setStats] = useState<ConStats>(() => loadConStats())
 
   const over = status !== 'playing'
@@ -77,6 +79,10 @@ export default function Conexoes() {
   function finish(won: boolean, finalMistakes: number, finalRows: string[][]) {
     setSolved(puzzle.groups)
     setStatus(won ? 'won' : 'lost')
+    if (won) {
+      confetti()
+      buzz([20, 40, 20])
+    }
     if (mode === 'daily' && !recorded) {
       setStats(recordCon(won))
       saveConDaily({ day: dayNumber(), won, mistakes: finalMistakes, rows: finalRows })
@@ -94,6 +100,7 @@ export default function Conexoes() {
       const g = puzzle.groups.find((x) => x.color === colors[0])!
       const nextSolved = [...solved, g]
       setSelected([])
+      buzz(30)
       if (nextSolved.length === 4) finish(true, mistakes, nextRows)
       else setSolved(nextSolved)
       return
@@ -106,6 +113,9 @@ export default function Conexoes() {
     setMistakes(m)
     setSelected([])
     setMessage(oneAway ? 'Faltou um!' : 'Não foi dessa vez')
+    setWrong(true)
+    setTimeout(() => setWrong(false), 450)
+    buzz([0, 40, 30, 40])
     if (m >= MAX_MISTAKES) finish(false, m, nextRows)
   }
 
@@ -177,7 +187,7 @@ export default function Conexoes() {
               {solved.map((g) => (
                 <div
                   key={g.color}
-                  className={`rounded-sm px-3 py-2 text-center text-paper ${solvedBg[g.color]}`}
+                  className={`animate-rise rounded-sm px-3 py-2 text-center text-paper ${solvedBg[g.color]}`}
                 >
                   <div className="font-cond text-xs font-700 uppercase tracking-wider">
                     {g.label}
@@ -189,7 +199,7 @@ export default function Conexoes() {
           )}
 
           {remaining.length > 0 && (
-            <div className="grid grid-cols-4 gap-1.5">
+            <div className={`grid grid-cols-4 gap-1.5 ${wrong ? 'animate-shake' : ''}`}>
               {remaining.map((name) => {
                 const on = selected.includes(name)
                 return (
