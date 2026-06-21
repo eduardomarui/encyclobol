@@ -148,6 +148,10 @@ export default function Intruso() {
         <h1 className="mt-3 font-display text-4xl uppercase leading-[1.05] tracking-tight text-ink-900 sm:text-5xl">
           O Intruso
         </h1>
+        <p className="mt-3 max-w-md text-center font-serif text-base italic text-ink-600">
+          Quatro craques, três com algo em comum e um infiltrado. Ache quem não
+          pertence — cuidado com as pistas falsas.
+        </p>
 
         {!finished && current && (
           <div className="mt-7 w-full max-w-xl">

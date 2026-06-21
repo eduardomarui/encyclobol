@@ -168,6 +168,10 @@ export default function QuizRelampago() {
         <h1 className="mt-3 font-display text-4xl uppercase leading-[1.05] tracking-tight text-ink-900 sm:text-5xl">
           Quiz Relâmpago
         </h1>
+        <p className="mt-3 max-w-md text-center font-serif text-base italic text-ink-600">
+          Oito perguntas sobre a história do futebol, quinze segundos cada.
+          Responda rápido antes do apito final.
+        </p>
 
         {!finished && current && (
           <div className="mt-8 w-full max-w-xl">

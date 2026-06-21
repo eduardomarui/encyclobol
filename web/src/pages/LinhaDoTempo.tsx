@@ -145,6 +145,10 @@ export default function LinhaDoTempo() {
         <h1 className="mt-3 font-display text-4xl uppercase leading-[1.05] tracking-tight text-ink-900 sm:text-5xl">
           Linha do Tempo
         </h1>
+        <p className="mt-3 max-w-md text-center font-serif text-base italic text-ink-600">
+          Encaixe cada craque na ordem certa da história, pelo ano de estreia.
+          Errou a época, perde uma vida.
+        </p>
 
         {/* Placar / vidas */}
         <div className="mt-4 flex items-center gap-5">
