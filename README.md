@@ -22,6 +22,13 @@ Para parar:
 docker compose down
 ```
 
+> **Adicionou uma dependência nova no `web/package.json`?**
+> O `node_modules` vive num volume anônimo que sobrevive ao `--build`. Recrie-o:
+>
+> ```bash
+> docker compose up -d --build --renew-anon-volumes
+> ```
+
 ## Produção (build otimizado + nginx)
 
 ```bash
