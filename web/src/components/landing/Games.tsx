@@ -47,6 +47,7 @@ const games: Game[] = [
     title: 'Escalação Rápida',
     desc: 'Monte o time no 4-4-2 com craques de todo tempo, escolha o estilo e mande pra campo. O motor simula o resto.',
     status: 'No ar',
+    to: '/jogos/escalacao-rapida',
   },
   {
     n: '04',
