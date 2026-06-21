@@ -27,7 +27,7 @@ const games: Game[] = [
     Icon: PlayerIcon,
     category: 'Adivinhação',
     title: 'Tira-Teima',
-    desc: 'Seis tentativas pra cravar o sobrenome do craque. Errou? O alfabeto vai pintando de verde e amarelo até você acertar.',
+    desc: 'Seis tentativas pra cravar o nome do craque. Errou? O alfabeto vai pintando de verde e amarelo até você acertar.',
     status: 'Edição de hoje',
     to: '/jogos/quem-sou-ele',
   },

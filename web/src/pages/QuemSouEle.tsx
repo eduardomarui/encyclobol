@@ -204,6 +204,10 @@ export default function QuemSouEle() {
         <h1 className="mt-3 font-display text-4xl uppercase leading-[1.05] tracking-tight text-ink-900 sm:text-5xl">
           Tira-Teima
         </h1>
+        <p className="mt-3 max-w-md text-center font-serif text-base italic text-ink-600">
+          Adivinhe o craque pelo nome que ele é conhecido — pode ser primeiro
+          nome, apelido ou sobrenome.
+        </p>
 
         <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
           {[
