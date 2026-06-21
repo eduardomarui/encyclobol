@@ -28,26 +28,25 @@ const emoji: Record<GroupColor, string> = {
 }
 
 const saved = loadConDaily()
+const DAILY_INDEX = dailyIndex(conexoes.length)
 
 export default function Conexoes() {
-  const puzzle = useMemo(() => conexoes[dailyIndex(conexoes.length)], [])
-  const allNames = useMemo(
-    () => puzzle.groups.flatMap((g) => g.members),
-    [puzzle],
-  )
+  const [mode, setMode] = useState<'daily' | 'practice'>('daily')
+  const [pIdx, setPIdx] = useState(DAILY_INDEX)
+  const puzzle = conexoes[pIdx]
+
   const groupOf = useMemo(() => {
     const map: Record<string, ConGroup> = {}
     for (const g of puzzle.groups) for (const m of g.members) map[m] = g
     return map
   }, [puzzle])
 
-  const finishedAtLoad = !!saved
   const [order, setOrder] = useState<string[]>(() =>
-    seededShuffle(allNames, (dayNumber() + 1) * 7919),
+    seededShuffle(puzzle.groups.flatMap((g) => g.members), (dayNumber() + 1) * 7919),
   )
   const [selected, setSelected] = useState<string[]>([])
   const [solved, setSolved] = useState<ConGroup[]>(() =>
-    finishedAtLoad ? puzzle.groups : [],
+    saved ? puzzle.groups : [],
   )
   const [mistakes, setMistakes] = useState(saved?.mistakes ?? 0)
   const [rows, setRows] = useState<string[][]>(saved?.rows ?? [])
@@ -55,7 +54,7 @@ export default function Conexoes() {
     saved ? (saved.won ? 'won' : 'lost') : 'playing',
   )
   const [message, setMessage] = useState('')
-  const [recorded, setRecorded] = useState(finishedAtLoad)
+  const [recorded, setRecorded] = useState(!!saved)
   const [copied, setCopied] = useState(false)
   const [stats, setStats] = useState<ConStats>(() => loadConStats())
 
@@ -78,7 +77,7 @@ export default function Conexoes() {
   function finish(won: boolean, finalMistakes: number, finalRows: string[][]) {
     setSolved(puzzle.groups)
     setStatus(won ? 'won' : 'lost')
-    if (!recorded) {
+    if (mode === 'daily' && !recorded) {
       setStats(recordCon(won))
       saveConDaily({ day: dayNumber(), won, mistakes: finalMistakes, rows: finalRows })
       setRecorded(true)
@@ -95,15 +94,11 @@ export default function Conexoes() {
       const g = puzzle.groups.find((x) => x.color === colors[0])!
       const nextSolved = [...solved, g]
       setSelected([])
-      if (nextSolved.length === 4) {
-        finish(true, mistakes, nextRows)
-      } else {
-        setSolved(nextSolved)
-      }
+      if (nextSolved.length === 4) finish(true, mistakes, nextRows)
+      else setSolved(nextSolved)
       return
     }
 
-    // Errou
     const counts: Record<string, number> = {}
     colors.forEach((c) => (counts[c] = (counts[c] ?? 0) + 1))
     const oneAway = Math.max(...Object.values(counts)) === 3
@@ -114,13 +109,32 @@ export default function Conexoes() {
     if (m >= MAX_MISTAKES) finish(false, m, nextRows)
   }
 
+  // Inicia um puzzle de treino (não conta pro placar diário).
+  function treinar() {
+    let next = pIdx
+    while (next === pIdx && conexoes.length > 1)
+      next = Math.floor(Math.random() * conexoes.length)
+    setMode('practice')
+    setPIdx(next)
+    setOrder(
+      seededShuffle(
+        conexoes[next].groups.flatMap((g) => g.members),
+        Math.floor(Math.random() * 1e9) + 1,
+      ),
+    )
+    setSelected([])
+    setSolved([])
+    setMistakes(0)
+    setRows([])
+    setStatus('playing')
+    setMessage('')
+  }
+
   function compartilhar() {
     const head = `Encyclobol · Conexões #${dayNumber()} — ${
       status === 'won' ? `${mistakes} erro${mistakes === 1 ? '' : 's'}` : 'X'
     }`
-    const grid = rows
-      .map((row) => row.map((c) => emoji[c as GroupColor]).join(''))
-      .join('\n')
+    const grid = rows.map((row) => row.map((c) => emoji[c as GroupColor]).join('')).join('\n')
     const text = `${head}\n${grid}\nencyclobol.com.br`
     navigator.clipboard?.writeText(text).then(
       () => {
@@ -142,7 +156,7 @@ export default function Conexoes() {
             </span>
           </Link>
           <span className="font-cond text-xs font-500 uppercase tracking-[0.16em] text-ink-600">
-            Edição diária
+            {mode === 'daily' ? 'Edição diária' : 'Modo treino'}
           </span>
         </div>
       </header>
@@ -158,7 +172,6 @@ export default function Conexoes() {
         </p>
 
         <div className="mt-6 w-full max-w-xl">
-          {/* Grupos resolvidos */}
           {solved.length > 0 && (
             <div className="mb-2 space-y-2">
               {solved.map((g) => (
@@ -175,7 +188,6 @@ export default function Conexoes() {
             </div>
           )}
 
-          {/* Grade de craques */}
           {remaining.length > 0 && (
             <div className="grid grid-cols-4 gap-1.5">
               {remaining.map((name) => {
@@ -197,7 +209,6 @@ export default function Conexoes() {
             </div>
           )}
 
-          {/* Erros + mensagem */}
           {!over && (
             <div className="mt-4 flex items-center justify-between">
               <div className="flex items-center gap-1.5">
@@ -219,7 +230,6 @@ export default function Conexoes() {
             </div>
           )}
 
-          {/* Ações */}
           {!over && (
             <div className="mt-4 flex flex-wrap justify-center gap-2">
               <button
@@ -244,32 +254,44 @@ export default function Conexoes() {
             </div>
           )}
 
-          {/* Fim de jogo */}
           {over && (
             <div className="mt-4 border-2 border-ink-900 bg-paper-100 p-6 text-center">
               <p className="kicker">
                 {status === 'won' ? 'Cravou os quatro grupos!' : 'Acabaram as tentativas'}
+                {mode === 'practice' && ' · treino'}
               </p>
-              <div className="mt-4 grid grid-cols-4 gap-px overflow-hidden border-2 border-ink-900 bg-ink-900/15">
-                {[
-                  ['Jogos', stats.played],
-                  ['Vitórias', stats.wins],
-                  ['Sequência', stats.currentStreak],
-                  ['Melhor', stats.maxStreak],
-                ].map(([k, v]) => (
-                  <div key={k} className="bg-paper-100 px-1 py-2">
-                    <div className="font-display text-2xl text-ink-900">{v}</div>
-                    <div className="font-cond text-[9px] font-500 uppercase tracking-wide text-ink-600">
-                      {k}
-                    </div>
+
+              {mode === 'daily' && (
+                <>
+                  <div className="mt-4 grid grid-cols-4 gap-px overflow-hidden border-2 border-ink-900 bg-ink-900/15">
+                    {[
+                      ['Jogos', stats.played],
+                      ['Vitórias', stats.wins],
+                      ['Sequência', stats.currentStreak],
+                      ['Melhor', stats.maxStreak],
+                    ].map(([k, v]) => (
+                      <div key={k} className="bg-paper-100 px-1 py-2">
+                        <div className="font-display text-2xl text-ink-900">{v}</div>
+                        <div className="font-cond text-[9px] font-500 uppercase tracking-wide text-ink-600">
+                          {k}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                  <button
+                    onClick={compartilhar}
+                    className="btn-stamp mt-5 w-full bg-ink-900 px-6 py-2.5 text-paper hover:bg-grass-600"
+                  >
+                    {copied ? 'Copiado!' : 'Compartilhar resultado'}
+                  </button>
+                </>
+              )}
+
               <button
-                onClick={compartilhar}
-                className="btn-stamp mt-5 w-full bg-ink-900 px-6 py-2.5 text-paper hover:bg-grass-600"
+                onClick={treinar}
+                className="btn-stamp mt-2 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700"
               >
-                {copied ? 'Copiado!' : 'Compartilhar resultado'}
+                Treinar com outro puzzle
               </button>
               <Link
                 to="/"
