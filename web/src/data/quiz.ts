@@ -34,4 +34,10 @@ export const quiz: QuizQuestion[] = [
   { q: 'Em qual país foi disputada a Copa do Mundo de 1994?', options: ['Estados Unidos', 'México', 'Itália', 'Brasil'], correct: 0, cat: 'Copas' },
   { q: 'Qual seleção foi vice-campeã da Copa do Mundo de 2018?', options: ['Croácia', 'França', 'Bélgica', 'Inglaterra'], correct: 0, cat: 'Copas' },
   { q: 'Qual jogador holandês ficou famoso pelo drible "Cruyff Turn"?', options: ['Johan Cruyff', 'Ruud Gullit', 'Dennis Bergkamp', 'Arjen Robben'], correct: 0, cat: 'Lendas' },
+  { q: 'Quem ganhou a Bola de Ouro de 2018, quebrando a sequência de Messi e Cristiano?', options: ['Luka Modrić', 'Kylian Mbappé', 'Antoine Griezmann', 'Mohamed Salah'], correct: 0, cat: 'Recordes' },
+  { q: 'Qual seleção venceu a Eurocopa de 2016?', options: ['Portugal', 'França', 'Alemanha', 'Espanha'], correct: 0, cat: 'Seleções' },
+  { q: 'Por qual clube Lionel Messi jogou a maior parte da carreira?', options: ['Barcelona', 'Real Madrid', 'Paris Saint-Germain', 'Manchester City'], correct: 0, cat: 'Clubes' },
+  { q: 'Qual seleção venceu a Copa América de 2021?', options: ['Argentina', 'Brasil', 'Uruguai', 'Chile'], correct: 0, cat: 'Seleções' },
+  { q: 'Em qual país foi disputada a Copa do Mundo de 2018?', options: ['Rússia', 'Catar', 'Brasil', 'Alemanha'], correct: 0, cat: 'Copas' },
+  { q: 'Qual clube inglês é apelidado de "Os Diabos Vermelhos"?', options: ['Manchester United', 'Liverpool', 'Arsenal', 'Chelsea'], correct: 0, cat: 'Clubes' },
 ]

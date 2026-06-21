@@ -69,4 +69,24 @@ export const intruso: IntrusoPuzzle[] = [
     intruder: 'Maradona',
     rule: 'Os outros brilharam no século 21; Maradona é dos anos 1980.',
   },
+  {
+    players: ['Drogba', "Eto'o", 'Weah', 'Maldini'],
+    intruder: 'Maldini',
+    rule: 'Os outros são atacantes africanos; Maldini é zagueiro italiano.',
+  },
+  {
+    players: ['Xavi', 'Iniesta', 'Xabi Alonso', 'Pirlo'],
+    intruder: 'Pirlo',
+    rule: 'Os outros são meias espanhóis; Pirlo é italiano.',
+  },
+  {
+    players: ['Cavani', 'Suárez', 'Forlán', 'Salah'],
+    intruder: 'Salah',
+    rule: 'Os outros são uruguaios; Salah é egípcio.',
+  },
+  {
+    players: ['Lewandowski', 'Lahm', 'Neuer', 'Drogba'],
+    intruder: 'Drogba',
+    rule: 'Os outros jogaram no Bayern de Munique; Drogba nunca.',
+  },
 ]

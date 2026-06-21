@@ -78,4 +78,43 @@ export const conexoes: Puzzle[] = [
       { color: 'ink', label: 'Argentinos', members: ['Maradona', 'Batistuta', 'Kempes', 'Zanetti'] },
     ],
   },
+  // 8 — quatro clubes ingleses. Armadilha: Torres jogou em Liverpool E
+  // Chelsea (só fecha no Liverpool); muitos ingleses espalhados.
+  {
+    groups: [
+      { color: 'corn', label: 'Jogaram no Liverpool', members: ['Gerrard', 'Suárez', 'Xabi Alonso', 'Fernando Torres'] },
+      { color: 'grass', label: 'Jogaram no Chelsea', members: ['Drogba', 'Lampard', 'Terry', 'Hazard'] },
+      { color: 'ochre', label: 'Jogaram no Arsenal', members: ['Henry', 'Bergkamp', 'Vieira', 'Pirès'] },
+      { color: 'ink', label: 'Jogaram no Manchester United', members: ['Rooney', 'Cantona', 'Van Nistelrooy', 'Beckham'] },
+    ],
+  },
+  // 9 — quatro seleções, incluindo um quarteto africano de continentes diferentes.
+  {
+    groups: [
+      { color: 'corn', label: 'Africanos', members: ['Weah', 'Drogba', "Eto'o", 'Salah'] },
+      { color: 'grass', label: 'Ingleses', members: ['Rooney', 'Lampard', 'Terry', 'Shearer'] },
+      { color: 'ochre', label: 'Espanhóis', members: ['Xavi', 'Iniesta', 'Raúl', 'Fernando Torres'] },
+      { color: 'ink', label: 'Uruguaios', members: ['Suárez', 'Cavani', 'Forlán', 'Francescoli'] },
+    ],
+  },
+  // 10 — quatro clubes (Itália + Espanha). Figo (Real), Ronaldinho (Barça),
+  // Zidane (Real), Seedorf (Milan) só fecham de um jeito.
+  {
+    groups: [
+      { color: 'corn', label: 'Jogaram no Milan', members: ['Maldini', 'Gattuso', 'Nesta', 'Seedorf'] },
+      { color: 'grass', label: 'Jogaram na Juventus', members: ['Buffon', 'Del Piero', 'Nedvěd', 'Trezeguet'] },
+      { color: 'ochre', label: 'Jogaram no Real Madrid', members: ['Raúl', 'Casillas', 'Figo', 'Zidane'] },
+      { color: 'ink', label: 'Jogaram no Barcelona', members: ['Xavi', 'Iniesta', 'Messi', 'Ronaldinho'] },
+    ],
+  },
+  // 11 — clubes + uma seleção. Robben/Beckham/Suárez têm muitos clubes,
+  // mas só fecham num grupo aqui.
+  {
+    groups: [
+      { color: 'corn', label: 'Jogaram no Liverpool', members: ['Gerrard', 'Suárez', 'Xabi Alonso', 'Fernando Torres'] },
+      { color: 'grass', label: 'Jogaram no Bayern de Munique', members: ['Lahm', 'Neuer', 'Lewandowski', 'Robben'] },
+      { color: 'ochre', label: 'Jogaram no Manchester United', members: ['Rooney', 'Cantona', 'Van Nistelrooy', 'Beckham'] },
+      { color: 'ink', label: 'Argentinos', members: ['Messi', 'Maradona', 'Agüero', 'Di María'] },
+    ],
+  },
 ]
