@@ -58,4 +58,24 @@ export const conexoes: Puzzle[] = [
       { color: 'ink', label: 'Holandeses', members: ['Cruyff', 'Bergkamp', 'Gullit', 'Robben'] },
     ],
   },
+  // 6 — por CLUBE. Armadilhas de carreira: Figo (Barça→Real), Ronaldinho
+  // (Barça→Milan) e Robben (Real→Bayern) só fecham de um jeito.
+  {
+    groups: [
+      { color: 'corn', label: 'Jogaram no Milan', members: ['Maldini', 'Baresi', 'Nesta', 'Gullit'] },
+      { color: 'grass', label: 'Jogaram no Bayern de Munique', members: ['Lahm', 'Neuer', 'Beckenbauer', 'Robben'] },
+      { color: 'ochre', label: 'Jogaram no Real Madrid', members: ['Figo', 'Zidane', 'Casillas', 'Ramos'] },
+      { color: 'ink', label: 'Jogaram no Barcelona', members: ['Messi', 'Ronaldinho', 'Puyol', 'Rivaldo'] },
+    ],
+  },
+  // 7 — CLUBE + posição + seleção misturados. Brasileiros espalhados entre
+  // Milan e Barça; Messi é argentino mas só fecha no Barça.
+  {
+    groups: [
+      { color: 'corn', label: 'Jogaram no Milan', members: ['Cafu', 'Kaká', 'Ronaldinho', 'Maldini'] },
+      { color: 'grass', label: 'Jogaram no Barcelona', members: ['Messi', 'Romário', 'Cruyff', 'Neymar'] },
+      { color: 'ochre', label: 'Goleiros', members: ['Buffon', 'Yashin', 'Banks', 'Casillas'] },
+      { color: 'ink', label: 'Argentinos', members: ['Maradona', 'Batistuta', 'Kempes', 'Zanetti'] },
+    ],
+  },
 ]
