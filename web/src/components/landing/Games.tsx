@@ -7,7 +7,6 @@ import {
   TimelineIcon,
   IntruderIcon,
   MysteryIcon,
-  AlbumIcon,
 } from './Icons'
 
 type Status = 'Edição de hoje' | 'No ar' | 'Em breve'
@@ -76,15 +75,6 @@ const games: Game[] = [
     desc: 'Há um craque secreto. Chute nomes e use as pistas — seleção, posição e época — pra desvendar quem é.',
     status: 'Edição de hoje',
     to: '/jogos/craque-misterioso',
-  },
-  {
-    n: '07',
-    Icon: AlbumIcon,
-    category: 'Figurinhas',
-    title: 'A Grade',
-    desc: 'Preencha o quadrado que cruza seleção e posição. Garimpe o craque mais raro pra pontuar — ou chame um amigo na pelada 2 jogadores.',
-    status: 'Edição de hoje',
-    to: '/jogos/a-grade',
   },
 ]
 

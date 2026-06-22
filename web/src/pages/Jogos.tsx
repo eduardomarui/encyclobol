@@ -9,7 +9,6 @@ import {
   TimelineIcon,
   IntruderIcon,
   MysteryIcon,
-  AlbumIcon,
 } from '../components/landing/Icons'
 import { dayNumber } from '../lib/daily'
 import { loadDailyState, loadStats } from '../lib/stats'
@@ -18,7 +17,6 @@ import { loadConDaily, loadConStats } from '../lib/conexoesStats'
 import { loadTLDaily, loadTLStats } from '../lib/timelineStats'
 import { loadIntrusoDaily, loadIntrusoStats } from '../lib/intrusoStats'
 import { loadMystDaily, loadMystStats } from '../lib/misteriosoStats'
-import { loadGradeDaily, loadGradeStats } from '../lib/gradeStats'
 
 type Result = { played: boolean; streak: number; detail: string; good: boolean }
 
@@ -125,22 +123,6 @@ const games: GameInfo[] = [
         streak: loadMystStats().currentStreak,
         detail: d ? (d.won ? `${d.guesses} chutes` : 'X') : '—',
         good: !!d && d.won,
-      }
-    },
-  },
-  {
-    n: '07',
-    title: 'A Grade',
-    category: 'Figurinhas',
-    route: '/jogos/a-grade',
-    Icon: AlbumIcon,
-    result: () => {
-      const d = loadGradeDaily()
-      return {
-        played: !!d,
-        streak: loadGradeStats().currentStreak,
-        detail: d ? `${d.filled}/9 · ${d.points} pts` : '—',
-        good: !!d && d.filled >= 6,
       }
     },
   },
