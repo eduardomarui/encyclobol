@@ -50,4 +50,6 @@ export const quiz: QuizQuestion[] = [
   { q: 'A Copa de 2026 estreia um novo formato com quantas seleções?', options: ['48', '32', '24', '64'], correct: 0, cat: 'Copa 2026' },
   { q: 'A Copa do Mundo de 2026 é a primeira sediada por quantos países ao mesmo tempo?', options: ['3', '1', '2', '4'], correct: 0, cat: 'Copa 2026' },
   { q: 'Em qual continente é disputada a maior parte da Copa de 2026?', options: ['América do Norte', 'América do Sul', 'Europa', 'Ásia'], correct: 0, cat: 'Copa 2026' },
+  { q: 'Qual técnico comanda a seleção brasileira na Copa de 2026?', options: ['Carlo Ancelotti', 'Dorival Júnior', 'Tite', 'Fernando Diniz'], correct: 0, cat: 'Copa 2026' },
+  { q: 'Quem voltou à seleção brasileira para a Copa de 2026 após mais de dois anos fora?', options: ['Neymar', 'Philippe Coutinho', 'Gabriel Jesus', 'Firmino'], correct: 0, cat: 'Copa 2026' },
 ]
