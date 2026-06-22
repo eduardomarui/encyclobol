@@ -72,6 +72,15 @@ export function JerseyIcon({ className }: IconProps) {
   )
 }
 
+export function AlbumIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className} aria-hidden>
+      <rect x="5" y="5" width="22" height="22" rx="1.5" />
+      <path d="M12.3 5v22M19.7 5v22M5 12.3h22M5 19.7h22" strokeWidth="1.3" />
+    </svg>
+  )
+}
+
 export function MysteryIcon({ className }: IconProps) {
   return (
     <svg {...base} className={className} aria-hidden>

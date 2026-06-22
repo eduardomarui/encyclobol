@@ -7,6 +7,7 @@ import Conexoes from './pages/Conexoes'
 import LinhaDoTempo from './pages/LinhaDoTempo'
 import Intruso from './pages/Intruso'
 import Misterioso from './pages/Misterioso'
+import Grade from './pages/Grade'
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
         <Route path="/jogos/linha-do-tempo" element={<LinhaDoTempo />} />
         <Route path="/jogos/o-intruso" element={<Intruso />} />
         <Route path="/jogos/craque-misterioso" element={<Misterioso />} />
+        <Route path="/jogos/a-grade" element={<Grade />} />
       </Routes>
     </BrowserRouter>
   )
