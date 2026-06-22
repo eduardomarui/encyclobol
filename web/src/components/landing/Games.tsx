@@ -2,7 +2,7 @@ import type { ComponentType } from 'react'
 import { Link } from 'react-router-dom'
 import {
   PlayerIcon,
-  TimerIcon,
+  GoalIcon,
   GridIcon,
   TimelineIcon,
   IntruderIcon,
@@ -33,12 +33,12 @@ const games: Game[] = [
   },
   {
     n: '02',
-    Icon: TimerIcon,
-    category: 'Quiz',
-    title: 'Quiz Relâmpago',
-    desc: 'Quinze segundos por pergunta. O cronômetro não tem dó de quem trava na hora de lembrar o artilheiro daquela Copa.',
+    Icon: GoalIcon,
+    category: 'Pênaltis',
+    title: 'Disputa de Pênaltis',
+    desc: 'Cada pergunta é uma cobrança. Acertou, é gol; errou, o goleiro pega. Melhor de cinco — e na defesa o jogo vira.',
     status: 'Edição de hoje',
-    to: '/jogos/quiz-relampago',
+    to: '/jogos/penaltis',
   },
   {
     n: '03',

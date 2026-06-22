@@ -4,7 +4,7 @@ import Nav from '../components/landing/Nav'
 import Footer from '../components/landing/Footer'
 import {
   PlayerIcon,
-  TimerIcon,
+  GoalIcon,
   GridIcon,
   TimelineIcon,
   IntruderIcon,
@@ -12,7 +12,7 @@ import {
 } from '../components/landing/Icons'
 import { dayNumber } from '../lib/daily'
 import { loadDailyState, loadStats } from '../lib/stats'
-import { loadQuizDaily, loadQuizStats } from '../lib/quizStats'
+import { loadPenDaily, loadPenStats } from '../lib/penaltisStats'
 import { loadConDaily, loadConStats } from '../lib/conexoesStats'
 import { loadTLDaily, loadTLStats } from '../lib/timelineStats'
 import { loadIntrusoDaily, loadIntrusoStats } from '../lib/intrusoStats'
@@ -48,17 +48,17 @@ const games: GameInfo[] = [
   },
   {
     n: '02',
-    title: 'Quiz Relâmpago',
-    category: 'Quiz',
-    route: '/jogos/quiz-relampago',
-    Icon: TimerIcon,
+    title: 'Disputa de Pênaltis',
+    category: 'Pênaltis',
+    route: '/jogos/penaltis',
+    Icon: GoalIcon,
     result: () => {
-      const d = loadQuizDaily()
+      const d = loadPenDaily()
       return {
         played: !!d,
-        streak: loadQuizStats().currentStreak,
-        detail: d ? `${d.score}/8` : '—',
-        good: !!d && d.score >= 4,
+        streak: loadPenStats().currentStreak,
+        detail: d ? `${d.myGoals}–${d.oppGoals}` : '—',
+        good: !!d && d.won,
       }
     },
   },
