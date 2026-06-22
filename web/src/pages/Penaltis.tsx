@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { quiz } from '../data/quiz'
 import { dailySequence, dayNumber, seededShuffle } from '../lib/daily'
@@ -12,19 +12,32 @@ import {
 import { BallMark } from '../components/landing/Icons'
 import { confetti } from '../lib/juice'
 
-const ROUNDS = 10 // 5 cobranças + 5 defesas, alternadas
+const ROUNDS = 10
 const SECONDS = 8
 
 type Mark = 'goal' | 'miss'
 type PQ = { q: string; cat: string; options: string[]; correct: number }
+type Zone = { x: number; y: number }
 type Shot = {
-  ballLeft: number
-  ballTop: number
-  keeperLeft: number
+  bx: number
+  by: number
+  kx: number
+  ky: number
+  rot: number
   label: string
   good: boolean
   net: boolean
 } | null
+
+// Cantos do gol onde a bola pode ir (variedade a cada cobrança)
+const ZONES: Zone[] = [
+  { x: 22, y: 20 },
+  { x: 50, y: 15 },
+  { x: 78, y: 20 },
+  { x: 24, y: 38 },
+  { x: 50, y: 40 },
+  { x: 76, y: 38 },
+]
 
 const saved = loadPenDaily()
 
@@ -43,35 +56,40 @@ function prepQ(bi: number, seed: number): PQ {
 }
 
 function dailyPrepared(): PQ[] {
-  const picks = dailySequence(quiz.length, ROUNDS)
-  return picks.map((bi, qi) => prepQ(bi, dayNumber() * 101 + qi * 7 + 1))
+  return dailySequence(quiz.length, ROUNDS).map((bi, qi) =>
+    prepQ(bi, dayNumber() * 101 + qi * 7 + 1),
+  )
 }
-
 function randomPrepared(n: number): PQ[] {
   const seed = Math.floor(Math.random() * 1e9) + 1
-  const picks = seededShuffle(
-    quiz.map((_, i) => i),
-    seed,
-  ).slice(0, n)
-  return picks.map((bi, qi) => prepQ(bi, seed + qi * 13))
+  return seededShuffle(quiz.map((_, i) => i), seed)
+    .slice(0, n)
+    .map((bi, qi) => prepQ(bi, seed + qi * 13))
 }
-
 function extraQ(): PQ {
   return prepQ(Math.floor(Math.random() * quiz.length), Math.floor(Math.random() * 1e9) + 1)
 }
 
-/* Marcador de cobrança (estilo placar de disputa) */
+// Pose do goleiro pra uma zona (alto/baixo, esq/dir, com rotação de mergulho)
+function keeperPose(z: Zone): { kx: number; ky: number; rot: number } {
+  const kx = Math.min(70, Math.max(30, z.x))
+  const high = z.y < 25
+  const ky = z.y < 25 ? 33 : 46
+  let rot = 0
+  if (z.x < 45) rot = high ? -42 : -22
+  else if (z.x > 55) rot = high ? 42 : 22
+  return { kx, ky, rot }
+}
+
 function Pip({ mark, team }: { mark?: Mark; team: 'me' | 'op' }) {
   if (!mark)
-    return <span className="h-3.5 w-3.5 rounded-full border border-ink-900/25 bg-paper" />
+    return <span className="h-3.5 w-3.5 rounded-full border border-paper/30" />
   if (mark === 'goal')
     return (
-      <span
-        className={`h-3.5 w-3.5 rounded-full ${team === 'me' ? 'bg-grass-600' : 'bg-ochre-500'}`}
-      />
+      <span className={`h-3.5 w-3.5 rounded-full ${team === 'me' ? 'bg-grass-400' : 'bg-ochre-500'}`} />
     )
   return (
-    <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full border border-ink-900/30 text-[9px] text-ink-500">
+    <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full border border-paper/40 text-[9px] text-paper/50">
       ✕
     </span>
   )
@@ -95,11 +113,15 @@ export default function Penaltis() {
   const [stats, setStats] = useState<PenStats>(() => loadPenStats())
   const [copied, setCopied] = useState(false)
 
+  const ballRef = useRef<HTMLDivElement>(null)
+  const sceneRef = useRef<HTMLDivElement>(null)
+
   const current = prepared[index]
   const attacking = index % 2 === 0
   const pair = Math.floor(index / 2) + 1
   const slots = Math.max(5, meus.length, rival.length)
 
+  // Cronômetro
   useEffect(() => {
     if (over || phase !== 'ask') return
     if (timeLeft <= 0) {
@@ -110,6 +132,34 @@ export default function Penaltis() {
     return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeLeft, phase, over])
+
+  // Trajetória da bola em arco (Web Animations API)
+  useEffect(() => {
+    const el = ballRef.current
+    const scene = sceneRef.current
+    if (!shot || !el || !scene) return
+    const { width: W, height: H } = scene.getBoundingClientRect()
+    const sx = W * 0.5
+    const sy = H * 0.82
+    const ex = (W * shot.bx) / 100
+    const ey = (H * shot.by) / 100
+    const ax = (sx + ex) / 2
+    const ay = Math.min(sy, ey) - H * 0.16
+    const anim = el.animate(
+      [
+        { transform: 'translate(-50%,-50%) scale(1)' },
+        {
+          transform: `translate(calc(-50% + ${ax - sx}px), calc(-50% + ${ay - sy}px)) scale(0.82)`,
+          offset: 0.5,
+        },
+        {
+          transform: `translate(calc(-50% + ${ex - sx}px), calc(-50% + ${ey - sy}px)) scale(0.58)`,
+        },
+      ],
+      { duration: 650, easing: 'cubic-bezier(.25,.6,.35,1)', fill: 'forwards' },
+    )
+    return () => anim.cancel()
+  }, [shot])
 
   function finish(myG: number, oppG: number) {
     const w = myG > oppG
@@ -148,39 +198,40 @@ export default function Penaltis() {
     setMy(myG)
     setOpp(oppG)
 
-    const side: 'L' | 'R' = (index + (correct ? 1 : 0)) % 2 === 0 ? 'L' : 'R'
-    const ballLeft = side === 'L' ? 26 : 74
-    let keeperLeft = 50
-    let ballTop = 44
+    // Bola vai pra um canto aleatório (variedade)
+    const ballZone = ZONES[Math.floor(Math.random() * ZONES.length)]
+    const isGoal =
+      (attacking && correct) || (!attacking && !correct)
+    // Goleiro: pega no canto da bola (defesa) ou voa pro lado errado (gol)
+    let keeperZone: Zone
+    if (isGoal) {
+      const others = ZONES.filter((z) => z !== ballZone)
+      keeperZone = others[Math.floor(Math.random() * others.length)]
+    } else {
+      keeperZone = ballZone
+    }
+    const pose = keeperPose(keeperZone)
+
     let label = ''
     let good = false
-    let net = false
-
     if (attacking) {
-      if (correct) {
-        keeperLeft = side === 'L' ? 64 : 36
-        ballTop = 20
-        net = true
-        label = 'GOOOL!'
-        good = true
-      } else {
-        keeperLeft = side === 'L' ? 30 : 70
-        label = choice === -1 ? 'PERDEU A HORA!' : 'DEFENDEU!'
-      }
+      if (correct) { label = 'GOOOL!'; good = true }
+      else label = choice === -1 ? 'PERDEU A HORA!' : 'DEFENDEU!'
     } else {
-      if (correct) {
-        keeperLeft = side === 'L' ? 30 : 70
-        label = 'VOCÊ PEGOU!'
-        good = true
-      } else {
-        keeperLeft = side === 'L' ? 64 : 36
-        ballTop = 20
-        net = true
-        label = 'TOMOU GOL'
-      }
+      if (correct) { label = 'VOCÊ PEGOU!'; good = true }
+      else label = 'TOMOU GOL'
     }
 
-    setShot({ ballLeft, ballTop, keeperLeft, label, good, net })
+    setShot({
+      bx: ballZone.x,
+      by: isGoal ? ballZone.y : 44,
+      kx: pose.kx,
+      ky: pose.ky,
+      rot: pose.rot,
+      label,
+      good,
+      net: isGoal,
+    })
     setPhase('shoot')
 
     setTimeout(() => {
@@ -227,10 +278,9 @@ export default function Penaltis() {
     )
   }
 
-  const ballLeft = shot ? shot.ballLeft : 50
-  const ballTop = shot ? shot.ballTop : 82
-  const keeperLeft = shot ? shot.keeperLeft : 50
-  const keeperRot = keeperLeft < 50 ? -26 : keeperLeft > 50 ? 26 : 0
+  const kx = shot ? shot.kx : 50
+  const ky = shot ? shot.ky : 45
+  const rot = shot ? shot.rot : 0
 
   return (
     <div className="flex min-h-screen flex-col bg-paper">
@@ -249,12 +299,10 @@ export default function Penaltis() {
       </header>
 
       <main className="container-page flex flex-1 flex-col items-center py-5">
-        {/* PLACAR estilo disputa */}
+        {/* PLACAR */}
         <div className="w-full max-w-sm border-2 border-ink-900 bg-ink-900 text-paper">
           <div className="flex items-center gap-3 border-b border-paper/15 px-3 py-2">
-            <span className="w-12 font-cond text-xs font-700 uppercase tracking-wider text-grass-400">
-              Você
-            </span>
+            <span className="w-12 font-cond text-xs font-700 uppercase tracking-wider text-grass-400">Você</span>
             <div className="flex flex-1 flex-wrap gap-1">
               {Array.from({ length: slots }).map((_, i) => (
                 <Pip key={i} mark={meus[i]} team="me" />
@@ -263,9 +311,7 @@ export default function Penaltis() {
             <span className="w-7 text-right font-display text-2xl leading-none">{my}</span>
           </div>
           <div className="flex items-center gap-3 px-3 py-2">
-            <span className="w-12 font-cond text-xs font-700 uppercase tracking-wider text-ochre-500">
-              Rival
-            </span>
+            <span className="w-12 font-cond text-xs font-700 uppercase tracking-wider text-ochre-500">Rival</span>
             <div className="flex flex-1 flex-wrap gap-1">
               {Array.from({ length: slots }).map((_, i) => (
                 <Pip key={i} mark={rival[i]} team="op" />
@@ -286,32 +332,27 @@ export default function Penaltis() {
 
         {/* CENA */}
         {!over && (
-          <div className="relative mt-3 h-64 w-full max-w-sm overflow-hidden rounded-sm border-2 border-ink-900">
-            {/* céu + gramado */}
+          <div
+            ref={sceneRef}
+            className={`relative mt-3 h-64 w-full max-w-sm overflow-hidden rounded-sm border-2 border-ink-900 ${
+              shot?.net ? 'animate-shake' : ''
+            }`}
+          >
             <div className="absolute inset-0 bg-gradient-to-b from-[#9ec7d8] via-[#86b98f] to-grass-700" />
-            {/* arquibancada / torcida */}
             <div
               className="absolute inset-x-0 top-0 h-[22%] bg-ink-800"
               style={{
-                backgroundImage:
-                  'radial-gradient(rgba(242,238,226,0.35) 1px, transparent 1.4px)',
+                backgroundImage: 'radial-gradient(rgba(242,238,226,0.35) 1px, transparent 1.4px)',
                 backgroundSize: '6px 6px',
               }}
             />
-            {/* faixa do gramado (linha de fundo) */}
             <div className="absolute inset-x-0 top-[52%] h-px bg-paper/40" />
-            {/* marca / arco do pênalti */}
             <div className="absolute left-1/2 top-[78%] h-2 w-2 -translate-x-1/2 rounded-full bg-paper/80" />
             <div className="absolute left-1/2 top-[64%] h-10 w-28 -translate-x-1/2 rounded-[100%] border-2 border-b-0 border-paper/25" />
 
             {/* GOL */}
-            <div
-              className={`absolute left-[11%] top-[16%] w-[78%] ${
-                shot?.net ? 'animate-netshake' : ''
-              }`}
-            >
+            <div className={`absolute left-[11%] top-[16%] w-[78%] ${shot?.net ? 'animate-netshake' : ''}`}>
               <svg viewBox="0 0 100 44" preserveAspectRatio="none" className="h-28 w-full">
-                {/* rede */}
                 <g stroke="#f2eee2" strokeWidth="0.4" opacity="0.5">
                   {Array.from({ length: 11 }).map((_, i) => (
                     <line key={`v${i}`} x1={4 + i * 9.2} y1="4" x2={4 + i * 9.2} y2="42" />
@@ -320,65 +361,48 @@ export default function Penaltis() {
                     <line key={`h${i}`} x1="4" y1={4 + i * 8} x2="96" y2={4 + i * 8} />
                   ))}
                 </g>
-                {/* traves */}
-                <path
-                  d="M4 42 V4 H96 V42"
-                  fill="none"
-                  stroke="#f2eee2"
-                  strokeWidth="3"
-                  strokeLinejoin="round"
-                />
+                <path d="M4 42 V4 H96 V42" fill="none" stroke="#f2eee2" strokeWidth="3" strokeLinejoin="round" />
               </svg>
             </div>
 
             {/* GOLEIRO */}
             <div
-              className="absolute z-10 transition-all duration-500 ease-out"
+              className="absolute z-10"
               style={{
-                left: `${keeperLeft}%`,
-                top: '44%',
-                transform: `translate(-50%, -50%) rotate(${keeperRot}deg)`,
+                left: `${kx}%`,
+                top: `${ky}%`,
+                transform: `translate(-50%, -50%) rotate(${rot}deg)`,
+                transition: 'left .45s cubic-bezier(.3,1.5,.5,1), top .45s cubic-bezier(.3,1.5,.5,1), transform .45s cubic-bezier(.3,1.5,.5,1)',
               }}
             >
               <svg viewBox="0 0 40 50" className="h-20 w-16">
-                {/* braços + luvas */}
-                <path d="M13 22 L4 11" stroke="#caa83a" strokeWidth="5" strokeLinecap="round" />
-                <path d="M27 22 L36 11" stroke="#caa83a" strokeWidth="5" strokeLinecap="round" />
-                <circle cx="4" cy="10" r="4" fill="#f2eee2" stroke="#16130d" strokeWidth="1.2" />
-                <circle cx="36" cy="10" r="4" fill="#f2eee2" stroke="#16130d" strokeWidth="1.2" />
-                {/* pernas */}
-                <rect x="15" y="34" width="4.5" height="14" rx="2" fill="#16130d" />
-                <rect x="20.5" y="34" width="4.5" height="14" rx="2" fill="#16130d" />
-                {/* short */}
+                <path d="M13 22 L3 12" stroke="#caa83a" strokeWidth="5" strokeLinecap="round" />
+                <path d="M27 22 L37 12" stroke="#caa83a" strokeWidth="5" strokeLinecap="round" />
+                <circle cx="3" cy="11" r="4.2" fill="#f2eee2" stroke="#16130d" strokeWidth="1.2" />
+                <circle cx="37" cy="11" r="4.2" fill="#f2eee2" stroke="#16130d" strokeWidth="1.2" />
+                <rect x="15" y="34" width="4.6" height="14" rx="2" fill="#16130d" />
+                <rect x="20.4" y="34" width="4.6" height="14" rx="2" fill="#16130d" />
                 <rect x="13" y="31" width="14" height="7" rx="1.5" fill="#262219" />
-                {/* camisa */}
                 <rect x="12" y="16" width="16" height="17" rx="3.5" fill="#caa83a" />
                 <rect x="12" y="22" width="16" height="3" fill="#16130d" opacity="0.25" />
-                {/* cabeça */}
                 <circle cx="20" cy="10.5" r="5" fill="#e0b48a" />
               </svg>
             </div>
 
             {/* BOLA */}
             <div
-              className="absolute z-20 -translate-x-1/2 -translate-y-1/2"
-              style={{
-                left: `${ballLeft}%`,
-                top: `${ballTop}%`,
-                transition: shot
-                  ? 'left 0.7s cubic-bezier(.3,.6,.4,1), top 0.7s cubic-bezier(.3,.6,.4,1)'
-                  : 'none',
-              }}
+              ref={ballRef}
+              className="absolute z-20"
+              style={{ left: '50%', top: '82%', transform: 'translate(-50%,-50%)' }}
             >
               <div
-                className="drop-shadow-[0_3px_3px_rgba(0,0,0,0.35)]"
-                style={{ animation: shot ? 'ballspin 0.45s linear infinite' : 'none' }}
+                className="drop-shadow-[0_3px_4px_rgba(0,0,0,0.4)]"
+                style={{ animation: shot ? 'ballspin 0.4s linear infinite' : 'none' }}
               >
                 <BallMark className="h-8 w-8 text-paper" />
               </div>
             </div>
 
-            {/* RESULTADO */}
             {shot && (
               <div className="absolute inset-x-0 bottom-3 z-30 flex justify-center">
                 <span
@@ -423,9 +447,7 @@ export default function Penaltis() {
                     disabled={phase === 'shoot'}
                     className={`flex items-center gap-3 border-2 px-4 py-2.5 text-left font-serif text-base transition-colors ${cls}`}
                   >
-                    <span className="font-cond text-xs font-700">
-                      {String.fromCharCode(65 + i)}
-                    </span>
+                    <span className="font-cond text-xs font-700">{String.fromCharCode(65 + i)}</span>
                     {opt}
                   </button>
                 )
@@ -442,9 +464,7 @@ export default function Penaltis() {
               {my} <span className="text-ink-500">×</span> {opp}
             </p>
             <p className="mt-1 font-serif text-base italic text-ink-600">
-              {won
-                ? 'Frieza na cobrança e mão firme na defesa. Craque!'
-                : 'Faltou pontaria. Amanhã tem revanche.'}
+              {won ? 'Frieza na cobrança e mão firme na defesa. Craque!' : 'Faltou pontaria. Amanhã tem revanche.'}
             </p>
 
             {mode === 'daily' && (
@@ -458,9 +478,7 @@ export default function Penaltis() {
                   ].map(([k, v]) => (
                     <div key={k} className="bg-paper-100 px-1 py-2">
                       <div className="font-display text-2xl text-ink-900">{v}</div>
-                      <div className="font-cond text-[9px] font-500 uppercase tracking-wide text-ink-600">
-                        {k}
-                      </div>
+                      <div className="font-cond text-[9px] font-500 uppercase tracking-wide text-ink-600">{k}</div>
                     </div>
                   ))}
                 </div>
