@@ -89,4 +89,34 @@ export const intruso: IntrusoPuzzle[] = [
     intruder: 'Drogba',
     rule: 'Os outros jogaram no Bayern de Munique; Drogba nunca.',
   },
+  {
+    players: ['Salah', 'Mané', 'Robben', 'Lewandowski'],
+    intruder: 'Lewandowski',
+    rule: 'Os outros são pontas; Lewandowski é centroavante.',
+  },
+  {
+    players: ['Pirlo', 'Xavi', 'Iniesta', 'Cannavaro'],
+    intruder: 'Cannavaro',
+    rule: 'Os outros eram meias; Cannavaro é zagueiro.',
+  },
+  {
+    players: ['Messi', 'Agüero', 'Batistuta', 'Suárez'],
+    intruder: 'Suárez',
+    rule: 'Os outros são argentinos; Suárez é uruguaio.',
+  },
+  {
+    players: ['Modrić', 'Hagi', 'Nedvěd', 'Stoichkov'],
+    intruder: 'Stoichkov',
+    rule: 'Os outros eram meias; Stoichkov era atacante.',
+  },
+  {
+    players: ['Drogba', "Eto'o", 'Weah', 'Lukaku'],
+    intruder: 'Lukaku',
+    rule: 'Os outros jogam por seleções africanas; Lukaku é belga.',
+  },
+  {
+    players: ['Neymar', 'Romário', 'Ronaldo', 'Cafu'],
+    intruder: 'Cafu',
+    rule: 'Os outros são atacantes; Cafu é lateral.',
+  },
 ]

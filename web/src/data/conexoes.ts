@@ -155,4 +155,32 @@ export const conexoes: Puzzle[] = [
       { color: 'ink', label: 'Holandeses', members: ['Van Dijk', 'De Jong', 'Gakpo', 'Depay'] },
     ],
   },
+  // 16 — quatro clubes. Armadilha: Suárez jogou em Liverpool E Atlético,
+  // mas só fecha no Liverpool.
+  {
+    groups: [
+      { color: 'corn', label: 'Jogaram no Atlético de Madrid', members: ['Griezmann', 'Forlán', 'Courtois', 'Agüero'] },
+      { color: 'grass', label: 'Jogaram no Tottenham', members: ['Kane', 'Bale', 'Modrić', 'Cristian Romero'] },
+      { color: 'ochre', label: 'Jogaram no Liverpool', members: ['Gerrard', 'Suárez', 'Salah', 'Van Dijk'] },
+      { color: 'ink', label: 'Jogaram no Borussia Dortmund', members: ['Lewandowski', 'Haaland', 'Dembélé', 'Bellingham'] },
+    ],
+  },
+  // 17 — por posição, todas as eras. Cuidado: dá pra confundir com seleção.
+  {
+    groups: [
+      { color: 'corn', label: 'Goleiros', members: ['Yashin', 'Zoff', 'Kahn', 'Van der Sar'] },
+      { color: 'grass', label: 'Pontas', members: ['Garrincha', 'Robben', 'Figo', 'Bale'] },
+      { color: 'ochre', label: 'Centroavantes', members: ['Shearer', 'Batistuta', 'Van Nistelrooy', 'Klose'] },
+      { color: 'ink', label: 'Zagueiros', members: ['Baresi', 'Cannavaro', 'Puyol', 'Terry'] },
+    ],
+  },
+  // 18 — por seleção (lendas). Goleiros espalhados servem de isca.
+  {
+    groups: [
+      { color: 'corn', label: 'Espanhóis', members: ['Casillas', 'Puyol', 'Xavi', 'Fernando Torres'] },
+      { color: 'grass', label: 'Alemães', members: ['Neuer', 'Lahm', 'Klose', 'Matthäus'] },
+      { color: 'ochre', label: 'Brasileiros', members: ['Cafu', 'Ronaldo', 'Kaká', 'Roberto Carlos'] },
+      { color: 'ink', label: 'Italianos', members: ['Buffon', 'Maldini', 'Pirlo', 'Totti'] },
+    ],
+  },
 ]
