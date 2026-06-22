@@ -15,6 +15,7 @@ import { confetti } from '../lib/juice'
 const ROUNDS = 10 // 5 cobranças + 5 defesas, alternadas
 const SECONDS = 8
 
+type Mark = 'goal' | 'miss'
 type PQ = { q: string; cat: string; options: string[]; correct: number }
 type Shot = {
   ballLeft: number
@@ -22,6 +23,7 @@ type Shot = {
   keeperLeft: number
   label: string
   good: boolean
+  net: boolean
 } | null
 
 const saved = loadPenDaily()
@@ -55,14 +57,32 @@ function randomPrepared(n: number): PQ[] {
 }
 
 function extraQ(): PQ {
-  const bi = Math.floor(Math.random() * quiz.length)
-  return prepQ(bi, Math.floor(Math.random() * 1e9) + 1)
+  return prepQ(Math.floor(Math.random() * quiz.length), Math.floor(Math.random() * 1e9) + 1)
+}
+
+/* Marcador de cobrança (estilo placar de disputa) */
+function Pip({ mark, team }: { mark?: Mark; team: 'me' | 'op' }) {
+  if (!mark)
+    return <span className="h-3.5 w-3.5 rounded-full border border-ink-900/25 bg-paper" />
+  if (mark === 'goal')
+    return (
+      <span
+        className={`h-3.5 w-3.5 rounded-full ${team === 'me' ? 'bg-grass-600' : 'bg-ochre-500'}`}
+      />
+    )
+  return (
+    <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full border border-ink-900/30 text-[9px] text-ink-500">
+      ✕
+    </span>
+  )
 }
 
 export default function Penaltis() {
   const [mode, setMode] = useState<'daily' | 'practice'>('daily')
   const [prepared, setPrepared] = useState<PQ[]>(() => dailyPrepared())
   const [index, setIndex] = useState(0)
+  const [meus, setMeus] = useState<Mark[]>([])
+  const [rival, setRival] = useState<Mark[]>([])
   const [my, setMy] = useState(saved?.myGoals ?? 0)
   const [opp, setOpp] = useState(saved?.oppGoals ?? 0)
   const [phase, setPhase] = useState<'ask' | 'shoot'>('ask')
@@ -78,8 +98,8 @@ export default function Penaltis() {
   const current = prepared[index]
   const attacking = index % 2 === 0
   const pair = Math.floor(index / 2) + 1
+  const slots = Math.max(5, meus.length, rival.length)
 
-  // Cronômetro
   useEffect(() => {
     if (over || phase !== 'ask') return
     if (timeLeft <= 0) {
@@ -116,44 +136,51 @@ export default function Penaltis() {
     const correct = choice === current.correct
     setSelected(choice)
 
-    let myG = my
-    let oppG = opp
+    const p = Math.floor(index / 2)
+    const nm = [...meus]
+    const nr = [...rival]
+    if (attacking) nm[p] = correct ? 'goal' : 'miss'
+    else nr[p] = correct ? 'miss' : 'goal'
+    setMeus(nm)
+    setRival(nr)
+    const myG = nm.filter((g) => g === 'goal').length
+    const oppG = nr.filter((g) => g === 'goal').length
+    setMy(myG)
+    setOpp(oppG)
+
     const side: 'L' | 'R' = (index + (correct ? 1 : 0)) % 2 === 0 ? 'L' : 'R'
-    const ballLeft = side === 'L' ? 24 : 76
+    const ballLeft = side === 'L' ? 26 : 74
     let keeperLeft = 50
-    let ballTop = 42
+    let ballTop = 44
     let label = ''
     let good = false
+    let net = false
 
     if (attacking) {
       if (correct) {
-        myG++
-        keeperLeft = side === 'L' ? 66 : 34
-        ballTop = 18
+        keeperLeft = side === 'L' ? 64 : 36
+        ballTop = 20
+        net = true
         label = 'GOOOL!'
         good = true
       } else {
-        keeperLeft = side === 'L' ? 34 : 66
-        ballTop = 42
+        keeperLeft = side === 'L' ? 30 : 70
         label = choice === -1 ? 'PERDEU A HORA!' : 'DEFENDEU!'
       }
     } else {
       if (correct) {
-        keeperLeft = side === 'L' ? 34 : 66
-        ballTop = 42
+        keeperLeft = side === 'L' ? 30 : 70
         label = 'VOCÊ PEGOU!'
         good = true
       } else {
-        oppG++
-        keeperLeft = side === 'L' ? 66 : 34
-        ballTop = 18
+        keeperLeft = side === 'L' ? 64 : 36
+        ballTop = 20
+        net = true
         label = 'TOMOU GOL'
       }
     }
 
-    setMy(myG)
-    setOpp(oppG)
-    setShot({ ballLeft, ballTop, keeperLeft, label, good })
+    setShot({ ballLeft, ballTop, keeperLeft, label, good, net })
     setPhase('shoot')
 
     setTimeout(() => {
@@ -161,16 +188,18 @@ export default function Penaltis() {
       if (i < prepared.length) goAsk(i)
       else if (myG !== oppG) finish(myG, oppG)
       else {
-        setPrepared((p) => [...p, extraQ(), extraQ()])
+        setPrepared((pp) => [...pp, extraQ(), extraQ()])
         goAsk(i)
       }
-    }, 1700)
+    }, 1800)
   }
 
   function treinar() {
     setMode('practice')
     setPrepared(randomPrepared(ROUNDS))
     setIndex(0)
+    setMeus([])
+    setRival([])
     setMy(0)
     setOpp(0)
     setPhase('ask')
@@ -182,10 +211,13 @@ export default function Penaltis() {
   }
 
   function compartilhar() {
-    const head = `Encyclobol · Disputa de Pênaltis #${dayNumber()} — ${
-      won ? 'venci' : 'perdi'
-    } por ${my} a ${opp}`
-    const text = `${head}\n${won ? '🥅⚽🏆' : '🥅⚽'}\nencyclobol.com.br`
+    const board = (arr: Mark[]) =>
+      Array.from({ length: slots })
+        .map((_, i) => (arr[i] === 'goal' ? '🟢' : arr[i] === 'miss' ? '⚪' : '▫️'))
+        .join('')
+    const text =
+      `Encyclobol · Pênaltis #${dayNumber()} — ${won ? 'venci' : 'perdi'} ${my}×${opp}\n` +
+      `Você  ${board(meus)}\nRival ${board(rival)}\nencyclobol.com.br`
     navigator.clipboard?.writeText(text).then(
       () => {
         setCopied(true)
@@ -196,8 +228,9 @@ export default function Penaltis() {
   }
 
   const ballLeft = shot ? shot.ballLeft : 50
-  const ballTop = shot ? shot.ballTop : 80
+  const ballTop = shot ? shot.ballTop : 82
   const keeperLeft = shot ? shot.keeperLeft : 50
+  const keeperRot = keeperLeft < 50 ? -26 : keeperLeft > 50 ? 26 : 0
 
   return (
     <div className="flex min-h-screen flex-col bg-paper">
@@ -215,82 +248,141 @@ export default function Penaltis() {
         </div>
       </header>
 
-      <main className="container-page flex flex-1 flex-col items-center py-6">
-        {/* Placar */}
-        <div className="flex items-center gap-4">
-          <span className="font-cond text-sm font-600 uppercase tracking-wider text-grass-600">
-            Você
-          </span>
-          <span className="font-display text-4xl text-ink-900">
-            {my} <span className="text-ink-500">×</span> {opp}
-          </span>
-          <span className="font-cond text-sm font-600 uppercase tracking-wider text-ochre-600">
-            Rival
-          </span>
+      <main className="container-page flex flex-1 flex-col items-center py-5">
+        {/* PLACAR estilo disputa */}
+        <div className="w-full max-w-sm border-2 border-ink-900 bg-ink-900 text-paper">
+          <div className="flex items-center gap-3 border-b border-paper/15 px-3 py-2">
+            <span className="w-12 font-cond text-xs font-700 uppercase tracking-wider text-grass-400">
+              Você
+            </span>
+            <div className="flex flex-1 flex-wrap gap-1">
+              {Array.from({ length: slots }).map((_, i) => (
+                <Pip key={i} mark={meus[i]} team="me" />
+              ))}
+            </div>
+            <span className="w-7 text-right font-display text-2xl leading-none">{my}</span>
+          </div>
+          <div className="flex items-center gap-3 px-3 py-2">
+            <span className="w-12 font-cond text-xs font-700 uppercase tracking-wider text-ochre-500">
+              Rival
+            </span>
+            <div className="flex flex-1 flex-wrap gap-1">
+              {Array.from({ length: slots }).map((_, i) => (
+                <Pip key={i} mark={rival[i]} team="op" />
+              ))}
+            </div>
+            <span className="w-7 text-right font-display text-2xl leading-none">{opp}</span>
+          </div>
         </div>
+
         {!over && (
-          <p className="mt-1 font-cond text-xs font-500 uppercase tracking-[0.16em] text-ink-500">
-            {pair <= 5 ? `Cobrança ${pair} de 5` : 'Morte súbita'} ·{' '}
+          <p className="mt-2 font-cond text-xs font-600 uppercase tracking-[0.16em] text-ink-500">
+            {pair <= 5 ? `Cobrança ${pair}/5` : 'Morte súbita'} ·{' '}
             <span className={attacking ? 'text-grass-600' : 'text-ochre-600'}>
               {attacking ? 'Você cobra' : 'Você defende'}
             </span>
           </p>
         )}
 
-        {/* Cena do gol */}
+        {/* CENA */}
         {!over && (
-          <div className="relative mt-4 h-56 w-full max-w-sm overflow-hidden rounded-sm border-2 border-ink-900 bg-gradient-to-b from-[#bcd9e6] via-[#7fb38a] to-grass-600">
-            {/* Gol / rede */}
-            <svg
-              viewBox="0 0 100 44"
-              preserveAspectRatio="none"
-              className="absolute left-1/2 top-2 h-[40%] w-[78%] -translate-x-1/2 text-paper"
-            >
-              <rect x="2" y="2" width="96" height="40" fill="none" stroke="currentColor" strokeWidth="2" />
-              <g stroke="currentColor" strokeWidth="0.5" opacity="0.55">
-                {Array.from({ length: 9 }).map((_, i) => (
-                  <line key={`v${i}`} x1={2 + (i + 1) * 9.6} y1="2" x2={2 + (i + 1) * 9.6} y2="42" />
-                ))}
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <line key={`h${i}`} x1="2" y1={2 + (i + 1) * 8} x2="98" y2={2 + (i + 1) * 8} />
-                ))}
-              </g>
-            </svg>
-
-            {/* Goleiro */}
+          <div className="relative mt-3 h-64 w-full max-w-sm overflow-hidden rounded-sm border-2 border-ink-900">
+            {/* céu + gramado */}
+            <div className="absolute inset-0 bg-gradient-to-b from-[#9ec7d8] via-[#86b98f] to-grass-700" />
+            {/* arquibancada / torcida */}
             <div
-              className="absolute z-10 -translate-x-1/2 -translate-y-1/2 transition-all duration-500 ease-out"
-              style={{ left: `${keeperLeft}%`, top: '40%' }}
+              className="absolute inset-x-0 top-0 h-[22%] bg-ink-800"
+              style={{
+                backgroundImage:
+                  'radial-gradient(rgba(242,238,226,0.35) 1px, transparent 1.4px)',
+                backgroundSize: '6px 6px',
+              }}
+            />
+            {/* faixa do gramado (linha de fundo) */}
+            <div className="absolute inset-x-0 top-[52%] h-px bg-paper/40" />
+            {/* marca / arco do pênalti */}
+            <div className="absolute left-1/2 top-[78%] h-2 w-2 -translate-x-1/2 rounded-full bg-paper/80" />
+            <div className="absolute left-1/2 top-[64%] h-10 w-28 -translate-x-1/2 rounded-[100%] border-2 border-b-0 border-paper/25" />
+
+            {/* GOL */}
+            <div
+              className={`absolute left-[11%] top-[16%] w-[78%] ${
+                shot?.net ? 'animate-netshake' : ''
+              }`}
             >
-              <svg viewBox="0 0 24 28" className="h-14 w-12 text-ink-900">
-                <circle cx="12" cy="5" r="3.4" fill="currentColor" />
+              <svg viewBox="0 0 100 44" preserveAspectRatio="none" className="h-28 w-full">
+                {/* rede */}
+                <g stroke="#f2eee2" strokeWidth="0.4" opacity="0.5">
+                  {Array.from({ length: 11 }).map((_, i) => (
+                    <line key={`v${i}`} x1={4 + i * 9.2} y1="4" x2={4 + i * 9.2} y2="42" />
+                  ))}
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <line key={`h${i}`} x1="4" y1={4 + i * 8} x2="96" y2={4 + i * 8} />
+                  ))}
+                </g>
+                {/* traves */}
                 <path
-                  d="M12 9c-3 0-5 2-5 5v6h10v-6c0-3-2-5-5-5Z"
-                  fill="currentColor"
+                  d="M4 42 V4 H96 V42"
+                  fill="none"
+                  stroke="#f2eee2"
+                  strokeWidth="3"
+                  strokeLinejoin="round"
                 />
-                <path d="M7 12 2 9M17 12l5-3" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
-                <circle cx="2" cy="9" r="1.8" fill="#c8472b" />
-                <circle cx="22" cy="9" r="1.8" fill="#c8472b" />
               </svg>
             </div>
 
-            {/* Bola */}
+            {/* GOLEIRO */}
             <div
-              className="absolute z-20 h-7 w-7 -translate-x-1/2 -translate-y-1/2"
+              className="absolute z-10 transition-all duration-500 ease-out"
+              style={{
+                left: `${keeperLeft}%`,
+                top: '44%',
+                transform: `translate(-50%, -50%) rotate(${keeperRot}deg)`,
+              }}
+            >
+              <svg viewBox="0 0 40 50" className="h-20 w-16">
+                {/* braços + luvas */}
+                <path d="M13 22 L4 11" stroke="#caa83a" strokeWidth="5" strokeLinecap="round" />
+                <path d="M27 22 L36 11" stroke="#caa83a" strokeWidth="5" strokeLinecap="round" />
+                <circle cx="4" cy="10" r="4" fill="#f2eee2" stroke="#16130d" strokeWidth="1.2" />
+                <circle cx="36" cy="10" r="4" fill="#f2eee2" stroke="#16130d" strokeWidth="1.2" />
+                {/* pernas */}
+                <rect x="15" y="34" width="4.5" height="14" rx="2" fill="#16130d" />
+                <rect x="20.5" y="34" width="4.5" height="14" rx="2" fill="#16130d" />
+                {/* short */}
+                <rect x="13" y="31" width="14" height="7" rx="1.5" fill="#262219" />
+                {/* camisa */}
+                <rect x="12" y="16" width="16" height="17" rx="3.5" fill="#caa83a" />
+                <rect x="12" y="22" width="16" height="3" fill="#16130d" opacity="0.25" />
+                {/* cabeça */}
+                <circle cx="20" cy="10.5" r="5" fill="#e0b48a" />
+              </svg>
+            </div>
+
+            {/* BOLA */}
+            <div
+              className="absolute z-20 -translate-x-1/2 -translate-y-1/2"
               style={{
                 left: `${ballLeft}%`,
                 top: `${ballTop}%`,
-                transition: shot ? 'left 0.7s cubic-bezier(.3,.7,.4,1), top 0.7s cubic-bezier(.3,.7,.4,1)' : 'none',
+                transition: shot
+                  ? 'left 0.7s cubic-bezier(.3,.6,.4,1), top 0.7s cubic-bezier(.3,.6,.4,1)'
+                  : 'none',
               }}
             >
-              <BallMark className="h-7 w-7 text-paper drop-shadow" />
+              <div
+                className="drop-shadow-[0_3px_3px_rgba(0,0,0,0.35)]"
+                style={{ animation: shot ? 'ballspin 0.45s linear infinite' : 'none' }}
+              >
+                <BallMark className="h-8 w-8 text-paper" />
+              </div>
             </div>
 
-            {/* Resultado */}
+            {/* RESULTADO */}
             {shot && (
               <div className="absolute inset-x-0 bottom-3 z-30 flex justify-center">
                 <span
-                  className={`animate-pop rounded-sm px-3 py-1 font-display text-2xl uppercase tracking-tight text-paper ${
+                  className={`animate-pop rounded-sm px-4 py-1.5 font-display text-3xl uppercase tracking-tight text-paper shadow-lg ${
                     shot.good ? 'bg-grass-600' : 'bg-ochre-500'
                   }`}
                 >
@@ -301,7 +393,7 @@ export default function Penaltis() {
           </div>
         )}
 
-        {/* Pergunta */}
+        {/* PERGUNTA */}
         {!over && current && (
           <div className="mt-4 w-full max-w-sm">
             <div className="mb-1.5 h-1.5 w-full bg-paper-300">
@@ -316,7 +408,7 @@ export default function Penaltis() {
             <h2 className="mt-1 font-serif text-xl leading-snug text-ink-900 sm:text-2xl">
               {current.q}
             </h2>
-            <div className="mt-3 grid grid-cols-1 gap-2">
+            <div className="mt-3 grid gap-2">
               {current.options.map((opt, i) => {
                 let cls = 'border-ink-900/25 bg-paper hover:border-ink-900 hover:bg-paper-100'
                 if (phase === 'shoot') {
@@ -342,17 +434,17 @@ export default function Penaltis() {
           </div>
         )}
 
-        {/* Fim */}
+        {/* FIM */}
         {over && (
           <div className="mt-8 w-full max-w-sm border-2 border-ink-900 bg-paper-100 p-6 text-center">
-            <p className="kicker">{won ? 'Vitória!' : 'Não foi dessa vez'}</p>
+            <p className="kicker">{won ? 'Vitória nos pênaltis!' : 'Disputa perdida'}</p>
             <p className="mt-1 font-display text-6xl text-ink-900">
               {my} <span className="text-ink-500">×</span> {opp}
             </p>
             <p className="mt-1 font-serif text-base italic text-ink-600">
               {won
-                ? 'Disputa vencida nos pênaltis. Craque!'
-                : 'Faltou frieza na cobrança. Amanhã tem revanche.'}
+                ? 'Frieza na cobrança e mão firme na defesa. Craque!'
+                : 'Faltou pontaria. Amanhã tem revanche.'}
             </p>
 
             {mode === 'daily' && (

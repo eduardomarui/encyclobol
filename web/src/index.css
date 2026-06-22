@@ -64,6 +64,16 @@
   0% { opacity: 0; transform: translateY(8px); }
   100% { opacity: 1; transform: translateY(0); }
 }
+@keyframes ballspin {
+  to { transform: rotate(360deg); }
+}
+@keyframes netshake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  50% { transform: translateX(2px); }
+  75% { transform: translateX(-1px); }
+}
+.animate-netshake { animation: netshake 0.35s ease 2; }
 .animate-pop { animation: pop 0.36s cubic-bezier(0.2, 0.8, 0.3, 1) both; }
 .animate-shake { animation: shake 0.4s ease; }
 .animate-rise { animation: riseIn 0.3s ease-out both; }
