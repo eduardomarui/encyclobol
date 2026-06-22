@@ -18,18 +18,17 @@ const SECONDS = 8
 type Mark = 'goal' | 'miss'
 type PQ = { q: string; cat: string; options: string[]; correct: number }
 type Zone = { x: number; y: number }
+type Pose = 'idle' | 'center' | 'tl' | 'tr' | 'dl' | 'dr'
 type Shot = {
   bx: number
   by: number
   kx: number
-  ky: number
-  rot: number
+  pose: Pose
   label: string
   good: boolean
   net: boolean
 } | null
 
-// Cantos do gol onde a bola pode ir (variedade a cada cobrança)
 const ZONES: Zone[] = [
   { x: 22, y: 20 },
   { x: 50, y: 15 },
@@ -39,14 +38,56 @@ const ZONES: Zone[] = [
   { x: 76, y: 38 },
 ]
 
+// "Folha de poses" do goleiro: cada pose é um quadro com braços/pernas/tronco
+// em posições diferentes. xy = ponto final de cada membro; tilt = inclinação.
+type PoseDef = {
+  tilt: number
+  handL: [number, number]
+  handR: [number, number]
+  footL: [number, number]
+  footR: [number, number]
+}
+const POSES: Record<Pose, PoseDef> = {
+  idle: { tilt: 0, handL: [16, 32], handR: [44, 32], footL: [24, 54], footR: [36, 54] },
+  center: { tilt: 0, handL: [20, 6], handR: [40, 6], footL: [26, 52], footR: [34, 52] },
+  tl: { tilt: -34, handL: [6, 8], handR: [20, 16], footL: [40, 50], footR: [46, 44] },
+  tr: { tilt: 34, handL: [40, 16], handR: [54, 8], footL: [14, 44], footR: [20, 50] },
+  dl: { tilt: -16, handL: [4, 36], handR: [18, 30], footL: [44, 48], footR: [50, 42] },
+  dr: { tilt: 16, handL: [42, 30], handR: [56, 36], footL: [10, 42], footR: [16, 48] },
+}
+
+function Keeper({ pose }: { pose: Pose }) {
+  const P = POSES[pose]
+  return (
+    <svg viewBox="0 0 60 64" className="h-24 w-24 overflow-visible">
+      <g
+        transform={`rotate(${P.tilt} 30 34)`}
+        style={{ transition: 'transform .12s' }}
+      >
+        {/* pernas */}
+        <path d={`M30 40 L${P.footL[0]} ${P.footL[1]}`} stroke="#16130d" strokeWidth="6" strokeLinecap="round" fill="none" />
+        <path d={`M30 40 L${P.footR[0]} ${P.footR[1]}`} stroke="#16130d" strokeWidth="6" strokeLinecap="round" fill="none" />
+        {/* tronco (camisa de goleiro) */}
+        <rect x="23" y="20" width="14" height="22" rx="5" fill="#caa83a" />
+        <rect x="23" y="27" width="14" height="3" fill="#16130d" opacity="0.25" />
+        {/* braços */}
+        <path d={`M30 25 L${P.handL[0]} ${P.handL[1]}`} stroke="#caa83a" strokeWidth="6" strokeLinecap="round" fill="none" />
+        <path d={`M30 25 L${P.handR[0]} ${P.handR[1]}`} stroke="#caa83a" strokeWidth="6" strokeLinecap="round" fill="none" />
+        {/* luvas */}
+        <circle cx={P.handL[0]} cy={P.handL[1]} r="4.3" fill="#f2eee2" stroke="#16130d" strokeWidth="1.3" />
+        <circle cx={P.handR[0]} cy={P.handR[1]} r="4.3" fill="#f2eee2" stroke="#16130d" strokeWidth="1.3" />
+        {/* cabeça */}
+        <circle cx="30" cy="13" r="5.2" fill="#e0b48a" />
+      </g>
+    </svg>
+  )
+}
+
 const saved = loadPenDaily()
 
 function prepQ(bi: number, seed: number): PQ {
   const base = quiz[bi]
-  const order = seededShuffle(
-    base.options.map((_, i) => i),
-    seed,
-  )
+  const order = seededShuffle(base.options.map((_, i) => i), seed)
   return {
     q: base.q,
     cat: base.cat,
@@ -54,11 +95,8 @@ function prepQ(bi: number, seed: number): PQ {
     correct: order.indexOf(base.correct),
   }
 }
-
 function dailyPrepared(): PQ[] {
-  return dailySequence(quiz.length, ROUNDS).map((bi, qi) =>
-    prepQ(bi, dayNumber() * 101 + qi * 7 + 1),
-  )
+  return dailySequence(quiz.length, ROUNDS).map((bi, qi) => prepQ(bi, dayNumber() * 101 + qi * 7 + 1))
 }
 function randomPrepared(n: number): PQ[] {
   const seed = Math.floor(Math.random() * 1e9) + 1
@@ -70,24 +108,16 @@ function extraQ(): PQ {
   return prepQ(Math.floor(Math.random() * quiz.length), Math.floor(Math.random() * 1e9) + 1)
 }
 
-// Pose do goleiro pra uma zona (alto/baixo, esq/dir, com rotação de mergulho)
-function keeperPose(z: Zone): { kx: number; ky: number; rot: number } {
-  const kx = Math.min(70, Math.max(30, z.x))
-  const high = z.y < 25
-  const ky = z.y < 25 ? 33 : 46
-  let rot = 0
-  if (z.x < 45) rot = high ? -42 : -22
-  else if (z.x > 55) rot = high ? 42 : 22
-  return { kx, ky, rot }
+function poseFor(z: Zone): Pose {
+  if (Math.abs(z.x - 50) < 8) return 'center'
+  if (z.x < 50) return z.y < 25 ? 'tl' : 'dl'
+  return z.y < 25 ? 'tr' : 'dr'
 }
 
 function Pip({ mark, team }: { mark?: Mark; team: 'me' | 'op' }) {
-  if (!mark)
-    return <span className="h-3.5 w-3.5 rounded-full border border-paper/30" />
+  if (!mark) return <span className="h-3.5 w-3.5 rounded-full border border-paper/30" />
   if (mark === 'goal')
-    return (
-      <span className={`h-3.5 w-3.5 rounded-full ${team === 'me' ? 'bg-grass-400' : 'bg-ochre-500'}`} />
-    )
+    return <span className={`h-3.5 w-3.5 rounded-full ${team === 'me' ? 'bg-grass-400' : 'bg-ochre-500'}`} />
   return (
     <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full border border-paper/40 text-[9px] text-paper/50">
       ✕
@@ -121,7 +151,6 @@ export default function Penaltis() {
   const pair = Math.floor(index / 2) + 1
   const slots = Math.max(5, meus.length, rival.length)
 
-  // Cronômetro
   useEffect(() => {
     if (over || phase !== 'ask') return
     if (timeLeft <= 0) {
@@ -133,7 +162,6 @@ export default function Penaltis() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeLeft, phase, over])
 
-  // Trajetória da bola em arco (Web Animations API)
   useEffect(() => {
     const el = ballRef.current
     const scene = sceneRef.current
@@ -148,15 +176,10 @@ export default function Penaltis() {
     const anim = el.animate(
       [
         { transform: 'translate(-50%,-50%) scale(1)' },
-        {
-          transform: `translate(calc(-50% + ${ax - sx}px), calc(-50% + ${ay - sy}px)) scale(0.82)`,
-          offset: 0.5,
-        },
-        {
-          transform: `translate(calc(-50% + ${ex - sx}px), calc(-50% + ${ey - sy}px)) scale(0.58)`,
-        },
+        { transform: `translate(calc(-50% + ${ax - sx}px), calc(-50% + ${ay - sy}px)) scale(0.82)`, offset: 0.5 },
+        { transform: `translate(calc(-50% + ${ex - sx}px), calc(-50% + ${ey - sy}px)) scale(0.56)` },
       ],
-      { duration: 650, easing: 'cubic-bezier(.25,.6,.35,1)', fill: 'forwards' },
+      { duration: 600, easing: 'cubic-bezier(.25,.6,.35,1)', fill: 'forwards' },
     )
     return () => anim.cancel()
   }, [shot])
@@ -198,11 +221,8 @@ export default function Penaltis() {
     setMy(myG)
     setOpp(oppG)
 
-    // Bola vai pra um canto aleatório (variedade)
     const ballZone = ZONES[Math.floor(Math.random() * ZONES.length)]
-    const isGoal =
-      (attacking && correct) || (!attacking && !correct)
-    // Goleiro: pega no canto da bola (defesa) ou voa pro lado errado (gol)
+    const isGoal = (attacking && correct) || (!attacking && !correct)
     let keeperZone: Zone
     if (isGoal) {
       const others = ZONES.filter((z) => z !== ballZone)
@@ -210,7 +230,6 @@ export default function Penaltis() {
     } else {
       keeperZone = ballZone
     }
-    const pose = keeperPose(keeperZone)
 
     let label = ''
     let good = false
@@ -225,9 +244,8 @@ export default function Penaltis() {
     setShot({
       bx: ballZone.x,
       by: isGoal ? ballZone.y : 44,
-      kx: pose.kx,
-      ky: pose.ky,
-      rot: pose.rot,
+      kx: Math.min(66, Math.max(34, keeperZone.x)),
+      pose: poseFor(keeperZone),
       label,
       good,
       net: isGoal,
@@ -279,8 +297,7 @@ export default function Penaltis() {
   }
 
   const kx = shot ? shot.kx : 50
-  const ky = shot ? shot.ky : 45
-  const rot = shot ? shot.rot : 0
+  const pose: Pose = shot ? shot.pose : 'idle'
 
   return (
     <div className="flex min-h-screen flex-col bg-paper">
@@ -288,9 +305,7 @@ export default function Penaltis() {
         <div className="container-page flex h-14 items-center justify-between">
           <Link to="/" className="flex items-center gap-2 text-ink-900">
             <BallMark className="h-6 w-6 text-grass-600" />
-            <span className="font-cond text-sm font-600 uppercase tracking-wider">
-              ← Encyclobol
-            </span>
+            <span className="font-cond text-sm font-600 uppercase tracking-wider">← Encyclobol</span>
           </Link>
           <span className="font-cond text-xs font-500 uppercase tracking-[0.16em] text-ink-600">
             {mode === 'daily' ? 'Edição diária' : 'Modo treino'}
@@ -350,7 +365,6 @@ export default function Penaltis() {
             <div className="absolute left-1/2 top-[78%] h-2 w-2 -translate-x-1/2 rounded-full bg-paper/80" />
             <div className="absolute left-1/2 top-[64%] h-10 w-28 -translate-x-1/2 rounded-[100%] border-2 border-b-0 border-paper/25" />
 
-            {/* GOL */}
             <div className={`absolute left-[11%] top-[16%] w-[78%] ${shot?.net ? 'animate-netshake' : ''}`}>
               <svg viewBox="0 0 100 44" preserveAspectRatio="none" className="h-28 w-full">
                 <g stroke="#f2eee2" strokeWidth="0.4" opacity="0.5">
@@ -365,28 +379,12 @@ export default function Penaltis() {
               </svg>
             </div>
 
-            {/* GOLEIRO */}
+            {/* GOLEIRO (poses tipo sprite) */}
             <div
-              className="absolute z-10"
-              style={{
-                left: `${kx}%`,
-                top: `${ky}%`,
-                transform: `translate(-50%, -50%) rotate(${rot}deg)`,
-                transition: 'left .45s cubic-bezier(.3,1.5,.5,1), top .45s cubic-bezier(.3,1.5,.5,1), transform .45s cubic-bezier(.3,1.5,.5,1)',
-              }}
+              className="absolute z-10 -translate-x-1/2 -translate-y-1/2"
+              style={{ left: `${kx}%`, top: '44%', transition: 'left .4s cubic-bezier(.3,1.4,.5,1)' }}
             >
-              <svg viewBox="0 0 40 50" className="h-20 w-16">
-                <path d="M13 22 L3 12" stroke="#caa83a" strokeWidth="5" strokeLinecap="round" />
-                <path d="M27 22 L37 12" stroke="#caa83a" strokeWidth="5" strokeLinecap="round" />
-                <circle cx="3" cy="11" r="4.2" fill="#f2eee2" stroke="#16130d" strokeWidth="1.2" />
-                <circle cx="37" cy="11" r="4.2" fill="#f2eee2" stroke="#16130d" strokeWidth="1.2" />
-                <rect x="15" y="34" width="4.6" height="14" rx="2" fill="#16130d" />
-                <rect x="20.4" y="34" width="4.6" height="14" rx="2" fill="#16130d" />
-                <rect x="13" y="31" width="14" height="7" rx="1.5" fill="#262219" />
-                <rect x="12" y="16" width="16" height="17" rx="3.5" fill="#caa83a" />
-                <rect x="12" y="22" width="16" height="3" fill="#16130d" opacity="0.25" />
-                <circle cx="20" cy="10.5" r="5" fill="#e0b48a" />
-              </svg>
+              <Keeper pose={pose} />
             </div>
 
             {/* BOLA */}
@@ -429,9 +427,7 @@ export default function Penaltis() {
               />
             </div>
             <p className="kicker text-ink-500">{current.cat}</p>
-            <h2 className="mt-1 font-serif text-xl leading-snug text-ink-900 sm:text-2xl">
-              {current.q}
-            </h2>
+            <h2 className="mt-1 font-serif text-xl leading-snug text-ink-900 sm:text-2xl">{current.q}</h2>
             <div className="mt-3 grid gap-2">
               {current.options.map((opt, i) => {
                 let cls = 'border-ink-900/25 bg-paper hover:border-ink-900 hover:bg-paper-100'
