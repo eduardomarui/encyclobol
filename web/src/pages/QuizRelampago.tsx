@@ -49,6 +49,14 @@ function practiceGame() {
   return { picks, questions: makeRounds(picks, seed) }
 }
 
+// Pontos de um acerto: base (50) + bônus por velocidade, vezes o multiplicador
+// de combo (acertos seguidos).
+function pointsFor(timeLeft: number, combo: number): number {
+  const base = 50 + timeLeft * 10
+  const mult = Math.min(1 + (combo - 1) * 0.25, 2.5)
+  return Math.round(base * mult)
+}
+
 export default function QuizRelampago() {
   const [mode, setMode] = useState<'daily' | 'practice'>('daily')
   const [game, setGame] = useState(dailyGame)
@@ -60,10 +68,13 @@ export default function QuizRelampago() {
   const [selected, setSelected] = useState<number | null>(null)
   const [phase, setPhase] = useState<'answering' | 'revealed'>('answering')
   const [timeLeft, setTimeLeft] = useState(SECONDS)
+  const [points, setPoints] = useState(saved?.points ?? 0)
+  const [combo, setCombo] = useState(0)
+  const [lastGain, setLastGain] = useState(0)
   const [stats, setStats] = useState<QuizStats>(() => loadQuizStats())
   const [recorded, setRecorded] = useState(() => !!saved)
-  const [copied, setCopied] = useState(false)
   const [celebrated, setCelebrated] = useState(() => !!saved)
+  const [copied, setCopied] = useState(false)
 
   const finished = index >= total
   const score = answers.reduce(
@@ -82,6 +93,8 @@ export default function QuizRelampago() {
     if (finished || phase !== 'answering') return
     if (timeLeft <= 0) {
       setAnswers((a) => [...a, -1])
+      setCombo(0)
+      setLastGain(0)
       setPhase('revealed')
       return
     }
@@ -97,11 +110,11 @@ export default function QuizRelampago() {
 
   useEffect(() => {
     if (mode === 'daily' && finished && !recorded && answers.length === total) {
-      setStats(recordQuiz(score, total))
-      saveQuizDaily({ day: dayNumber(), picks, answers, score })
+      setStats(recordQuiz(points))
+      saveQuizDaily({ day: dayNumber(), picks, answers, score, points })
       setRecorded(true)
     }
-  }, [mode, finished, recorded, answers, total, score, picks])
+  }, [mode, finished, recorded, answers, total, score, points, picks])
 
   useEffect(() => {
     if (finished && !celebrated) {
@@ -112,6 +125,17 @@ export default function QuizRelampago() {
 
   function answer(i: number) {
     if (phase !== 'answering') return
+    const correct = i === questions[index].correct
+    if (correct) {
+      const c = combo + 1
+      const gain = pointsFor(timeLeft, c)
+      setCombo(c)
+      setPoints((p) => p + gain)
+      setLastGain(gain)
+    } else {
+      setCombo(0)
+      setLastGain(0)
+    }
     setSelected(i)
     setAnswers((a) => [...a, i])
     setPhase('revealed')
@@ -125,11 +149,14 @@ export default function QuizRelampago() {
     setSelected(null)
     setPhase('answering')
     setTimeLeft(SECONDS)
+    setPoints(0)
+    setCombo(0)
+    setLastGain(0)
     setCelebrated(false)
   }
 
   function compartilhar() {
-    const head = `Encyclobol · Quiz Relâmpago #${dayNumber()} — ${score}/${total}`
+    const head = `Encyclobol · Quiz Relâmpago #${dayNumber()} — ${points} pts (${score}/${total})`
     const dots = questions
       .map((qq, i) => (answers[i] === qq.correct ? '🟩' : '🟥'))
       .join('')
@@ -145,7 +172,6 @@ export default function QuizRelampago() {
 
   const current = questions[index]
   const urgent = timeLeft <= 5
-  const avg = stats.played ? (stats.totalScore / stats.played).toFixed(1) : '0'
 
   return (
     <div className="flex min-h-screen flex-col bg-paper">
@@ -169,12 +195,29 @@ export default function QuizRelampago() {
           Quiz Relâmpago
         </h1>
         <p className="mt-3 max-w-md text-center font-serif text-base italic text-ink-600">
-          Oito perguntas sobre a história do futebol, quinze segundos cada.
-          Responda rápido antes do apito final.
+          Oito perguntas, quinze segundos cada. Responda rápido: quanto mais ágil e
+          mais acertos seguidos, mais pontos.
         </p>
 
         {!finished && current && (
-          <div className="mt-8 w-full max-w-xl">
+          <div className="mt-7 w-full max-w-xl">
+            {/* Pontos + combo */}
+            <div className="mb-3 flex items-end justify-between">
+              <div>
+                <div className="font-display text-3xl leading-none text-ink-900">
+                  {points}
+                  <span className="ml-1 font-cond text-xs font-500 uppercase tracking-wide text-ink-500">
+                    pts
+                  </span>
+                </div>
+              </div>
+              {combo >= 2 && (
+                <span className="rounded-sm bg-ochre-500 px-2 py-1 font-cond text-xs font-700 uppercase tracking-wider text-paper">
+                  Combo x{combo}
+                </span>
+              )}
+            </div>
+
             <div className="flex items-center justify-between font-cond text-xs font-600 uppercase tracking-wider text-ink-600">
               <span>
                 Pergunta {index + 1} de {total}
@@ -222,17 +265,23 @@ export default function QuizRelampago() {
                 )
               })}
             </div>
+
+            {phase === 'revealed' && lastGain > 0 && (
+              <p className="mt-3 text-center font-cond text-sm font-600 uppercase tracking-wider text-grass-600">
+                +{lastGain} pts
+              </p>
+            )}
           </div>
         )}
 
         {finished && (
           <div className="mt-8 w-full max-w-md border-2 border-ink-900 bg-paper-100 p-6 text-center">
             <p className="kicker">Fim de jogo{mode === 'practice' && ' · treino'}</p>
-            <p className="mt-1 font-display text-6xl text-ink-900">
-              {score}
-              <span className="text-3xl text-ink-500">/{total}</span>
+            <p className="mt-1 font-display text-6xl text-ink-900">{points}</p>
+            <p className="font-cond text-xs font-500 uppercase tracking-wider text-ink-600">
+              pontos · {score}/{total} acertos
             </p>
-            <p className="mt-1 font-serif text-base italic text-ink-600">
+            <p className="mt-2 font-serif text-base italic text-ink-600">
               {score === total
                 ? 'Gabaritou! Almanaque ambulante.'
                 : score >= total / 2
@@ -245,8 +294,8 @@ export default function QuizRelampago() {
                 {[
                   ['Jogos', stats.played],
                   ['Recorde', stats.best],
-                  ['Média', avg],
                   ['Sequência', stats.currentStreak],
+                  ['Melhor', stats.maxStreak],
                 ].map(([k, v]) => (
                   <div key={k} className="bg-paper-100 px-1 py-2">
                     <div className="font-display text-2xl text-ink-900">{v}</div>
@@ -258,7 +307,6 @@ export default function QuizRelampago() {
               </div>
             )}
 
-            {/* Gabarito */}
             <div className="mt-4 space-y-1.5 text-left">
               {questions.map((qq, i) => {
                 const ok = answers[i] === qq.correct

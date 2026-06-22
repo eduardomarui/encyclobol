@@ -1,11 +1,12 @@
 // Persistência local da Linha do Tempo: resultado do dia + estatísticas.
+// Pontuação com multiplicador de sequência (não só nº de cartas).
 import { dayNumber } from './daily'
 
-export type TLDaily = { day: number; score: number }
+export type TLDaily = { day: number; score: number; points: number }
 
 export type TLStats = {
   played: number
-  best: number
+  best: number // melhor pontuação
   currentStreak: number
   maxStreak: number
   lastDay: number | null
@@ -52,11 +53,11 @@ export function loadTLStats(): TLStats {
   return read<TLStats>(STATS_KEY) ?? { ...emptyStats }
 }
 
-export function recordTL(score: number): TLStats {
+export function recordTL(points: number): TLStats {
   const stats = loadTLStats()
   const today = dayNumber()
   stats.played += 1
-  stats.best = Math.max(stats.best, score)
+  stats.best = Math.max(stats.best, points)
   stats.currentStreak = stats.lastDay === today - 1 ? stats.currentStreak + 1 : 1
   stats.lastDay = today
   stats.maxStreak = Math.max(stats.maxStreak, stats.currentStreak)

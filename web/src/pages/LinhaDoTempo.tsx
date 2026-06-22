@@ -12,8 +12,6 @@ import {
 import { BallMark } from '../components/landing/Icons'
 import { confetti } from '../lib/juice'
 
-const LIVES = 3
-
 type Card = { player: Player; year: number }
 
 function startYear(era: string): number {
@@ -26,7 +24,6 @@ function buildDeck(seed: number): Card[] {
   return seededShuffle(cards, seed)
 }
 
-// Faixa de slots válidos para inserir `year` na linha ordenada.
 function validSlot(placed: Card[], slot: number, year: number): boolean {
   const okLeft = slot === 0 || placed[slot - 1].year <= year
   const okRight = slot === placed.length || year <= placed[slot].year
@@ -40,16 +37,18 @@ function lowerBound(placed: Card[], year: number): number {
 }
 
 const dailySaved = loadTLDaily()
+const DAILY_SEED = (dayNumber() + 1) * 40503
 
 export default function LinhaDoTempo() {
   const [mode, setMode] = useState<'daily' | 'practice'>('daily')
-  const [deck, setDeck] = useState<Card[]>(() =>
-    buildDeck((dayNumber() + 1) * 40503),
-  )
-  const [placed, setPlaced] = useState<Card[]>(() => [deck0((dayNumber() + 1) * 40503)])
+  const [hard, setHard] = useState(false)
+  const [deck, setDeck] = useState<Card[]>(() => buildDeck(DAILY_SEED))
+  const [placed, setPlaced] = useState<Card[]>(() => [buildDeck(DAILY_SEED)[0]])
   const [cursor, setCursor] = useState(1)
-  const [lives, setLives] = useState(LIVES)
+  const [lives, setLives] = useState(3)
   const [score, setScore] = useState(dailySaved?.score ?? 0)
+  const [points, setPoints] = useState(dailySaved?.points ?? 0)
+  const [combo, setCombo] = useState(0)
   const [status, setStatus] = useState<'playing' | 'over'>(
     dailySaved ? 'over' : 'playing',
   )
@@ -60,13 +59,14 @@ export default function LinhaDoTempo() {
 
   const current = cursor < deck.length ? deck[cursor] : null
   const over = status === 'over'
+  const maxLives = hard ? 1 : 3
 
-  function finish(finalScore: number) {
+  function finish(finalScore: number, finalPoints: number) {
     setStatus('over')
-    if (finalScore >= 5) confetti()
+    if (finalPoints >= 80) confetti()
     if (mode === 'daily' && !recorded) {
-      setStats(recordTL(finalScore))
-      saveTLDaily({ day: dayNumber(), score: finalScore })
+      setStats(recordTL(finalPoints))
+      saveTLDaily({ day: dayNumber(), score: finalScore, points: finalPoints })
       setRecorded(true)
     }
   }
@@ -75,46 +75,50 @@ export default function LinhaDoTempo() {
     if (over || !current) return
     const ok = validSlot(placed, slot, current.year)
     const at = lowerBound(placed, current.year)
-    const next = [...placed.slice(0, at), current, ...placed.slice(at)]
-    setPlaced(next)
+    setPlaced([...placed.slice(0, at), current, ...placed.slice(at)])
 
     let newScore = score
+    let newPoints = points
     let newLives = lives
     if (ok) {
+      const c = combo + 1
+      const gain = c * 10
       newScore = score + 1
+      newPoints = points + gain
       setScore(newScore)
-      setFlash('Na mosca!')
+      setPoints(newPoints)
+      setCombo(c)
+      setFlash(`Na mosca! +${gain}${c >= 2 ? ` (x${c})` : ''}`)
     } else {
       newLives = lives - 1
       setLives(newLives)
+      setCombo(0)
       setFlash(`Fora de época — estreou em ${current.year}`)
     }
 
     const nextCursor = cursor + 1
     setCursor(nextCursor)
-    if (newLives <= 0 || nextCursor >= deck.length) finish(newScore)
+    if (newLives <= 0 || nextCursor >= deck.length) finish(newScore, newPoints)
   }
 
-  function restart(m: 'daily' | 'practice', seed: number) {
+  function restart(isHard: boolean) {
+    const seed = Math.floor(Math.random() * 1e9) + 1
     const d = buildDeck(seed)
-    setMode(m)
+    setMode('practice')
+    setHard(isHard)
     setDeck(d)
     setPlaced([d[0]])
     setCursor(1)
-    setLives(LIVES)
+    setLives(isHard ? 1 : 3)
     setScore(0)
+    setPoints(0)
+    setCombo(0)
     setStatus('playing')
     setFlash('')
   }
 
-  function treinar() {
-    restart('practice', Math.floor(Math.random() * 1e9) + 1)
-  }
-
   function compartilhar() {
-    const text = `Encyclobol · Linha do Tempo #${dayNumber()} — ${score} carta${
-      score === 1 ? '' : 's'
-    } em sequência\nencyclobol.com.br`
+    const text = `Encyclobol · Linha do Tempo #${dayNumber()} — ${points} pts (${score} cartas)\nencyclobol.com.br`
     navigator.clipboard?.writeText(text).then(
       () => {
         setCopied(true)
@@ -135,7 +139,7 @@ export default function LinhaDoTempo() {
             </span>
           </Link>
           <span className="font-cond text-xs font-500 uppercase tracking-[0.16em] text-ink-600">
-            {mode === 'daily' ? 'Edição diária' : 'Modo treino'}
+            {mode === 'daily' ? 'Edição diária' : hard ? 'Treino · difícil' : 'Modo treino'}
           </span>
         </div>
       </header>
@@ -147,16 +151,27 @@ export default function LinhaDoTempo() {
         </h1>
         <p className="mt-3 max-w-md text-center font-serif text-base italic text-ink-600">
           Encaixe cada craque na ordem certa da história, pelo ano de estreia.
-          Errou a época, perde uma vida.
+          Acertos seguidos valem mais; errou a época, perde uma vida.
         </p>
 
-        {/* Placar / vidas */}
-        <div className="mt-4 flex items-center gap-5">
-          <span className="font-cond text-sm font-600 uppercase tracking-wider text-ink-700">
-            Sequência: <span className="text-grass-600">{score}</span>
+        {/* Placar / combo / vidas */}
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+          <span className="font-display text-2xl text-ink-900">
+            {points}
+            <span className="ml-1 font-cond text-xs font-500 uppercase tracking-wide text-ink-500">
+              pts
+            </span>
           </span>
+          <span className="font-cond text-sm font-600 uppercase tracking-wider text-ink-700">
+            Cartas: <span className="text-grass-600">{score}</span>
+          </span>
+          {combo >= 2 && (
+            <span className="rounded-sm bg-ochre-500 px-2 py-0.5 font-cond text-xs font-700 uppercase tracking-wider text-paper">
+              x{combo}
+            </span>
+          )}
           <span className="flex items-center gap-1">
-            {Array.from({ length: LIVES }).map((_, i) => (
+            {Array.from({ length: maxLives }).map((_, i) => (
               <span
                 key={i}
                 className={`h-2.5 w-2.5 rotate-45 ${i < lives ? 'bg-ochre-500' : 'bg-ink-900/20'}`}
@@ -172,9 +187,11 @@ export default function LinhaDoTempo() {
             <p className="mt-2 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900">
               {current.player.display}
             </p>
-            <p className="mt-1 font-cond text-xs font-500 uppercase tracking-wide text-ink-600">
-              {current.player.nat} · {current.player.pos}
-            </p>
+            {!hard && (
+              <p className="mt-1 font-cond text-xs font-500 uppercase tracking-wide text-ink-600">
+                {current.player.nat} · {current.player.pos}
+              </p>
+            )}
             {flash && (
               <p className="mt-2 font-serif text-sm italic text-ochre-600">{flash}</p>
             )}
@@ -215,44 +232,52 @@ export default function LinhaDoTempo() {
         {/* Fim de jogo */}
         {over && (
           <div className="mt-2 w-full max-w-md border-2 border-ink-900 bg-paper-100 p-6 text-center">
-            <p className="kicker">Fim de jogo</p>
-            <p className="mt-1 font-display text-6xl text-ink-900">{score}</p>
+            <p className="kicker">Fim de jogo{mode === 'practice' && (hard ? ' · difícil' : ' · treino')}</p>
+            <p className="mt-1 font-display text-6xl text-ink-900">{points}</p>
             <p className="font-cond text-xs font-500 uppercase tracking-wider text-ink-600">
-              cartas em sequência
+              pontos · {score} cartas em sequência
             </p>
 
             {mode === 'daily' && (
-              <>
-                <div className="mt-5 grid grid-cols-4 gap-px overflow-hidden border-2 border-ink-900 bg-ink-900/15">
-                  {[
-                    ['Jogos', stats.played],
-                    ['Recorde', stats.best],
-                    ['Sequência', stats.currentStreak],
-                    ['Melhor', stats.maxStreak],
-                  ].map(([k, v]) => (
-                    <div key={k} className="bg-paper-100 px-1 py-2">
-                      <div className="font-display text-2xl text-ink-900">{v}</div>
-                      <div className="font-cond text-[9px] font-500 uppercase tracking-wide text-ink-600">
-                        {k}
-                      </div>
+              <div className="mt-5 grid grid-cols-4 gap-px overflow-hidden border-2 border-ink-900 bg-ink-900/15">
+                {[
+                  ['Jogos', stats.played],
+                  ['Recorde', stats.best],
+                  ['Sequência', stats.currentStreak],
+                  ['Melhor', stats.maxStreak],
+                ].map(([k, v]) => (
+                  <div key={k} className="bg-paper-100 px-1 py-2">
+                    <div className="font-display text-2xl text-ink-900">{v}</div>
+                    <div className="font-cond text-[9px] font-500 uppercase tracking-wide text-ink-600">
+                      {k}
                     </div>
-                  ))}
-                </div>
-                <button
-                  onClick={compartilhar}
-                  className="btn-stamp mt-5 w-full bg-ink-900 px-6 py-2.5 text-paper hover:bg-grass-600"
-                >
-                  {copied ? 'Copiado!' : 'Compartilhar resultado'}
-                </button>
-              </>
+                  </div>
+                ))}
+              </div>
             )}
 
-            <button
-              onClick={treinar}
-              className="btn-stamp mt-2 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700"
-            >
-              Treinar de novo
-            </button>
+            {mode === 'daily' && (
+              <button
+                onClick={compartilhar}
+                className="btn-stamp mt-5 w-full bg-ink-900 px-6 py-2.5 text-paper hover:bg-grass-600"
+              >
+                {copied ? 'Copiado!' : 'Compartilhar resultado'}
+              </button>
+            )}
+            <div className="mt-2 flex gap-2">
+              <button
+                onClick={() => restart(false)}
+                className="btn-stamp flex-1 bg-grass-600 px-4 py-2.5 text-paper hover:bg-grass-700"
+              >
+                Treinar
+              </button>
+              <button
+                onClick={() => restart(true)}
+                className="btn-stamp flex-1 border-2 border-ink-900 px-4 py-2.5 text-ink-900 hover:bg-ink-900 hover:text-paper"
+              >
+                Difícil
+              </button>
+            </div>
             <Link
               to="/"
               className="btn-stamp mt-2 block border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-ink-900 hover:text-paper"
@@ -264,9 +289,4 @@ export default function LinhaDoTempo() {
       </main>
     </div>
   )
-}
-
-// Primeira carta (semente) da linha, derivada do mesmo embaralhamento.
-function deck0(seed: number): Card {
-  return buildDeck(seed)[0]
 }

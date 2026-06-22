@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { players, type Player } from '../data/players'
+import { clubHint } from '../data/clubs'
 import { dailyIndex, dayNumber } from '../lib/daily'
 import {
   loadMystDaily,
@@ -180,6 +181,18 @@ export default function Misterioso() {
           Dica: posição — <span className="text-ochre-600">{secret.pos}</span>
         </div>
 
+        {/* Dica extra após alguns chutes */}
+        {!over && rows.length >= 3 && (
+          <div className="mt-2 border border-ink-900/20 bg-paper-100 px-4 py-1.5 font-cond text-xs font-500 uppercase tracking-wider text-ink-700">
+            Dica extra —{' '}
+            <span className="text-ochre-600">
+              {clubHint[secret.answer]
+                ? `jogou no ${clubHint[secret.answer]}`
+                : `estreou na década de ${Math.floor(secretYear / 10) * 10}`}
+            </span>
+          </div>
+        )}
+
         <div className="mt-6 w-full max-w-xl">
           {/* Cabeçalho da tabela */}
           {rows.length > 0 && (
@@ -221,8 +234,15 @@ export default function Misterioso() {
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Digite o nome de um craque…"
                   autoFocus
+                  list="craques"
+                  autoComplete="off"
                   className="flex-1 border-2 border-ink-900 bg-paper px-4 py-3 font-serif text-base text-ink-900 outline-none placeholder:text-ink-500 focus:bg-paper-100"
                 />
+                <datalist id="craques">
+                  {players.map((p) => (
+                    <option key={p.answer} value={p.display} />
+                  ))}
+                </datalist>
                 <button
                   type="submit"
                   className="btn-stamp bg-grass-600 px-6 text-paper hover:bg-grass-700"
