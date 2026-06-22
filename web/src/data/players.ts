@@ -11,12 +11,12 @@ export type Player = {
 }
 
 export const players: Player[] = [
-  { answer: 'PELE', display: 'Pelé', nat: 'Brasil', pos: 'Atacante', era: '1958–1971' },
-  { answer: 'ZICO', display: 'Zico', nat: 'Brasil', pos: 'Meia', era: '1976–1986' },
+  { answer: 'PELE', display: 'Pelé', nat: 'Brasil', pos: 'Atacante', era: '1957–1977' },
+  { answer: 'ZICO', display: 'Zico', nat: 'Brasil', pos: 'Meia', era: '1971–1994' },
   { answer: 'CAFU', display: 'Cafu', nat: 'Brasil', pos: 'Lateral', era: '1994–2006' },
   { answer: 'KAKA', display: 'Kaká', nat: 'Brasil', pos: 'Meia', era: '2002–2010' },
   { answer: 'FIGO', display: 'Luís Figo', nat: 'Portugal', pos: 'Ponta', era: '1995–2006' },
-  { answer: 'MESSI', display: 'Lionel Messi', nat: 'Argentina', pos: 'Atacante', era: '2005–2024' },
+  { answer: 'MESSI', display: 'Lionel Messi', nat: 'Argentina', pos: 'Atacante', era: '2005–presente' },
   { answer: 'TOTTI', display: 'Francesco Totti', nat: 'Itália', pos: 'Atacante', era: '1994–2017' },
   { answer: 'PIRLO', display: 'Andrea Pirlo', nat: 'Itália', pos: 'Meia', era: '1998–2017' },
   { answer: 'HENRY', display: 'Thierry Henry', nat: 'França', pos: 'Atacante', era: '1996–2012' },

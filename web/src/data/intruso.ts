@@ -32,7 +32,7 @@ export const intruso: IntrusoPuzzle[] = [
   {
     players: ['Mbappé', 'Neymar', 'Messi', 'Pelé'],
     intruder: 'Pelé',
-    rule: 'Os outros estrearam nos anos 2000; Pelé é dos anos 1950.',
+    rule: 'Os outros surgiram no século 21; Pelé é dos anos 1950.',
   },
   {
     players: ['Cruyff', 'Bergkamp', 'Robben', 'Figo'],
