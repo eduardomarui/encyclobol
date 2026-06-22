@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { players, type Player } from '../data/players'
 import { clubHint } from '../data/clubs'
+import PlayerInput from '../components/PlayerInput'
 import { dailyIndex, dayNumber } from '../lib/daily'
 import {
   loadMystDaily,
@@ -60,7 +61,6 @@ export default function Misterioso() {
   const secretYear = useMemo(() => startYear(secret.era), [secret])
 
   const [rows, setRows] = useState<Row[]>([])
-  const [input, setInput] = useState('')
   const [note, setNote] = useState('')
   const [status, setStatus] = useState<'playing' | 'won' | 'lost'>(
     saved ? (saved.won ? 'won' : 'lost') : 'playing',
@@ -85,10 +85,9 @@ export default function Misterioso() {
     }
   }
 
-  function submit(e: React.FormEvent) {
-    e.preventDefault()
+  function tryGuess(text: string) {
     if (over) return
-    const p = findPlayer(input)
+    const p = findPlayer(text)
     if (!p) {
       setNote('Não achei esse craque na enciclopédia.')
       return
@@ -98,7 +97,6 @@ export default function Misterioso() {
       return
     }
     setNote('')
-    setInput('')
 
     const gy = startYear(p.era)
     const row: Row = {
@@ -126,7 +124,6 @@ export default function Misterioso() {
     setMode('practice')
     setSecret(next)
     setRows([])
-    setInput('')
     setNote('')
     setShareRows([])
     setStatus('playing')
@@ -227,29 +224,8 @@ export default function Misterioso() {
 
           {/* Entrada */}
           {!over && (
-            <form onSubmit={submit} className="mt-4">
-              <div className="flex gap-2">
-                <input
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="Digite o nome de um craque…"
-                  autoFocus
-                  list="craques"
-                  autoComplete="off"
-                  className="flex-1 border-2 border-ink-900 bg-paper px-4 py-3 font-serif text-base text-ink-900 outline-none placeholder:text-ink-500 focus:bg-paper-100"
-                />
-                <datalist id="craques">
-                  {players.map((p) => (
-                    <option key={p.answer} value={p.display} />
-                  ))}
-                </datalist>
-                <button
-                  type="submit"
-                  className="btn-stamp bg-grass-600 px-6 text-paper hover:bg-grass-700"
-                >
-                  Chutar
-                </button>
-              </div>
+            <div className="mt-4">
+              <PlayerInput options={players} onGuess={tryGuess} placeholder="Digite o nome de um craque…" />
               <div className="mt-2 flex items-center justify-between">
                 <span className="font-cond text-xs font-500 uppercase tracking-wider text-ink-600">
                   {guessesLeft} {guessesLeft === 1 ? 'tentativa' : 'tentativas'}
@@ -260,7 +236,7 @@ export default function Misterioso() {
                   </span>
                 )}
               </div>
-            </form>
+            </div>
           )}
 
           {/* Fim de jogo */}
