@@ -136,4 +136,23 @@ export const conexoes: Puzzle[] = [
       { color: 'ink', label: 'Brasileiros', members: ['Sócrates', 'Bebeto', 'Adriano', 'Coutinho'] },
     ],
   },
+  // 14 — geração 2026 por clube. Armadilha: Lewandowski (Bayern e Barça) só
+  // fecha no Barça; os 4 espanhóis estão espalhados (City e Barça).
+  {
+    groups: [
+      { color: 'corn', label: 'Jogam no Real Madrid', members: ['Vinícius', 'Bellingham', 'Mbappé', 'Courtois'] },
+      { color: 'grass', label: 'Jogam no Manchester City', members: ['Haaland', 'De Bruyne', 'Foden', 'Rodri'] },
+      { color: 'ochre', label: 'Jogam no Barcelona', members: ['Pedri', 'Gavi', 'Yamal', 'Lewandowski'] },
+      { color: 'ink', label: 'Jogam no Bayern de Munique', members: ['Musiala', 'Kimmich', 'Kane', 'Neuer'] },
+    ],
+  },
+  // 15 — a nova geração por seleção (rumo à Copa de 2026).
+  {
+    groups: [
+      { color: 'corn', label: 'Brasileiros', members: ['Vinícius', 'Rodrygo', 'Raphinha', 'Endrick'] },
+      { color: 'grass', label: 'Argentinos', members: ['Lautaro', 'Julián Álvarez', 'Enzo Fernández', 'Mac Allister'] },
+      { color: 'ochre', label: 'Portugueses', members: ['Bruno Fernandes', 'Bernardo Silva', 'Rafael Leão', 'Rúben Dias'] },
+      { color: 'ink', label: 'Holandeses', members: ['Van Dijk', 'De Jong', 'Gakpo', 'Depay'] },
+    ],
+  },
 ]

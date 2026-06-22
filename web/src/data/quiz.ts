@@ -46,4 +46,8 @@ export const quiz: QuizQuestion[] = [
   { q: 'Qual seleção africana chegou às semifinais da Copa de 2022, fato inédito?', options: ['Marrocos', 'Senegal', 'Gana', 'Camarões'], correct: 0, cat: 'Copas' },
   { q: 'Quem é o maior artilheiro da história da seleção brasileira?', options: ['Neymar', 'Pelé', 'Ronaldo', 'Romário'], correct: 0, cat: 'Brasil' },
   { q: 'Qual atacante brasileiro era apelidado de "O Imperador"?', options: ['Adriano', 'Ronaldo', 'Romário', 'Bebeto'], correct: 0, cat: 'Lendas' },
+  { q: 'Quais países sediam a Copa do Mundo de 2026?', options: ['Estados Unidos, México e Canadá', 'Brasil e Argentina', 'Espanha e Portugal', 'Catar'], correct: 0, cat: 'Copa 2026' },
+  { q: 'A Copa de 2026 estreia um novo formato com quantas seleções?', options: ['48', '32', '24', '64'], correct: 0, cat: 'Copa 2026' },
+  { q: 'A Copa do Mundo de 2026 é a primeira sediada por quantos países ao mesmo tempo?', options: ['3', '1', '2', '4'], correct: 0, cat: 'Copa 2026' },
+  { q: 'Em qual continente é disputada a maior parte da Copa de 2026?', options: ['América do Norte', 'América do Sul', 'Europa', 'Ásia'], correct: 0, cat: 'Copa 2026' },
 ]

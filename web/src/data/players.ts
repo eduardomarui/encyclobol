@@ -180,4 +180,75 @@ export const players: Player[] = [
   { answer: 'CASEMIRO', display: 'Casemiro', nat: 'Brasil', pos: 'Meia', era: '2010–presente' },
   { answer: 'VINICIUS', display: 'Vinícius Júnior', nat: 'Brasil', pos: 'Ponta', era: '2017–presente' },
   { answer: 'HAALAND', display: 'Erling Haaland', nat: 'Noruega', pos: 'Atacante', era: '2016–presente' },
+
+  // === Geração da Copa de 2026 ===
+
+  // Brasil
+  { answer: 'RODRYGO', display: 'Rodrygo', nat: 'Brasil', pos: 'Ponta', era: '2017–presente' },
+  { answer: 'RAPHINHA', display: 'Raphinha', nat: 'Brasil', pos: 'Ponta', era: '2016–presente' },
+  { answer: 'GUIMARAES', display: 'Bruno Guimarães', nat: 'Brasil', pos: 'Meia', era: '2015–presente' },
+  { answer: 'ENDRICK', display: 'Endrick', nat: 'Brasil', pos: 'Atacante', era: '2022–presente' },
+  { answer: 'MILITAO', display: 'Éder Militão', nat: 'Brasil', pos: 'Zagueiro', era: '2017–presente' },
+  { answer: 'MARQUINHOS', display: 'Marquinhos', nat: 'Brasil', pos: 'Zagueiro', era: '2012–presente' },
+  { answer: 'EDERSON', display: 'Ederson', nat: 'Brasil', pos: 'Goleiro', era: '2012–presente' },
+
+  // Argentina
+  { answer: 'LAUTARO', display: 'Lautaro Martínez', nat: 'Argentina', pos: 'Atacante', era: '2015–presente' },
+  { answer: 'ALVAREZ', display: 'Julián Álvarez', nat: 'Argentina', pos: 'Atacante', era: '2018–presente' },
+  { answer: 'ENZO', display: 'Enzo Fernández', nat: 'Argentina', pos: 'Meia', era: '2019–presente' },
+  { answer: 'MACALLISTER', display: 'Alexis Mac Allister', nat: 'Argentina', pos: 'Meia', era: '2016–presente' },
+  { answer: 'DIBU', display: 'Emiliano Martínez', nat: 'Argentina', pos: 'Goleiro', era: '2010–presente' },
+  { answer: 'ROMERO', display: 'Cristian Romero', nat: 'Argentina', pos: 'Zagueiro', era: '2018–presente' },
+
+  // França
+  { answer: 'TCHOUAMENI', display: 'Aurélien Tchouaméni', nat: 'França', pos: 'Meia', era: '2018–presente' },
+  { answer: 'CAMAVINGA', display: 'Eduardo Camavinga', nat: 'França', pos: 'Meia', era: '2019–presente' },
+  { answer: 'DEMBELE', display: 'Ousmane Dembélé', nat: 'França', pos: 'Ponta', era: '2015–presente' },
+  { answer: 'SALIBA', display: 'William Saliba', nat: 'França', pos: 'Zagueiro', era: '2019–presente' },
+
+  // Inglaterra
+  { answer: 'BELLINGHAM', display: 'Jude Bellingham', nat: 'Inglaterra', pos: 'Meia', era: '2019–presente' },
+  { answer: 'KANE', display: 'Harry Kane', nat: 'Inglaterra', pos: 'Atacante', era: '2011–presente' },
+  { answer: 'FODEN', display: 'Phil Foden', nat: 'Inglaterra', pos: 'Meia', era: '2017–presente' },
+  { answer: 'SAKA', display: 'Bukayo Saka', nat: 'Inglaterra', pos: 'Ponta', era: '2018–presente' },
+  { answer: 'RICE', display: 'Declan Rice', nat: 'Inglaterra', pos: 'Meia', era: '2017–presente' },
+
+  // Portugal
+  { answer: 'FERNANDES', display: 'Bruno Fernandes', nat: 'Portugal', pos: 'Meia', era: '2012–presente' },
+  { answer: 'BERNARDO', display: 'Bernardo Silva', nat: 'Portugal', pos: 'Meia', era: '2013–presente' },
+  { answer: 'DIAS', display: 'Rúben Dias', nat: 'Portugal', pos: 'Zagueiro', era: '2015–presente' },
+  { answer: 'LEAO', display: 'Rafael Leão', nat: 'Portugal', pos: 'Ponta', era: '2017–presente' },
+
+  // Espanha
+  { answer: 'PEDRI', display: 'Pedri', nat: 'Espanha', pos: 'Meia', era: '2019–presente' },
+  { answer: 'GAVI', display: 'Gavi', nat: 'Espanha', pos: 'Meia', era: '2021–presente' },
+  { answer: 'RODRI', display: 'Rodri', nat: 'Espanha', pos: 'Meia', era: '2015–presente' },
+  { answer: 'YAMAL', display: 'Lamine Yamal', nat: 'Espanha', pos: 'Ponta', era: '2023–presente' },
+  { answer: 'MORATA', display: 'Álvaro Morata', nat: 'Espanha', pos: 'Atacante', era: '2010–presente' },
+  { answer: 'NICOWILLIAMS', display: 'Nico Williams', nat: 'Espanha', pos: 'Ponta', era: '2021–presente' },
+
+  // Alemanha
+  { answer: 'MUSIALA', display: 'Jamal Musiala', nat: 'Alemanha', pos: 'Meia', era: '2020–presente' },
+  { answer: 'WIRTZ', display: 'Florian Wirtz', nat: 'Alemanha', pos: 'Meia', era: '2020–presente' },
+  { answer: 'KIMMICH', display: 'Joshua Kimmich', nat: 'Alemanha', pos: 'Lateral', era: '2013–presente' },
+  { answer: 'GUNDOGAN', display: 'Ilkay Gündoğan', nat: 'Alemanha', pos: 'Meia', era: '2009–presente' },
+
+  // Holanda
+  { answer: 'VANDIJK', display: 'Virgil van Dijk', nat: 'Holanda', pos: 'Zagueiro', era: '2011–presente' },
+  { answer: 'DEJONG', display: 'Frenkie de Jong', nat: 'Holanda', pos: 'Meia', era: '2015–presente' },
+  { answer: 'GAKPO', display: 'Cody Gakpo', nat: 'Holanda', pos: 'Atacante', era: '2018–presente' },
+  { answer: 'DEPAY', display: 'Memphis Depay', nat: 'Holanda', pos: 'Atacante', era: '2011–presente' },
+
+  // Bélgica
+  { answer: 'LUKAKU', display: 'Romelu Lukaku', nat: 'Bélgica', pos: 'Atacante', era: '2009–presente' },
+  { answer: 'COURTOIS', display: 'Thibaut Courtois', nat: 'Bélgica', pos: 'Goleiro', era: '2011–presente' },
+
+  // Uruguai
+  { answer: 'VALVERDE', display: 'Federico Valverde', nat: 'Uruguai', pos: 'Meia', era: '2015–presente' },
+  { answer: 'NUNEZ', display: 'Darwin Núñez', nat: 'Uruguai', pos: 'Atacante', era: '2017–presente' },
+
+  // Marrocos e Nigéria
+  { answer: 'HAKIMI', display: 'Achraf Hakimi', nat: 'Marrocos', pos: 'Lateral', era: '2016–presente' },
+  { answer: 'ZIYECH', display: 'Hakim Ziyech', nat: 'Marrocos', pos: 'Meia', era: '2012–presente' },
+  { answer: 'OSIMHEN', display: 'Victor Osimhen', nat: 'Nigéria', pos: 'Atacante', era: '2015–presente' },
 ]
