@@ -11,6 +11,9 @@ import {
 } from '../lib/penaltisStats'
 import { BallMark } from '../components/landing/Icons'
 import { confetti } from '../lib/juice'
+import LottieBox from '../components/LottieBox'
+
+const LOTTIE_KEEPER = `${import.meta.env.BASE_URL}lottie/keeper.json`
 
 const ROUNDS = 10
 const SECONDS = 8
@@ -384,7 +387,11 @@ export default function Penaltis() {
               className="absolute z-10 -translate-x-1/2 -translate-y-1/2"
               style={{ left: `${kx}%`, top: '44%', transition: 'left .4s cubic-bezier(.3,1.4,.5,1)' }}
             >
-              <Keeper pose={pose} />
+              <LottieBox
+                path={LOTTIE_KEEPER}
+                className="h-24 w-24"
+                fallback={<Keeper pose={pose} />}
+              />
             </div>
 
             {/* BOLA */}

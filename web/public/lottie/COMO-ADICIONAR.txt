@@ -1,0 +1,15 @@
+Como ativar o goleiro em Lottie
+===============================
+
+1. Baixe uma animação de goleiro em JSON (ex: LottieFiles / IconScout,
+   sob licença que permita uso).
+2. Salve o arquivo aqui como:  keeper.json
+   (caminho final: web/public/lottie/keeper.json)
+3. Pronto — a Disputa de Pênaltis passa a usar o Lottie automaticamente,
+   sem precisar rebuildar (é carregado em runtime).
+
+Se o arquivo não existir, o jogo usa o goleiro desenhado (fallback) — não quebra.
+
+Dica: prefira uma animação com defesa/mergulho. Se quiser que ela reaja ao
+canto (mergulho esq/dir/alto/baixo), me passe os "markers"/segmentos do
+arquivo que eu controlo a reprodução por canto.
