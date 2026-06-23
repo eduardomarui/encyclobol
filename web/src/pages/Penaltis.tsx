@@ -63,24 +63,28 @@ function Keeper({ pose }: { pose: Pose }) {
   const P = POSES[pose]
   return (
     <svg viewBox="0 0 60 64" className="h-24 w-24 overflow-visible">
-      <g
-        transform={`rotate(${P.tilt} 30 34)`}
-        style={{ transition: 'transform .12s' }}
-      >
-        {/* pernas */}
-        <path d={`M30 40 L${P.footL[0]} ${P.footL[1]}`} stroke="#16130d" strokeWidth="6" strokeLinecap="round" fill="none" />
-        <path d={`M30 40 L${P.footR[0]} ${P.footR[1]}`} stroke="#16130d" strokeWidth="6" strokeLinecap="round" fill="none" />
-        {/* tronco (camisa de goleiro) */}
-        <rect x="23" y="20" width="14" height="22" rx="5" fill="#caa83a" />
-        <rect x="23" y="27" width="14" height="3" fill="#16130d" opacity="0.25" />
+      <g transform={`rotate(${P.tilt} 30 34)`} style={{ transition: 'transform .14s' }}>
+        {/* pernas (calção curto + perna + chuteira) */}
+        {([P.footL, P.footR] as [number, number][]).map((f, i) => (
+          <g key={i}>
+            <path d={`M30 39 L${f[0]} ${f[1]}`} stroke="#e0b48a" strokeWidth="5.5" strokeLinecap="round" fill="none" />
+            <path d={`M30 39 L${(30 + f[0]) / 2} ${(39 + f[1]) / 2}`} stroke="#262219" strokeWidth="6.5" strokeLinecap="round" fill="none" />
+            <ellipse cx={f[0]} cy={f[1] + 1.5} rx="3.4" ry="2" fill="#16130d" />
+          </g>
+        ))}
         {/* braços */}
-        <path d={`M30 25 L${P.handL[0]} ${P.handL[1]}`} stroke="#caa83a" strokeWidth="6" strokeLinecap="round" fill="none" />
-        <path d={`M30 25 L${P.handR[0]} ${P.handR[1]}`} stroke="#caa83a" strokeWidth="6" strokeLinecap="round" fill="none" />
+        <path d={`M30 24 L${P.handL[0]} ${P.handL[1]}`} stroke="#caa83a" strokeWidth="6" strokeLinecap="round" fill="none" />
+        <path d={`M30 24 L${P.handR[0]} ${P.handR[1]}`} stroke="#caa83a" strokeWidth="6" strokeLinecap="round" fill="none" />
+        {/* tronco / camisa */}
+        <path d="M21 21 Q30 17 39 21 L38 40 Q30 43 22 40 Z" fill="#caa83a" />
+        <path d="M26 18 Q30 22 34 18" fill="none" stroke="#16130d" strokeWidth="1.4" opacity="0.5" />
+        <text x="30" y="34" textAnchor="middle" fontSize="9" fontWeight="700" fill="#16130d" opacity="0.55">1</text>
         {/* luvas */}
-        <circle cx={P.handL[0]} cy={P.handL[1]} r="4.3" fill="#f2eee2" stroke="#16130d" strokeWidth="1.3" />
-        <circle cx={P.handR[0]} cy={P.handR[1]} r="4.3" fill="#f2eee2" stroke="#16130d" strokeWidth="1.3" />
-        {/* cabeça */}
-        <circle cx="30" cy="13" r="5.2" fill="#e0b48a" />
+        <circle cx={P.handL[0]} cy={P.handL[1]} r="5" fill="#f2eee2" stroke="#16130d" strokeWidth="1.4" />
+        <circle cx={P.handR[0]} cy={P.handR[1]} r="5" fill="#f2eee2" stroke="#16130d" strokeWidth="1.4" />
+        {/* cabeça + cabelo */}
+        <circle cx="30" cy="12.5" r="5.4" fill="#e8c39e" />
+        <path d="M24.8 11.5 Q30 4 35.2 11.5 Q30 8.5 24.8 11.5 Z" fill="#3a2a1a" />
       </g>
     </svg>
   )
@@ -357,6 +361,22 @@ export default function Penaltis() {
             }`}
           >
             <div className="absolute inset-0 bg-gradient-to-b from-[#9ec7d8] via-[#86b98f] to-grass-700" />
+            {/* refletor */}
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  'radial-gradient(120% 55% at 50% 0%, rgba(255,255,255,0.22), transparent 60%)',
+              }}
+            />
+            {/* gramado listrado */}
+            <div
+              className="absolute inset-x-0 bottom-0 top-[52%]"
+              style={{
+                backgroundImage:
+                  'repeating-linear-gradient(90deg, rgba(255,255,255,0.06) 0 20px, transparent 20px 40px)',
+              }}
+            />
             <div
               className="absolute inset-x-0 top-0 h-[22%] bg-ink-800"
               style={{
@@ -387,12 +407,36 @@ export default function Penaltis() {
               className="absolute z-10 -translate-x-1/2 -translate-y-1/2"
               style={{ left: `${kx}%`, top: '44%', transition: 'left .4s cubic-bezier(.3,1.4,.5,1)' }}
             >
-              <LottieBox
-                path={LOTTIE_KEEPER}
-                className="h-24 w-24"
-                fallback={<Keeper pose={pose} />}
-              />
+              <div className={!shot ? 'animate-bob' : ''}>
+                <LottieBox
+                  path={LOTTIE_KEEPER}
+                  className="h-24 w-24"
+                  fallback={<Keeper pose={pose} />}
+                />
+              </div>
             </div>
+
+            {/* poeira do gramado ao chutar */}
+            {shot && (
+              <div
+                key={`dust${index}`}
+                className="absolute left-1/2 top-[82%] z-10 -translate-x-1/2 -translate-y-1/2"
+              >
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="absolute" style={{ transform: `rotate(${i * 60}deg)` }}>
+                    <span
+                      className="block h-1.5 w-1.5 rounded-full bg-paper/70"
+                      style={{ animation: 'dustfly 0.5s ease-out forwards' }}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* flash da torcida no gol */}
+            {shot?.net && (
+              <div key={`flash${index}`} className="pointer-events-none absolute inset-0 z-20 animate-crowdflash bg-paper" />
+            )}
 
             {/* BOLA */}
             <div
