@@ -15,8 +15,9 @@ import LottieBox from '../components/LottieBox'
 
 const LOTTIE_KEEPER = `${import.meta.env.BASE_URL}lottie/keeper.json`
 
-const ROUNDS = 10
-const SECONDS = 8
+const ATTACK_SEC = 8 // tempo pra cobrar (mais)
+const DEF_SEC = 5 // tempo pra defender (menos — pressão)
+const secsFor = (i: number) => (i % 2 === 0 ? ATTACK_SEC : DEF_SEC)
 
 type Mark = 'goal' | 'miss'
 type PQ = { q: string; cat: string; options: string[]; correct: number }
@@ -102,17 +103,35 @@ function prepQ(bi: number, seed: number): PQ {
     correct: order.indexOf(base.correct),
   }
 }
+const EASY = quiz.flatMap((q, i) => (q.dif === 'facil' ? [i] : []))
+const HARD = quiz.flatMap((q, i) => (q.dif === 'dificil' ? [i] : []))
+
+// Intercala cobrança (fácil) e defesa (difícil): A, D, A, D...
+function interleave(eIdx: number[], hIdx: number[], seed: number): PQ[] {
+  const out: PQ[] = []
+  for (let p = 0; p < 5; p++) {
+    out.push(prepQ(eIdx[p], seed + p * 7 + 1))
+    out.push(prepQ(hIdx[p], seed + p * 7 + 4))
+  }
+  return out
+}
 function dailyPrepared(): PQ[] {
-  return dailySequence(quiz.length, ROUNDS).map((bi, qi) => prepQ(bi, dayNumber() * 101 + qi * 7 + 1))
+  const e = dailySequence(EASY.length, 5).map((k) => EASY[k])
+  const h = dailySequence(HARD.length, 5).map((k) => HARD[k])
+  return interleave(e, h, dayNumber() * 101 + 1)
 }
-function randomPrepared(n: number): PQ[] {
-  const seed = Math.floor(Math.random() * 1e9) + 1
-  return seededShuffle(quiz.map((_, i) => i), seed)
-    .slice(0, n)
-    .map((bi, qi) => prepQ(bi, seed + qi * 13))
+function randomPrepared(): PQ[] {
+  const s = Math.floor(Math.random() * 1e9) + 1
+  const e = seededShuffle(EASY, s).slice(0, 5)
+  const h = seededShuffle(HARD, s + 1).slice(0, 5)
+  return interleave(e, h, s)
 }
-function extraQ(): PQ {
-  return prepQ(Math.floor(Math.random() * quiz.length), Math.floor(Math.random() * 1e9) + 1)
+// Par extra pra morte súbita (1 cobrança fácil + 1 defesa difícil)
+function extraPair(): PQ[] {
+  return [
+    prepQ(EASY[Math.floor(Math.random() * EASY.length)], Math.floor(Math.random() * 1e9) + 1),
+    prepQ(HARD[Math.floor(Math.random() * HARD.length)], Math.floor(Math.random() * 1e9) + 1),
+  ]
 }
 
 function poseFor(z: Zone): Pose {
@@ -142,7 +161,7 @@ export default function Penaltis() {
   const [opp, setOpp] = useState(saved?.oppGoals ?? 0)
   const [phase, setPhase] = useState<'ask' | 'shoot'>('ask')
   const [selected, setSelected] = useState<number | null>(null)
-  const [timeLeft, setTimeLeft] = useState(SECONDS)
+  const [timeLeft, setTimeLeft] = useState(ATTACK_SEC)
   const [shot, setShot] = useState<Shot>(null)
   const [over, setOver] = useState(!!saved)
   const [won, setWon] = useState(saved?.won ?? false)
@@ -207,7 +226,7 @@ export default function Penaltis() {
     setIndex(i)
     setShot(null)
     setSelected(null)
-    setTimeLeft(SECONDS)
+    setTimeLeft(secsFor(i))
     setPhase('ask')
   }
 
@@ -264,7 +283,7 @@ export default function Penaltis() {
       if (i < prepared.length) goAsk(i)
       else if (myG !== oppG) finish(myG, oppG)
       else {
-        setPrepared((pp) => [...pp, extraQ(), extraQ()])
+        setPrepared((pp) => [...pp, ...extraPair()])
         goAsk(i)
       }
     }, 1800)
@@ -272,7 +291,7 @@ export default function Penaltis() {
 
   function treinar() {
     setMode('practice')
-    setPrepared(randomPrepared(ROUNDS))
+    setPrepared(randomPrepared())
     setIndex(0)
     setMeus([])
     setRival([])
@@ -280,7 +299,7 @@ export default function Penaltis() {
     setOpp(0)
     setPhase('ask')
     setSelected(null)
-    setTimeLeft(SECONDS)
+    setTimeLeft(ATTACK_SEC)
     setShot(null)
     setOver(false)
     setWon(false)
@@ -347,7 +366,7 @@ export default function Penaltis() {
           <p className="mt-2 font-cond text-xs font-600 uppercase tracking-[0.16em] text-ink-500">
             {pair <= 5 ? `Cobrança ${pair}/5` : 'Morte súbita'} ·{' '}
             <span className={attacking ? 'text-grass-600' : 'text-ochre-600'}>
-              {attacking ? 'Você cobra' : 'Você defende'}
+              {attacking ? 'Você cobra' : `Você defende · difícil · ${DEF_SEC}s`}
             </span>
           </p>
         )}
@@ -474,7 +493,7 @@ export default function Penaltis() {
                 className={`h-1.5 transition-[width] duration-1000 ease-linear ${
                   timeLeft <= 3 ? 'bg-ochre-500' : 'bg-grass-600'
                 }`}
-                style={{ width: `${(timeLeft / SECONDS) * 100}%` }}
+                style={{ width: `${(timeLeft / secsFor(index)) * 100}%` }}
               />
             </div>
             <p className="kicker text-ink-500">{current.cat}</p>
