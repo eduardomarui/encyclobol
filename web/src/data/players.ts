@@ -543,4 +543,51 @@ export const players: Player[] = [
   // África
   { answer: 'KOULIBALY', display: 'Kalidou Koulibaly', nat: 'Senegal', pos: 'Zagueiro', era: '2010–presente' },
   { answer: 'ADEBAYOR', display: 'Emmanuel Adebayor', nat: 'Togo', pos: 'Atacante', era: '2001–2020' },
+
+  // ===== Expansão (4ª leva) =====
+  // Brasil
+  { answer: 'BRANCO', display: 'Branco', nat: 'Brasil', pos: 'Lateral', era: '1983–1998' },
+  // Argentina
+  { answer: 'RUGGERI', display: 'Oscar Ruggeri', nat: 'Argentina', pos: 'Zagueiro', era: '1980–1997' },
+  { answer: 'BURRUCHAGA', display: 'Jorge Burruchaga', nat: 'Argentina', pos: 'Meia', era: '1980–1998' },
+  { answer: 'GOYCOCHEA', display: 'Sergio Goycochea', nat: 'Argentina', pos: 'Goleiro', era: '1983–1999' },
+  // Paraguai / México
+  { answer: 'SANTACRUZ', display: 'Roque Santa Cruz', nat: 'Paraguai', pos: 'Atacante', era: '1997–2021' },
+  { answer: 'HUGOSANCHEZ', display: 'Hugo Sánchez', nat: 'México', pos: 'Atacante', era: '1976–1997' },
+  // Inglaterra
+  { answer: 'BARNES', display: 'John Barnes', nat: 'Inglaterra', pos: 'Ponta', era: '1981–1999' },
+  { answer: 'ADAMS', display: 'Tony Adams', nat: 'Inglaterra', pos: 'Zagueiro', era: '1983–2002' },
+  // França
+  { answer: 'GIRESSE', display: 'Alain Giresse', nat: 'França', pos: 'Meia', era: '1970–1988' },
+  { answer: 'TIGANA', display: 'Jean Tigana', nat: 'França', pos: 'Meia', era: '1975–1991' },
+  { answer: 'EVRA', display: 'Patrice Evra', nat: 'França', pos: 'Lateral', era: '2000–2017' },
+  // Itália
+  { answer: 'CABRINI', display: 'Antonio Cabrini', nat: 'Itália', pos: 'Lateral', era: '1973–1991' },
+  { answer: 'CONTI', display: 'Bruno Conti', nat: 'Itália', pos: 'Ponta', era: '1973–1991' },
+  { answer: 'ALTOBELLI', display: 'Alessandro Altobelli', nat: 'Itália', pos: 'Atacante', era: '1974–1989' },
+  { answer: 'ANCELOTTI', display: 'Carlo Ancelotti', nat: 'Itália', pos: 'Meia', era: '1976–1992' },
+  { answer: 'TONI', display: 'Luca Toni', nat: 'Itália', pos: 'Atacante', era: '1994–2016' },
+  // Alemanha
+  { answer: 'BREHME', display: 'Andreas Brehme', nat: 'Alemanha', pos: 'Lateral', era: '1980–1998' },
+  { answer: 'LITTBARSKI', display: 'Pierre Littbarski', nat: 'Alemanha', pos: 'Ponta', era: '1978–1995' },
+  { answer: 'HASSLER', display: 'Thomas Häßler', nat: 'Alemanha', pos: 'Meia', era: '1984–2004' },
+  // Espanha
+  { answer: 'GUTI', display: 'Guti', nat: 'Espanha', pos: 'Meia', era: '1995–2014' },
+  { answer: 'JOAQUIN', display: 'Joaquín', nat: 'Espanha', pos: 'Ponta', era: '2000–2023' },
+  { answer: 'DEGEA', display: 'David de Gea', nat: 'Espanha', pos: 'Goleiro', era: '2009–presente' },
+  // Portugal
+  { answer: 'FUTRE', display: 'Paulo Futre', nat: 'Portugal', pos: 'Ponta', era: '1983–1998' },
+  // Holanda
+  { answer: 'VANBOMMEL', display: 'Mark van Bommel', nat: 'Holanda', pos: 'Meia', era: '1992–2013' },
+  { answer: 'DELIGT', display: 'Matthijs de Ligt', nat: 'Holanda', pos: 'Zagueiro', era: '2016–presente' },
+  // Bélgica
+  { answer: 'WITSEL', display: 'Axel Witsel', nat: 'Bélgica', pos: 'Meia', era: '2006–presente' },
+  // Leste Europeu / Rep. Tcheca / Sérvia
+  { answer: 'CECH', display: 'Petr Čech', nat: 'Rep. Tcheca', pos: 'Goleiro', era: '1999–2019' },
+  { answer: 'ROSICKY', display: 'Tomáš Rosický', nat: 'Rep. Tcheca', pos: 'Meia', era: '1998–2016' },
+  { answer: 'VIDIC', display: 'Nemanja Vidić', nat: 'Sérvia', pos: 'Zagueiro', era: '2000–2016' },
+  { answer: 'GVARDIOL', display: 'Joško Gvardiol', nat: 'Croácia', pos: 'Zagueiro', era: '2020–presente' },
+  { answer: 'SZOBOSZLAI', display: 'Dominik Szoboszlai', nat: 'Hungria', pos: 'Meia', era: '2016–presente' },
+  // África
+  { answer: 'MIKEL', display: 'John Obi Mikel', nat: 'Nigéria', pos: 'Meia', era: '2004–2022' },
 ]

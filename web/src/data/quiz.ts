@@ -158,4 +158,32 @@ export const quiz: QuizQuestion[] = [
   { q: 'Qual clube tem mais títulos da Copa Libertadores?', options: ['Independiente', 'Boca Juniors', 'Peñarol', 'River Plate'], correct: 0, cat: 'Clubes', dif: 'dificil' },
   { q: 'Quem venceu a Eurocopa de 2024?', options: ['Espanha', 'Inglaterra', 'França', 'Alemanha'], correct: 0, cat: 'Seleções', dif: 'dificil' },
   { q: 'Quem foi o primeiro brasileiro a vencer a Bola de Ouro?', options: ['Ronaldo', 'Romário', 'Rivaldo', 'Ronaldinho'], correct: 0, cat: 'Bola de Ouro', dif: 'dificil' },
+
+  // ===== Expansão 2 — FÁCEIS (cobranças) =====
+  { q: 'Qual seleção venceu a Copa do Mundo de 1966?', options: ['Inglaterra', 'Alemanha', 'Brasil', 'Portugal'], correct: 0, cat: 'Copas', dif: 'facil' },
+  { q: 'Qual seleção venceu a Copa do Mundo de 1962?', options: ['Brasil', 'Tchecoslováquia', 'Chile', 'Iugoslávia'], correct: 0, cat: 'Copas', dif: 'facil' },
+  { q: 'Qual seleção venceu a Copa do Mundo de 1978?', options: ['Argentina', 'Holanda', 'Brasil', 'Itália'], correct: 0, cat: 'Copas', dif: 'facil' },
+  { q: 'Em que país foi a Copa do Mundo de 2018?', options: ['Rússia', 'Brasil', 'Catar', 'Alemanha'], correct: 0, cat: 'Copas', dif: 'facil' },
+  { q: 'Em que país foi a Copa do Mundo de 1950?', options: ['Brasil', 'Uruguai', 'Suíça', 'Suécia'], correct: 0, cat: 'Copas', dif: 'facil' },
+  { q: 'Quantas Copas do Mundo Pelé venceu?', options: ['3', '2', '4', '1'], correct: 0, cat: 'Brasil', dif: 'facil' },
+  { q: 'Qual seleção é apelidada de "Azzurra"?', options: ['Itália', 'França', 'Argentina', 'Espanha'], correct: 0, cat: 'Seleções', dif: 'facil' },
+  { q: 'De que país é o River Plate?', options: ['Argentina', 'Uruguai', 'Brasil', 'Chile'], correct: 0, cat: 'Clubes', dif: 'facil' },
+  { q: 'Em qual cidade fica o estádio Camp Nou?', options: ['Barcelona', 'Madri', 'Lisboa', 'Milão'], correct: 0, cat: 'Clubes', dif: 'facil' },
+  { q: 'Quem é o craque apelidado de "CR7"?', options: ['Cristiano Ronaldo', 'Romário', 'Robinho', 'Coutinho'], correct: 0, cat: 'Craques', dif: 'facil' },
+  { q: 'Em que ano a Argentina de Messi venceu a Copa do Mundo?', options: ['2022', '2018', '2014', '2010'], correct: 0, cat: 'Copas', dif: 'facil' },
+  { q: 'Quanto dura a prorrogação completa de um jogo?', options: ['30 minutos', '20 minutos', '15 minutos', '45 minutos'], correct: 0, cat: 'Regras', dif: 'facil' },
+
+  // ===== Expansão 2 — DIFÍCEIS (defesas) =====
+  { q: 'Quem venceu a Bola de Ouro de 2005?', options: ['Ronaldinho', 'Lampard', 'Henry', "Eto'o"], correct: 0, cat: 'Bola de Ouro', dif: 'dificil' },
+  { q: 'Quem venceu a Bola de Ouro de 2007?', options: ['Kaká', 'Messi', 'Cristiano Ronaldo', 'Henry'], correct: 0, cat: 'Bola de Ouro', dif: 'dificil' },
+  { q: 'Quem venceu a Bola de Ouro de 2008?', options: ['Cristiano Ronaldo', 'Messi', 'Fernando Torres', 'Kaká'], correct: 0, cat: 'Bola de Ouro', dif: 'dificil' },
+  { q: 'Qual seleção venceu a Copa do Mundo de 1974?', options: ['Alemanha', 'Holanda', 'Polônia', 'Brasil'], correct: 0, cat: 'Copas', dif: 'dificil' },
+  { q: 'Quem ganhou a Chuteira de Ouro da Copa de 2010?', options: ['Thomas Müller', 'Diego Forlán', 'David Villa', 'Sneijder'], correct: 0, cat: 'Copas', dif: 'dificil' },
+  { q: 'Quem é o maior artilheiro da história da seleção brasileira?', options: ['Neymar', 'Pelé', 'Ronaldo', 'Romário'], correct: 0, cat: 'Brasil', dif: 'dificil' },
+  { q: 'Qual clube venceu a primeira Copa Libertadores, em 1960?', options: ['Peñarol', 'Santos', 'Independiente', 'Boca Juniors'], correct: 0, cat: 'Clubes', dif: 'dificil' },
+  { q: 'Qual seleção venceu a primeira Eurocopa, em 1960?', options: ['União Soviética', 'Iugoslávia', 'França', 'Espanha'], correct: 0, cat: 'Seleções', dif: 'dificil' },
+  { q: 'Quantos títulos de Copa do Mundo a Itália conquistou?', options: ['4', '3', '5', '2'], correct: 0, cat: 'Seleções', dif: 'dificil' },
+  { q: 'Quem foi o técnico do Barcelona campeão de tudo em 2009?', options: ['Pep Guardiola', 'Frank Rijkaard', 'Luis Enrique', 'Tito Vilanova'], correct: 0, cat: 'Clubes', dif: 'dificil' },
+  { q: 'Quantos títulos da Champions tem o Milan?', options: ['7', '5', '6', '3'], correct: 0, cat: 'Champions', dif: 'dificil' },
+  { q: 'Quem marcou o gol do título da Alemanha em 1990 (pênalti na final)?', options: ['Andreas Brehme', 'Lothar Matthäus', 'Rudi Völler', 'Jürgen Klinsmann'], correct: 0, cat: 'Copas', dif: 'dificil' },
 ]
