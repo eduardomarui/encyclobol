@@ -56,6 +56,21 @@ const keyClass: Record<Cell | 'idle', string> = {
   idle: 'bg-paper-200 text-ink-900 hover:bg-paper-300',
 }
 
+const HELP_KEY = 'encyclobol:qse:help'
+
+function Heart({ on }: { on: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden>
+      <path
+        d="M12 21C12 21 3.5 14.6 3.5 8.8 3.5 6 5.6 4 8 4c1.9 0 3.2 1.1 4 2.4C12.8 5.1 14.1 4 16 4c2.4 0 4.5 2 4.5 4.8 0 5.8-8.5 12.2-8.5 12.2Z"
+        fill={on ? '#c8472b' : 'none'}
+        stroke={on ? '#c8472b' : 'rgba(22,19,13,0.3)'}
+        strokeWidth="1.6"
+      />
+    </svg>
+  )
+}
+
 // Dificuldade da escada: nomes curtos no começo, longos no fim.
 function lenWindow(stage: number): [number, number] {
   if (stage <= 2) return [3, 5]
@@ -87,6 +102,13 @@ export default function QuemSouEle() {
   const [recorded, setRecorded] = useState(() => !!saved)
   const [copied, setCopied] = useState(false)
   const [celebrated, setCelebrated] = useState(() => !!saved)
+  const [showHelp, setShowHelp] = useState(() => {
+    try {
+      return !localStorage.getItem(HELP_KEY)
+    } catch {
+      return false
+    }
+  })
 
   // Modo Carreira (corrida diária acumulativa)
   const [stage, setStage] = useState(1)
@@ -287,8 +309,20 @@ export default function QuemSouEle() {
     )
   }
 
+  function closeHelp() {
+    setShowHelp(false)
+    try {
+      localStorage.setItem(HELP_KEY, '1')
+    } catch {
+      /* ignore */
+    }
+  }
+
   const winRate = stats.played ? Math.round((stats.wins / stats.played) * 100) : 0
   const maxDist = Math.max(1, ...stats.dist)
+  // Fonte das peças encolhe pra nomes grandes caberem na tela.
+  const tileFont =
+    answer.length >= 11 ? '0.95rem' : answer.length >= 9 ? '1.15rem' : answer.length >= 7 ? '1.4rem' : '1.7rem'
 
   return (
     <div className="flex min-h-screen flex-col bg-paper">
@@ -300,9 +334,18 @@ export default function QuemSouEle() {
               ← Encyclobol
             </span>
           </Link>
-          <span className="font-cond text-xs font-500 uppercase tracking-[0.16em] text-ink-600">
-            {mode === 'daily' ? 'Edição diária' : careerMode ? 'Carreira do dia' : 'Modo treino'}
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="font-cond text-xs font-500 uppercase tracking-[0.16em] text-ink-600">
+              {mode === 'daily' ? 'Edição diária' : careerMode ? 'Carreira do dia' : 'Modo treino'}
+            </span>
+            <button
+              onClick={() => setShowHelp(true)}
+              aria-label="Como jogar"
+              className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink-900 font-cond text-sm font-700 text-ink-900 hover:bg-ink-900 hover:text-paper"
+            >
+              ?
+            </button>
+          </div>
         </div>
       </header>
 
@@ -322,9 +365,9 @@ export default function QuemSouEle() {
               {careerScore}
               <span className="ml-1 font-cond text-xs font-500 uppercase tracking-wide text-ink-500">pts hoje</span>
             </span>
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-0.5">
               {Array.from({ length: CAREER_LIVES }).map((_, i) => (
-                <span key={i} className={`h-2.5 w-2.5 rotate-45 ${i < lives ? 'bg-ochre-500' : 'bg-ink-900/20'}`} />
+                <Heart key={i} on={i < lives} />
               ))}
             </span>
           </div>
@@ -360,11 +403,14 @@ export default function QuemSouEle() {
             </p>
 
             {careerMode && revealed > 0 && (
-              <div className="mt-3 flex gap-1">
+              <div
+                className="mx-auto mt-3 flex w-full gap-1"
+                style={{ maxWidth: `${answer.length * 28}px` }}
+              >
                 {answer.split('').map((ch, i) => (
                   <span
                     key={i}
-                    className={`flex h-6 w-6 items-center justify-center border font-display text-sm uppercase ${
+                    className={`flex aspect-square min-w-0 flex-1 items-center justify-center border font-display text-sm uppercase ${
                       i < revealed ? 'border-grass-700 bg-grass-600 text-paper' : 'border-ink-900/20 text-ink-500'
                     }`}
                   >
@@ -374,14 +420,17 @@ export default function QuemSouEle() {
               </div>
             )}
 
-            <div className="mt-6 flex flex-col gap-1.5">
+            <div
+              className="mx-auto mt-6 flex w-full flex-col gap-1.5"
+              style={{ maxWidth: `${answer.length * 48}px` }}
+            >
               {Array.from({ length: MAX_ATTEMPTS }).map((_, r) => {
                 const guessed = guesses[r]
                 const isCurrent = r === guesses.length && !over
                 const text = guessed ?? (isCurrent ? current : '')
                 const ev = guessed ? evaluate(guessed, answer) : null
                 return (
-                  <div key={r} className="flex gap-1.5">
+                  <div key={r} className="flex w-full gap-1">
                     {Array.from({ length: answer.length }).map((__, c) => {
                       const ch = text[c] ?? ''
                       const state = ev
@@ -390,8 +439,11 @@ export default function QuemSouEle() {
                       return (
                         <div
                           key={c}
-                          style={ev ? { animationDelay: `${c * 60}ms` } : undefined}
-                          className={`flex h-11 w-11 items-center justify-center border-2 font-display text-2xl uppercase sm:h-12 sm:w-12 ${state} ${ev ? 'animate-pop' : ''}`}
+                          style={{
+                            fontSize: tileFont,
+                            ...(ev ? { animationDelay: `${c * 60}ms` } : {}),
+                          }}
+                          className={`flex aspect-square min-w-0 flex-1 items-center justify-center border-2 font-display uppercase ${state} ${ev ? 'animate-pop' : ''}`}
                         >
                           {ch}
                         </div>
@@ -593,6 +645,49 @@ export default function QuemSouEle() {
           </div>
         )}
       </main>
+
+      {showHelp && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/60 p-4"
+          onClick={closeHelp}
+        >
+          <div
+            className="w-full max-w-sm border-2 border-ink-900 bg-paper p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="kicker">Como jogar</p>
+            <h2 className="mt-1 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900">
+              Tira-Teima
+            </h2>
+            <ul className="mt-4 space-y-3 font-serif text-[15px] leading-snug text-ink-700">
+              <li>
+                Digite o <strong>nome pelo qual o craque é conhecido</strong> — tudo
+                junto, <strong>sem espaço e sem acento</strong>. Ex: <em>Thiago Silva</em>{' '}
+                → <span className="font-cond tracking-wide">THIAGOSILVA</span>.
+              </li>
+              <li>
+                <span className="inline-block h-3 w-3 translate-y-0.5 bg-grass-600" /> verde:
+                letra certa no lugar certo.{' '}
+                <span className="inline-block h-3 w-3 translate-y-0.5 bg-corn-500" /> amarelo:
+                existe, mas no lugar errado.{' '}
+                <span className="inline-block h-3 w-3 translate-y-0.5 bg-ink-700" /> escuro: não
+                tem no nome.
+              </li>
+              <li>Use as dicas (seleção, posição, época) pra deduzir. São 6 tentativas.</li>
+              <li>
+                <strong>Modo Carreira:</strong> uma corrida por dia (3 vidas), craques cada vez
+                mais difíceis. Os pontos somam num total que cresce a cada dia.
+              </li>
+            </ul>
+            <button
+              onClick={closeHelp}
+              className="btn-stamp mt-6 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700"
+            >
+              Entendi, bora jogar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
