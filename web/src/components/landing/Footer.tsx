@@ -1,9 +1,9 @@
-import { BallMark } from './Icons'
+const BASE = import.meta.env.BASE_URL
 
 const cols = [
   {
     title: 'O caderno',
-    links: ['Tira-Teima', 'Disputa de Pênaltis', 'Conexões', 'Linha do Tempo', 'O Intruso', 'Craque Misterioso'],
+    links: ['Tira-Teima', 'Copa de Pênaltis', 'Quarteto', 'Linha do Tempo', 'O Intruso', 'Craque Misterioso'],
   },
   {
     title: 'A casa',
@@ -22,7 +22,7 @@ export default function Footer() {
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <div className="flex items-center gap-2">
-              <BallMark className="h-7 w-7 text-grass-400" />
+              <img src={`${BASE}logo.png`} alt="" className="h-8 w-auto" />
               <span className="font-display text-2xl uppercase tracking-tight">
                 Encyclobol
               </span>

@@ -28,6 +28,15 @@ const SQ: Record<Sq, string> = { g: C.grass, y: C.corn, o: C.ochre, k: '#2a2620'
 
 const S = 1080
 
+function loadImage(src: string): Promise<HTMLImageElement | null> {
+  return new Promise((res) => {
+    const img = new Image()
+    img.onload = () => res(img)
+    img.onerror = () => res(null)
+    img.src = src
+  })
+}
+
 function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
   ctx.beginPath()
   ctx.moveTo(x + r, y)
@@ -88,22 +97,30 @@ async function draw(o: ShareOpts): Promise<Blob | null> {
   const cx = S / 2
   ctx.textAlign = 'center'
 
+  // Logo (taça)
+  const logo = await loadImage(`${import.meta.env.BASE_URL}logo.png`)
+  if (logo && logo.height) {
+    const lh = 132
+    const lw = (logo.width * lh) / logo.height
+    ctx.drawImage(logo, cx - lw / 2, 56, lw, lh)
+  }
+
   // Kicker
   ctx.fillStyle = C.grass
   ctx.font = '600 30px Oswald, sans-serif'
-  ctx.fillText('E N C Y C L O B O L', cx, 150)
+  ctx.fillText('E N C Y C L O B O L', cx, 224)
 
   // Nome do jogo
   ctx.fillStyle = C.ink
   ctx.font = '500 44px Oswald, sans-serif'
-  ctx.fillText(o.game.toUpperCase(), cx, 212)
+  ctx.fillText(o.game.toUpperCase(), cx, 270)
 
   // Linha divisória
   ctx.strokeStyle = 'rgba(22,19,13,0.25)'
   ctx.lineWidth = 3
   ctx.beginPath()
-  ctx.moveTo(160, 250)
-  ctx.lineTo(S - 160, 250)
+  ctx.moveTo(160, 304)
+  ctx.lineTo(S - 160, 304)
   ctx.stroke()
 
   // Headline grande

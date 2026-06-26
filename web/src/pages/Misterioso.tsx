@@ -10,7 +10,6 @@ import {
   recordMystCareer,
   type MystCareer,
 } from '../lib/misteriosoStats'
-import { BallMark } from '../components/landing/Icons'
 import { confetti } from '../lib/juice'
 import { shareScoreImage, type Sq } from '../lib/shareCard'
 
@@ -267,7 +266,7 @@ export default function Misterioso() {
       <header className="sticky top-0 z-10 border-b-2 border-ink-900 bg-paper/95 backdrop-blur-sm">
         <div className="container-page flex h-14 items-center justify-between">
           <Link to="/" className="flex items-center gap-2 text-ink-900">
-            <BallMark className="h-6 w-6 text-grass-600" />
+            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" className="h-6 w-auto" />
             <span className="font-cond text-sm font-600 uppercase tracking-wider">← Encyclobol</span>
           </Link>
           <div className="flex items-center gap-3">
