@@ -77,13 +77,29 @@ export function recordResult(won: boolean, attempts: number): Stats {
   return stats
 }
 
-// Recorde do Modo Carreira (escada).
+// Modo Carreira (escada) — corrida diária com pontos acumulados.
 const CAREER_KEY = 'encyclobol:qse:career'
+const CAREER_TODAY_KEY = 'encyclobol:qse:career-today'
 
-export function loadCareerBest(): number {
-  return read<number>(CAREER_KEY) ?? 0
+export type Career = { total: number; best: number; days: number; lastDay: number | null }
+export type CareerToday = { day: number; score: number; stage: number }
+
+export function loadCareer(): Career {
+  return read<Career>(CAREER_KEY) ?? { total: 0, best: 0, days: 0, lastDay: null }
 }
 
-export function saveCareerBest(n: number) {
-  write(CAREER_KEY, n)
+export function loadCareerToday(): CareerToday | null {
+  const t = read<CareerToday>(CAREER_TODAY_KEY)
+  return t && t.day === dayNumber() ? t : null
+}
+
+export function recordCareer(score: number, stage: number): Career {
+  const c = loadCareer()
+  c.total += score
+  c.best = Math.max(c.best, score)
+  c.days += 1
+  c.lastDay = dayNumber()
+  write(CAREER_KEY, c)
+  write(CAREER_TODAY_KEY, { day: dayNumber(), score, stage })
+  return c
 }

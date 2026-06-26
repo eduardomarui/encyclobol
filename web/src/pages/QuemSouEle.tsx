@@ -3,12 +3,14 @@ import { Link } from 'react-router-dom'
 import { players } from '../data/players'
 import { dailyIndex, dayNumber } from '../lib/daily'
 import {
-  loadCareerBest,
+  loadCareer,
+  loadCareerToday,
   loadDailyState,
   loadStats,
+  recordCareer,
   recordResult,
-  saveCareerBest,
   saveDailyState,
+  type Career,
   type Stats,
 } from '../lib/stats'
 import { BallMark } from '../components/landing/Icons'
@@ -16,6 +18,7 @@ import { confetti } from '../lib/juice'
 
 const MAX_ATTEMPTS = 6
 const ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM']
+const CAREER_LIVES = 3
 
 type Mode = 'daily' | 'practice' | 'carreira'
 type Cell = 'correct' | 'present' | 'absent'
@@ -61,14 +64,16 @@ function lenWindow(stage: number): [number, number] {
   if (stage <= 9) return [7, 10]
   return [4, 30]
 }
-function pickForStage(stage: number, used: number[]): number {
+// Escada DETERMINÍSTICA do dia: todo mundo pega a mesma sequência hoje.
+function ladderPick(stage: number, used: number[]): number {
   const [lo, hi] = lenWindow(stage)
-  const inWindow = players
+  const pool = players
     .map((_, i) => i)
     .filter((i) => !used.includes(i) && players[i].answer.length >= lo && players[i].answer.length <= hi)
   const notUsed = players.map((_, i) => i).filter((i) => !used.includes(i))
-  const arr = inWindow.length ? inWindow : notUsed.length ? notUsed : players.map((_, i) => i)
-  return arr[Math.floor(Math.random() * arr.length)]
+  const arr = pool.length ? pool : notUsed.length ? notUsed : players.map((_, i) => i)
+  const h = (dayNumber() * 131 + stage * 977 + 7) >>> 0
+  return arr[h % arr.length]
 }
 
 const saved = loadDailyState()
@@ -83,26 +88,27 @@ export default function QuemSouEle() {
   const [copied, setCopied] = useState(false)
   const [celebrated, setCelebrated] = useState(() => !!saved)
 
-  // Modo Carreira
+  // Modo Carreira (corrida diária acumulativa)
   const [stage, setStage] = useState(1)
-  const [lives, setLives] = useState(3)
+  const [lives, setLives] = useState(CAREER_LIVES)
   const [careerScore, setCareerScore] = useState(0)
-  const [careerBest, setCareerBest] = useState(() => loadCareerBest())
+  const [career, setCareerInfo] = useState<Career>(() => loadCareer())
+  const [careerDoneToday, setCareerDoneToday] = useState(false)
   const [revealCount, setRevealCount] = useState(1)
   const [skipCount, setSkipCount] = useState(1)
   const [revealed, setRevealed] = useState(0)
   const [usedPicks, setUsedPicks] = useState<number[]>([])
   const [roundDone, setRoundDone] = useState(false)
-  const [runOver, setRunOver] = useState(false)
   const [lastGain, setLastGain] = useState(0)
 
   const player = players[pick]
   const answer = player.answer
-  const career = mode === 'carreira'
+  const careerMode = mode === 'carreira'
 
   const won = guesses.includes(answer)
   const lost = !won && guesses.length >= MAX_ATTEMPTS
   const over = won || lost
+  const ended = over || (careerMode && careerDoneToday)
 
   const keyStates = useMemo(() => {
     const map: Record<string, Cell> = {}
@@ -117,17 +123,17 @@ export default function QuemSouEle() {
     return map
   }, [guesses, answer])
 
-  // Comemora a vitória (diário/treino).
+  // Comemora vitória (diário/treino).
   useEffect(() => {
-    if (!career && won && !celebrated) {
+    if (!careerMode && won && !celebrated) {
       confetti()
       setCelebrated(true)
     }
-  }, [career, won, celebrated])
+  }, [careerMode, won, celebrated])
 
-  // Resolve a rodada da carreira (uma vez).
+  // Resolve a rodada da carreira (uma vez por craque).
   useEffect(() => {
-    if (!career || !over || roundDone) return
+    if (!careerMode || careerDoneToday || !over || roundDone) return
     setRoundDone(true)
     if (won) {
       const gain = 100 + (MAX_ATTEMPTS - guesses.length) * 25 + stage * 10
@@ -139,13 +145,11 @@ export default function QuemSouEle() {
       const nl = lives - 1
       setLives(nl)
       if (nl <= 0) {
-        setRunOver(true)
-        const nb = Math.max(careerBest, careerScore)
-        setCareerBest(nb)
-        saveCareerBest(nb)
+        setCareerDoneToday(true)
+        setCareerInfo(recordCareer(careerScore, stage))
       }
     }
-  }, [career, over, roundDone])
+  }, [careerMode, careerDoneToday, over, roundDone])
 
   // Registra o diário, uma vez.
   useEffect(() => {
@@ -191,6 +195,7 @@ export default function QuemSouEle() {
     let next = pick
     while (next === pick && players.length > 1) next = Math.floor(Math.random() * players.length)
     setMode('practice')
+    setCareerDoneToday(false)
     setPick(next)
     setGuesses([])
     setCurrent('')
@@ -200,6 +205,7 @@ export default function QuemSouEle() {
   function voltarParaHoje() {
     const s = loadDailyState()
     setMode('daily')
+    setCareerDoneToday(false)
     setPick(s?.pick ?? dailyIndex(players.length))
     setGuesses(s?.guesses ?? [])
     setCurrent('')
@@ -209,40 +215,49 @@ export default function QuemSouEle() {
 
   function iniciarCarreira() {
     setMode('carreira')
+    setCareerInfo(loadCareer())
+    const done = loadCareerToday()
+    if (done) {
+      // Já jogou a corrida de hoje — mostra o resumo.
+      setCareerDoneToday(true)
+      setCareerScore(done.score)
+      setStage(done.stage)
+      setRoundDone(true)
+      return
+    }
+    setCareerDoneToday(false)
     setStage(1)
-    setLives(3)
+    setLives(CAREER_LIVES)
     setCareerScore(0)
     setRevealCount(1)
     setSkipCount(1)
     setRevealed(0)
     setUsedPicks([])
     setRoundDone(false)
-    setRunOver(false)
     setLastGain(0)
-    setPick(pickForStage(1, []))
+    setPick(ladderPick(1, []))
     setGuesses([])
     setCurrent('')
     setCelebrated(false)
   }
 
-  function avancar(custaVida: boolean) {
+  function avancar() {
     const ns = stage + 1
     const used = [...usedPicks, pick]
     setStage(ns)
     setUsedPicks(used)
-    setPick(pickForStage(ns, used))
+    setPick(ladderPick(ns, used))
     setGuesses([])
     setCurrent('')
     setRevealed(0)
     setRoundDone(false)
-    if (ns % 3 === 1) setRevealCount((c) => c + 1) // bônus a cada 3 craques
-    void custaVida
+    if (ns % 3 === 1) setRevealCount((c) => c + 1)
   }
 
   function pular() {
     if (skipCount <= 0 || over) return
     setSkipCount((c) => c - 1)
-    avancar(false)
+    avancar()
   }
 
   function revelar() {
@@ -286,7 +301,7 @@ export default function QuemSouEle() {
             </span>
           </Link>
           <span className="font-cond text-xs font-500 uppercase tracking-[0.16em] text-ink-600">
-            {mode === 'daily' ? 'Edição diária' : career ? 'Modo Carreira' : 'Modo treino'}
+            {mode === 'daily' ? 'Edição diária' : careerMode ? 'Carreira do dia' : 'Modo treino'}
           </span>
         </div>
       </header>
@@ -298,164 +313,171 @@ export default function QuemSouEle() {
         </h1>
 
         {/* HUD da carreira */}
-        {career && (
+        {careerMode && !careerDoneToday && (
           <div className="mt-4 flex items-center gap-5">
             <span className="font-cond text-sm font-600 uppercase tracking-wider text-ink-700">
               Estágio <span className="text-grass-600">{stage}</span>
             </span>
             <span className="font-display text-2xl text-ink-900">
               {careerScore}
-              <span className="ml-1 font-cond text-xs font-500 uppercase tracking-wide text-ink-500">pts</span>
+              <span className="ml-1 font-cond text-xs font-500 uppercase tracking-wide text-ink-500">pts hoje</span>
             </span>
             <span className="flex items-center gap-1">
-              {Array.from({ length: 3 }).map((_, i) => (
+              {Array.from({ length: CAREER_LIVES }).map((_, i) => (
                 <span key={i} className={`h-2.5 w-2.5 rotate-45 ${i < lives ? 'bg-ochre-500' : 'bg-ink-900/20'}`} />
               ))}
             </span>
           </div>
         )}
 
-        {!career && (
+        {!careerMode && (
           <p className="mt-3 max-w-md text-center font-serif text-base italic text-ink-600">
             Adivinhe o craque pelo nome que ele é conhecido — primeiro nome,
             apelido ou sobrenome.
           </p>
         )}
 
-        {/* Dicas */}
-        <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-          {[
-            ['Seleção', player.nat],
-            ['Posição', player.pos],
-            ['Período', player.era],
-          ].map(([k, v]) => (
-            <span
-              key={k}
-              className="border border-ink-900/20 bg-paper-100 px-3 py-1 font-cond text-[11px] font-500 uppercase tracking-wider text-ink-700"
-            >
-              <span className="text-ink-500">{k}:</span> {v}
-            </span>
-          ))}
-        </div>
-        <p className="mt-3 font-serif text-sm italic text-ink-500">
-          {answer.length} letras · {MAX_ATTEMPTS} tentativas
-          {mode === 'practice' && ' · treino não conta pro placar'}
-        </p>
+        {/* Conteúdo do jogo (escondido no resumo da carreira) */}
+        {!(careerMode && careerDoneToday) && (
+          <>
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+              {[
+                ['Seleção', player.nat],
+                ['Posição', player.pos],
+                ['Período', player.era],
+              ].map(([k, v]) => (
+                <span
+                  key={k}
+                  className="border border-ink-900/20 bg-paper-100 px-3 py-1 font-cond text-[11px] font-500 uppercase tracking-wider text-ink-700"
+                >
+                  <span className="text-ink-500">{k}:</span> {v}
+                </span>
+              ))}
+            </div>
+            <p className="mt-3 font-serif text-sm italic text-ink-500">
+              {answer.length} letras · {MAX_ATTEMPTS} tentativas
+              {mode === 'practice' && ' · treino não conta pro placar'}
+            </p>
 
-        {/* Letras reveladas (power-up) */}
-        {career && revealed > 0 && (
-          <div className="mt-3 flex gap-1">
-            {answer.split('').map((ch, i) => (
-              <span
-                key={i}
-                className={`flex h-6 w-6 items-center justify-center border font-display text-sm uppercase ${
-                  i < revealed ? 'border-grass-700 bg-grass-600 text-paper' : 'border-ink-900/20 text-ink-500'
-                }`}
-              >
-                {i < revealed ? ch : '·'}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* Tabuleiro */}
-        <div className="mt-6 flex flex-col gap-1.5">
-          {Array.from({ length: MAX_ATTEMPTS }).map((_, r) => {
-            const guessed = guesses[r]
-            const isCurrent = r === guesses.length && !over
-            const text = guessed ?? (isCurrent ? current : '')
-            const ev = guessed ? evaluate(guessed, answer) : null
-            return (
-              <div key={r} className="flex gap-1.5">
-                {Array.from({ length: answer.length }).map((__, c) => {
-                  const ch = text[c] ?? ''
-                  const state = ev
-                    ? cellClass[ev[c]]
-                    : `bg-paper text-ink-900 ${ch ? 'border-ink-900/60' : 'border-ink-900/25'}`
-                  return (
-                    <div
-                      key={c}
-                      style={ev ? { animationDelay: `${c * 60}ms` } : undefined}
-                      className={`flex h-11 w-11 items-center justify-center border-2 font-display text-2xl uppercase sm:h-12 sm:w-12 ${state} ${ev ? 'animate-pop' : ''}`}
-                    >
-                      {ch}
-                    </div>
-                  )
-                })}
+            {careerMode && revealed > 0 && (
+              <div className="mt-3 flex gap-1">
+                {answer.split('').map((ch, i) => (
+                  <span
+                    key={i}
+                    className={`flex h-6 w-6 items-center justify-center border font-display text-sm uppercase ${
+                      i < revealed ? 'border-grass-700 bg-grass-600 text-paper' : 'border-ink-900/20 text-ink-500'
+                    }`}
+                  >
+                    {i < revealed ? ch : '·'}
+                  </span>
+                ))}
               </div>
-            )
-          })}
-        </div>
+            )}
 
-        {/* Power-ups da carreira (em jogo) */}
-        {career && !over && (
-          <div className="mt-4 flex gap-2">
-            <button
-              onClick={revelar}
-              disabled={revealCount <= 0 || revealed >= answer.length}
-              className="btn-stamp border-2 border-ink-900 px-4 py-2 text-ink-900 hover:bg-ink-900 hover:text-paper disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Revelar letra ({revealCount})
-            </button>
-            <button
-              onClick={pular}
-              disabled={skipCount <= 0}
-              className="btn-stamp border-2 border-ink-900 px-4 py-2 text-ink-900 hover:bg-ink-900 hover:text-paper disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Pular ({skipCount})
-            </button>
-          </div>
+            <div className="mt-6 flex flex-col gap-1.5">
+              {Array.from({ length: MAX_ATTEMPTS }).map((_, r) => {
+                const guessed = guesses[r]
+                const isCurrent = r === guesses.length && !over
+                const text = guessed ?? (isCurrent ? current : '')
+                const ev = guessed ? evaluate(guessed, answer) : null
+                return (
+                  <div key={r} className="flex gap-1.5">
+                    {Array.from({ length: answer.length }).map((__, c) => {
+                      const ch = text[c] ?? ''
+                      const state = ev
+                        ? cellClass[ev[c]]
+                        : `bg-paper text-ink-900 ${ch ? 'border-ink-900/60' : 'border-ink-900/25'}`
+                      return (
+                        <div
+                          key={c}
+                          style={ev ? { animationDelay: `${c * 60}ms` } : undefined}
+                          className={`flex h-11 w-11 items-center justify-center border-2 font-display text-2xl uppercase sm:h-12 sm:w-12 ${state} ${ev ? 'animate-pop' : ''}`}
+                        >
+                          {ch}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )
+              })}
+            </div>
+
+            {careerMode && !over && (
+              <div className="mt-4 flex gap-2">
+                <button
+                  onClick={revelar}
+                  disabled={revealCount <= 0 || revealed >= answer.length}
+                  className="btn-stamp border-2 border-ink-900 px-4 py-2 text-ink-900 hover:bg-ink-900 hover:text-paper disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Revelar letra ({revealCount})
+                </button>
+                <button
+                  onClick={pular}
+                  disabled={skipCount <= 0}
+                  className="btn-stamp border-2 border-ink-900 px-4 py-2 text-ink-900 hover:bg-ink-900 hover:text-paper disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Pular ({skipCount})
+                </button>
+              </div>
+            )}
+          </>
         )}
 
         {/* ===== Fim de rodada ===== */}
-        {over && (
+        {ended && (
           <div className="mt-6 w-full max-w-md border-2 border-ink-900 bg-paper-100 p-5 text-center">
-            {/* CARREIRA */}
-            {career ? (
-              runOver ? (
-                <>
-                  <p className="kicker">Fim da carreira</p>
-                  <p className="mt-1 font-display text-6xl text-ink-900">{careerScore}</p>
-                  <p className="font-cond text-xs font-500 uppercase tracking-wider text-ink-600">
-                    pontos · chegou ao estágio {stage}
-                  </p>
-                  <p className="mt-1 font-serif text-sm italic text-ink-600">
-                    O craque era {player.display}. Recorde: {careerBest} pts.
-                  </p>
-                  <button
-                    onClick={iniciarCarreira}
-                    className="btn-stamp mt-5 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700"
-                  >
-                    Jogar de novo
-                  </button>
-                  <button
-                    onClick={voltarParaHoje}
-                    className="btn-stamp mt-2 w-full border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-ink-900 hover:text-paper"
-                  >
-                    Voltar pra edição de hoje
-                  </button>
-                </>
-              ) : (
-                <>
-                  <p className="kicker">
-                    {won ? `Cravou! +${lastGain} pts` : 'Errou — perdeu uma vida'}
-                  </p>
-                  <p className="mt-1 font-display text-3xl uppercase tracking-tight text-ink-900">
-                    {player.display}
-                  </p>
-                  <p className="mt-1 font-serif text-sm italic text-ink-600">
-                    {player.nat} · {player.pos} · {player.era}
-                  </p>
-                  <button
-                    onClick={() => avancar(!won)}
-                    className="btn-stamp mt-4 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700"
-                  >
-                    Próximo craque →
-                  </button>
-                </>
-              )
+            {careerMode && careerDoneToday ? (
+              <>
+                <p className="kicker">Carreira de hoje</p>
+                <p className="mt-1 font-display text-6xl text-ink-900">{careerScore}</p>
+                <p className="font-cond text-xs font-500 uppercase tracking-wider text-ink-600">
+                  pontos hoje · chegou ao estágio {stage}
+                </p>
+                <div className="mt-5 grid grid-cols-3 gap-px overflow-hidden border-2 border-ink-900 bg-ink-900/15">
+                  {[
+                    ['Total', career.total],
+                    ['Recorde/dia', career.best],
+                    ['Dias', career.days],
+                  ].map(([k, v]) => (
+                    <div key={k} className="bg-paper-100 px-1 py-2">
+                      <div className="font-display text-2xl text-ink-900">{v}</div>
+                      <div className="font-cond text-[9px] font-500 uppercase tracking-wide text-ink-600">{k}</div>
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-3 font-serif text-sm italic text-ink-600">
+                  Volte amanhã pra somar mais à sua carreira.
+                </p>
+                <button
+                  onClick={praticar}
+                  className="btn-stamp mt-4 w-full border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-ink-900 hover:text-paper"
+                >
+                  Treinar (sem pontos)
+                </button>
+                <button
+                  onClick={voltarParaHoje}
+                  className="btn-stamp mt-2 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700"
+                >
+                  Edição de hoje
+                </button>
+              </>
+            ) : careerMode ? (
+              <>
+                <p className="kicker">{won ? `Cravou! +${lastGain} pts` : 'Errou — perdeu uma vida'}</p>
+                <p className="mt-1 font-display text-3xl uppercase tracking-tight text-ink-900">
+                  {player.display}
+                </p>
+                <p className="mt-1 font-serif text-sm italic text-ink-600">
+                  {player.nat} · {player.pos} · {player.era}
+                </p>
+                <button
+                  onClick={avancar}
+                  className="btn-stamp mt-4 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700"
+                >
+                  Próximo craque →
+                </button>
+              </>
             ) : (
-              /* DIÁRIO / TREINO */
               <>
                 <p className="kicker">{won ? 'Cravou!' : 'Acabaram as tentativas'}</p>
                 <p className="mt-1 font-display text-3xl uppercase tracking-tight text-ink-900">
@@ -476,9 +498,7 @@ export default function QuemSouEle() {
                       ].map(([k, v]) => (
                         <div key={k} className="bg-paper-100 px-1 py-2">
                           <div className="font-display text-2xl text-ink-900">{v}</div>
-                          <div className="font-cond text-[9px] font-500 uppercase tracking-wide text-ink-600">
-                            {k}
-                          </div>
+                          <div className="font-cond text-[9px] font-500 uppercase tracking-wide text-ink-600">{k}</div>
                         </div>
                       ))}
                     </div>
@@ -515,31 +535,29 @@ export default function QuemSouEle() {
                   onClick={iniciarCarreira}
                   className="btn-stamp mt-2 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700"
                 >
-                  Modo Carreira
+                  Carreira do dia
                 </button>
-                <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+                <button
+                  onClick={praticar}
+                  className="btn-stamp mt-2 w-full border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-ink-900 hover:text-paper"
+                >
+                  Sortear outro
+                </button>
+                {mode === 'practice' && (
                   <button
-                    onClick={praticar}
-                    className="btn-stamp flex-1 border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-ink-900 hover:text-paper"
+                    onClick={voltarParaHoje}
+                    className="btn-stamp mt-2 w-full border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-ink-900 hover:text-paper"
                   >
-                    Sortear outro
+                    Edição de hoje
                   </button>
-                  {mode === 'practice' && (
-                    <button
-                      onClick={voltarParaHoje}
-                      className="btn-stamp flex-1 border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-ink-900 hover:text-paper"
-                    >
-                      Edição de hoje
-                    </button>
-                  )}
-                </div>
+                )}
               </>
             )}
           </div>
         )}
 
         {/* Teclado */}
-        {!over && (
+        {!ended && (
           <div className="mt-8 flex w-full max-w-lg flex-col gap-1.5">
             {ROWS.map((row, i) => (
               <div key={i} className="flex justify-center gap-1.5">
