@@ -3,16 +3,21 @@ import { Link } from 'react-router-dom'
 import { conexoes, type ConGroup, type GroupColor } from '../data/conexoes'
 import { dailyIndex, dayNumber, seededShuffle } from '../lib/daily'
 import {
-  loadConDaily,
-  loadConStats,
-  recordCon,
-  saveConDaily,
-  type ConStats,
+  loadConCareer,
+  loadConToday,
+  recordConCareer,
+  type ConCareer,
 } from '../lib/conexoesStats'
 import { BallMark } from '../components/landing/Icons'
 import { confetti } from '../lib/juice'
 
 const MAX_MISTAKES = 4
+const SOLVE_PTS = 100
+const LIFE_PTS = 40
+const PERFECT_BONUS = 250
+const ORDER_BONUS = 150
+const ORDER: GroupColor[] = ['corn', 'grass', 'ochre', 'ink']
+const HELP_KEY = 'encyclobol:quarteto:help'
 
 const solvedBg: Record<GroupColor, string> = {
   corn: 'bg-corn-500',
@@ -20,7 +25,6 @@ const solvedBg: Record<GroupColor, string> = {
   ochre: 'bg-ochre-500',
   ink: 'bg-ink-700',
 }
-
 const emoji: Record<GroupColor, string> = {
   corn: '🟨',
   grass: '🟩',
@@ -28,7 +32,22 @@ const emoji: Record<GroupColor, string> = {
   ink: '⬛',
 }
 
-const saved = loadConDaily()
+function computePoints(
+  solvedCount: number,
+  mistakes: number,
+  won: boolean,
+  seq: GroupColor[],
+): number {
+  let pts = solvedCount * SOLVE_PTS
+  if (won) {
+    pts += (MAX_MISTAKES - mistakes) * LIFE_PTS
+    if (mistakes === 0) pts += PERFECT_BONUS
+    if (seq.length === 4 && seq.every((c, i) => c === ORDER[i])) pts += ORDER_BONUS
+  }
+  return pts
+}
+
+const today = loadConToday()
 const DAILY_INDEX = dailyIndex(conexoes.length)
 
 export default function Conexoes() {
@@ -46,21 +65,32 @@ export default function Conexoes() {
     seededShuffle(puzzle.groups.flatMap((g) => g.members), (dayNumber() + 1) * 7919),
   )
   const [selected, setSelected] = useState<string[]>([])
-  const [solved, setSolved] = useState<ConGroup[]>(() =>
-    saved ? puzzle.groups : [],
-  )
-  const [mistakes, setMistakes] = useState(saved?.mistakes ?? 0)
-  const [rows, setRows] = useState<string[][]>(saved?.rows ?? [])
+  const [solved, setSolved] = useState<ConGroup[]>(() => (today ? puzzle.groups : []))
+  const [solveSeq, setSolveSeq] = useState<GroupColor[]>([])
+  const [mistakes, setMistakes] = useState(today?.mistakes ?? 0)
+  const [rows, setRows] = useState<string[][]>(today?.rows ?? [])
   const [status, setStatus] = useState<'playing' | 'won' | 'lost'>(
-    saved ? (saved.won ? 'won' : 'lost') : 'playing',
+    today ? (today.won ? 'won' : 'lost') : 'playing',
   )
+  const [points, setPoints] = useState(today?.points ?? 0)
+  const [career, setCareer] = useState<ConCareer>(() => loadConCareer())
+  const [recorded, setRecorded] = useState(!!today)
   const [message, setMessage] = useState('')
-  const [recorded, setRecorded] = useState(!!saved)
   const [copied, setCopied] = useState(false)
   const [wrong, setWrong] = useState(false)
-  const [stats, setStats] = useState<ConStats>(() => loadConStats())
+  const [showHelp, setShowHelp] = useState(() => {
+    try {
+      return !localStorage.getItem(HELP_KEY)
+    } catch {
+      return false
+    }
+  })
 
   const over = status !== 'playing'
+  const daily = mode === 'daily'
+  const won = status === 'won'
+  const perfect = won && mistakes === 0
+  const ordered = won && solveSeq.length === 4 && solveSeq.every((c, i) => c === ORDER[i])
   const solvedNames = new Set(solved.flatMap((g) => g.members))
   const remaining = order.filter((n) => !solvedNames.has(n))
 
@@ -76,15 +106,20 @@ export default function Conexoes() {
     )
   }
 
-  function finish(won: boolean, finalMistakes: number, finalRows: string[][]) {
+  function finish(
+    didWin: boolean,
+    finalMistakes: number,
+    finalRows: string[][],
+    seq: GroupColor[],
+  ) {
     setSolved(puzzle.groups)
-    setStatus(won ? 'won' : 'lost')
-    if (won) {
-      confetti()
-    }
-    if (mode === 'daily' && !recorded) {
-      setStats(recordCon(won))
-      saveConDaily({ day: dayNumber(), won, mistakes: finalMistakes, rows: finalRows })
+    setStatus(didWin ? 'won' : 'lost')
+    const solvedCount = didWin ? 4 : seq.length
+    const pts = computePoints(solvedCount, finalMistakes, didWin, seq)
+    setPoints(pts)
+    if (didWin) confetti()
+    if (daily && !recorded) {
+      setCareer(recordConCareer({ points: pts, won: didWin, mistakes: finalMistakes, rows: finalRows }))
       setRecorded(true)
     }
   }
@@ -98,8 +133,10 @@ export default function Conexoes() {
     if (colors.every((c) => c === colors[0])) {
       const g = puzzle.groups.find((x) => x.color === colors[0])!
       const nextSolved = [...solved, g]
+      const nextSeq = [...solveSeq, g.color]
+      setSolveSeq(nextSeq)
       setSelected([])
-      if (nextSolved.length === 4) finish(true, mistakes, nextRows)
+      if (nextSolved.length === 4) finish(true, mistakes, nextRows, nextSeq)
       else setSolved(nextSolved)
       return
     }
@@ -110,13 +147,13 @@ export default function Conexoes() {
     const m = mistakes + 1
     setMistakes(m)
     setSelected([])
-    setMessage(oneAway ? 'Faltou um!' : 'Não foi dessa vez')
+    setMessage(oneAway ? 'Faltou um! (cuidado com a isca)' : 'Não foi dessa vez')
     setWrong(true)
     setTimeout(() => setWrong(false), 450)
-    if (m >= MAX_MISTAKES) finish(false, m, nextRows)
+    if (m >= MAX_MISTAKES) finish(false, m, nextRows, solveSeq)
   }
 
-  // Inicia um puzzle de treino (não conta pro placar diário).
+  // Inicia um puzzle de treino (não conta pontos).
   function treinar() {
     let next = pIdx
     while (next === pIdx && conexoes.length > 1)
@@ -131,18 +168,29 @@ export default function Conexoes() {
     )
     setSelected([])
     setSolved([])
+    setSolveSeq([])
     setMistakes(0)
     setRows([])
     setStatus('playing')
+    setPoints(0)
     setMessage('')
   }
 
+  function closeHelp() {
+    setShowHelp(false)
+    try {
+      localStorage.setItem(HELP_KEY, '1')
+    } catch {
+      /* ignore */
+    }
+  }
+
   function compartilhar() {
-    const head = `Encyclobol · Conexões #${dayNumber()} — ${
-      status === 'won' ? `${mistakes} erro${mistakes === 1 ? '' : 's'}` : 'X'
+    const head = `Encyclobol · Quarteto #${dayNumber()} — ${points} pts${
+      perfect ? ' (limpo!)' : won ? '' : ' (X)'
     }`
     const grid = rows.map((row) => row.map((c) => emoji[c as GroupColor]).join('')).join('\n')
-    const text = `${head}\n${grid}\nencyclobol.com.br`
+    const text = `${head}\n${grid}\nTotal: ${career.total} pts\nencyclobol.com.br`
     navigator.clipboard?.writeText(text).then(
       () => {
         setCopied(true)
@@ -158,25 +206,39 @@ export default function Conexoes() {
         <div className="container-page flex h-14 items-center justify-between">
           <Link to="/" className="flex items-center gap-2 text-ink-900">
             <BallMark className="h-6 w-6 text-grass-600" />
-            <span className="font-cond text-sm font-600 uppercase tracking-wider">
-              ← Encyclobol
-            </span>
+            <span className="font-cond text-sm font-600 uppercase tracking-wider">← Encyclobol</span>
           </Link>
-          <span className="font-cond text-xs font-500 uppercase tracking-[0.16em] text-ink-600">
-            {mode === 'daily' ? 'Edição diária' : 'Modo treino'}
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="font-cond text-xs font-500 uppercase tracking-[0.16em] text-ink-600">
+              {daily ? 'Quarteto do dia' : 'Modo treino'}
+            </span>
+            <button
+              onClick={() => setShowHelp(true)}
+              aria-label="Como jogar"
+              className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink-900 font-cond text-sm font-700 text-ink-900 hover:bg-ink-900 hover:text-paper"
+            >
+              ?
+            </button>
+          </div>
         </div>
       </header>
 
       <main className="container-page flex flex-1 flex-col items-center py-8">
         <p className="kicker">Lógica · jogo 03</p>
         <h1 className="mt-3 font-display text-4xl uppercase leading-[1.05] tracking-tight text-ink-900 sm:text-5xl">
-          Conexões
+          Quarteto
         </h1>
         <p className="mt-3 max-w-md text-center font-serif text-base italic text-ink-600">
-          Encontre os quatro grupos de quatro craques. Cuidado: alguns parecem se
-          encaixar em mais de um lugar.
+          Ache os quatro grupos de quatro craques. Sempre tem uma isca: alguém que
+          parece caber em dois lugares — mas só fecha de um jeito.
         </p>
+
+        {daily && (
+          <p className="mt-2 font-cond text-xs font-600 uppercase tracking-wider text-ink-500">
+            Total na ofensiva: <span className="text-grass-600">{career.total} pts</span>
+            {career.streak > 0 && <> · {career.streak} dia{career.streak === 1 ? '' : 's'} seguido{career.streak === 1 ? '' : 's'}</>}
+          </p>
+        )}
 
         <div className="mt-6 w-full max-w-xl">
           {solved.length > 0 && (
@@ -186,9 +248,7 @@ export default function Conexoes() {
                   key={g.color}
                   className={`animate-rise rounded-sm px-3 py-2 text-center text-paper ${solvedBg[g.color]}`}
                 >
-                  <div className="font-cond text-xs font-700 uppercase tracking-wider">
-                    {g.label}
-                  </div>
+                  <div className="font-cond text-xs font-700 uppercase tracking-wider">{g.label}</div>
                   <div className="font-serif text-sm">{g.members.join(' · ')}</div>
                 </div>
               ))}
@@ -219,21 +279,15 @@ export default function Conexoes() {
           {!over && (
             <div className="mt-4 flex items-center justify-between">
               <div className="flex items-center gap-1.5">
-                <span className="font-cond text-xs font-500 uppercase tracking-wider text-ink-600">
-                  Erros
-                </span>
+                <span className="font-cond text-xs font-500 uppercase tracking-wider text-ink-600">Erros</span>
                 {Array.from({ length: MAX_MISTAKES }).map((_, i) => (
                   <span
                     key={i}
-                    className={`h-2.5 w-2.5 rounded-full ${
-                      i < mistakes ? 'bg-ochre-500' : 'bg-ink-900/20'
-                    }`}
+                    className={`h-2.5 w-2.5 rounded-full ${i < mistakes ? 'bg-ochre-500' : 'bg-ink-900/20'}`}
                   />
                 ))}
               </div>
-              <span className="font-cond text-xs font-600 uppercase tracking-wider text-ochre-600">
-                {message}
-              </span>
+              <span className="font-cond text-xs font-600 uppercase tracking-wider text-ochre-600">{message}</span>
             </div>
           )}
 
@@ -264,30 +318,48 @@ export default function Conexoes() {
           {over && (
             <div className="mt-4 border-2 border-ink-900 bg-paper-100 p-6 text-center">
               <p className="kicker">
-                {status === 'won' ? 'Cravou os quatro grupos!' : 'Acabaram as tentativas'}
-                {mode === 'practice' && ' · treino'}
+                {won ? 'Cravou os quatro grupos!' : 'Acabaram as tentativas'}
+                {!daily && ' · treino'}
+              </p>
+              <p className="mt-1 font-display text-6xl text-ink-900">{points}</p>
+              <p className="font-cond text-xs font-500 uppercase tracking-wider text-ink-600">
+                pontos {daily ? 'hoje' : 'no treino'}
               </p>
 
-              {mode === 'daily' && (
+              {(perfect || ordered) && (
+                <div className="mt-2 flex flex-wrap justify-center gap-1.5">
+                  {perfect && (
+                    <span className="border border-grass-700 bg-grass-600 px-2 py-0.5 font-cond text-[10px] font-700 uppercase tracking-wide text-paper">
+                      Sem erros +{PERFECT_BONUS}
+                    </span>
+                  )}
+                  {ordered && (
+                    <span className="border border-ink-900 bg-ink-900 px-2 py-0.5 font-cond text-[10px] font-700 uppercase tracking-wide text-paper">
+                      Na ordem +{ORDER_BONUS}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {daily && (
                 <>
-                  <div className="mt-4 grid grid-cols-4 gap-px overflow-hidden border-2 border-ink-900 bg-ink-900/15">
+                  <div className="mt-5 grid grid-cols-4 gap-px overflow-hidden border-2 border-ink-900 bg-ink-900/15">
                     {[
-                      ['Jogos', stats.played],
-                      ['Vitórias', stats.wins],
-                      ['Sequência', stats.currentStreak],
-                      ['Melhor', stats.maxStreak],
+                      ['Total', career.total],
+                      ['Recorde', career.best],
+                      ['Ofensiva', career.streak],
+                      ['Dias', career.days],
                     ].map(([k, v]) => (
                       <div key={k} className="bg-paper-100 px-1 py-2">
                         <div className="font-display text-2xl text-ink-900">{v}</div>
-                        <div className="font-cond text-[9px] font-500 uppercase tracking-wide text-ink-600">
-                          {k}
-                        </div>
+                        <div className="font-cond text-[9px] font-500 uppercase tracking-wide text-ink-600">{k}</div>
                       </div>
                     ))}
                   </div>
+                  <p className="mt-3 font-serif text-sm italic text-ink-600">Volte amanhã pra somar mais.</p>
                   <button
                     onClick={compartilhar}
-                    className="btn-stamp mt-5 w-full bg-ink-900 px-6 py-2.5 text-paper hover:bg-grass-600"
+                    className="btn-stamp mt-4 w-full bg-ink-900 px-6 py-2.5 text-paper hover:bg-grass-600"
                   >
                     {copied ? 'Copiado!' : 'Compartilhar resultado'}
                   </button>
@@ -298,7 +370,7 @@ export default function Conexoes() {
                 onClick={treinar}
                 className="btn-stamp mt-2 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700"
               >
-                Treinar com outro puzzle
+                {daily ? 'Treinar (sem pontos)' : 'Outro puzzle'}
               </button>
               <Link
                 to="/"
@@ -310,6 +382,42 @@ export default function Conexoes() {
           )}
         </div>
       </main>
+
+      {showHelp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/60 p-4" onClick={closeHelp}>
+          <div className="w-full max-w-sm border-2 border-ink-900 bg-paper p-6" onClick={(e) => e.stopPropagation()}>
+            <p className="kicker">Como jogar</p>
+            <h2 className="mt-1 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900">
+              Quarteto
+            </h2>
+            <ul className="mt-4 space-y-3 font-serif text-[15px] leading-snug text-ink-700">
+              <li>
+                Os 16 craques formam <strong>4 grupos de 4</strong> por algum elo: clube, seleção,
+                posição, era...
+              </li>
+              <li>
+                Tem sempre uma <strong>isca</strong>: um craque que parece caber em dois grupos, mas
+                só fecha de um jeito. São <strong>4 erros</strong> e acaba.
+              </li>
+              <li>
+                A cor mostra a dificuldade do grupo:{' '}
+                <span className="inline-block h-3 w-3 translate-y-0.5 bg-corn-500" /> fácil →{' '}
+                <span className="inline-block h-3 w-3 translate-y-0.5 bg-grass-600" />{' '}
+                <span className="inline-block h-3 w-3 translate-y-0.5 bg-ochre-500" /> →{' '}
+                <span className="inline-block h-3 w-3 translate-y-0.5 bg-ink-700" /> traiçoeiro.
+              </li>
+              <li>
+                <strong>Pontos:</strong> cada grupo +{SOLVE_PTS}; terminar <strong>sem erros</strong>{' '}
+                rende +{PERFECT_BONUS}; achar do mais fácil ao mais difícil rende +{ORDER_BONUS}. Tudo
+                soma num <strong>total</strong> que cresce a cada dia.
+              </li>
+            </ul>
+            <button onClick={closeHelp} className="btn-stamp mt-6 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700">
+              Entendi, bora
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -183,4 +183,15 @@ export const conexoes: Puzzle[] = [
       { color: 'ink', label: 'Italianos', members: ['Buffon', 'Maldini', 'Pirlo', 'Totti'] },
     ],
   },
+  // 19 — quatro clubes europeus. Iscas de carreira: cada um passou por vários
+  // clubes, mas só fecha de um jeito aqui (Lampard tb jogou no City; Čech tb
+  // no Arsenal; Modrić tb no Tottenham — nenhum desses é grupo).
+  {
+    groups: [
+      { color: 'corn', label: 'Jogaram na Juventus', members: ['Pirlo', 'Pogba', 'Tevez', 'Buffon'] },
+      { color: 'grass', label: 'Jogaram no Bayern de Munique', members: ['Lahm', 'Ribéry', 'Müller', 'Neuer'] },
+      { color: 'ochre', label: 'Jogaram no Chelsea', members: ['Drogba', 'Lampard', 'Terry', 'Čech'] },
+      { color: 'ink', label: 'Jogaram no Real Madrid', members: ['Modrić', 'Benzema', 'Marcelo', 'Raúl'] },
+    ],
+  },
 ]

@@ -13,7 +13,7 @@ import {
 import { dayNumber } from '../lib/daily'
 import { loadCareer, loadCareerToday } from '../lib/stats'
 import { loadCopaStats, loadCopaToday } from '../lib/penaltisStats'
-import { loadConDaily, loadConStats } from '../lib/conexoesStats'
+import { loadConCareer, loadConToday } from '../lib/conexoesStats'
 import { loadTLDaily, loadTLStats } from '../lib/timelineStats'
 import { loadIntrusoDaily, loadIntrusoStats } from '../lib/intrusoStats'
 import { loadMystDaily, loadMystStats } from '../lib/misteriosoStats'
@@ -66,17 +66,18 @@ const games: GameInfo[] = [
   },
   {
     n: '03',
-    title: 'Conexões',
+    title: 'Quarteto',
     category: 'Lógica',
     route: '/jogos/conexoes',
     Icon: GridIcon,
     result: () => {
-      const d = loadConDaily()
+      const t = loadConToday()
+      const c = loadConCareer()
       return {
-        played: !!d,
-        streak: loadConStats().currentStreak,
-        detail: d ? (d.won ? `${d.mistakes} erro${d.mistakes === 1 ? '' : 's'}` : 'X') : '—',
-        good: !!d && d.won,
+        played: !!t,
+        streak: c.streak,
+        detail: t ? `${t.points} pts` : '—',
+        good: !!t && t.won,
       }
     },
   },
