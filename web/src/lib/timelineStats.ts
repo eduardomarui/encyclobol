@@ -1,24 +1,28 @@
-// Persistência local da Linha do Tempo: resultado do dia + estatísticas.
-// Pontuação com multiplicador de sequência (não só nº de cartas).
+// Persistência local da Linha do Tempo: corrida diária + total acumulado.
+// Modo infinito: empilhe até perder as vidas; pontos com combo somam no total.
 import { dayNumber } from './daily'
 
-export type TLDaily = { day: number; score: number; points: number }
+export type TLToday = { day: number; points: number; score: number }
 
-export type TLStats = {
-  played: number
-  best: number // melhor pontuação
-  currentStreak: number
+export type TLCareer = {
+  total: number
+  best: number // recorde de pontos num dia
+  bestScore: number // recorde de cartas empilhadas
+  days: number
+  streak: number // dias seguidos jogando
   maxStreak: number
   lastDay: number | null
 }
 
-const STATE_KEY = 'encyclobol:timeline:state'
-const STATS_KEY = 'encyclobol:timeline:stats'
+const TODAY_KEY = 'encyclobol:timeline:today'
+const CAREER_KEY = 'encyclobol:timeline:career'
 
-const emptyStats: TLStats = {
-  played: 0,
+const emptyCareer: TLCareer = {
+  total: 0,
   best: 0,
-  currentStreak: 0,
+  bestScore: 0,
+  days: 0,
+  streak: 0,
   maxStreak: 0,
   lastDay: null,
 }
@@ -40,27 +44,26 @@ function write(key: string, value: unknown) {
   }
 }
 
-export function loadTLDaily(): TLDaily | null {
-  const s = read<TLDaily>(STATE_KEY)
-  return s && s.day === dayNumber() ? s : null
+export function loadTLToday(): TLToday | null {
+  const t = read<TLToday>(TODAY_KEY)
+  return t && t.day === dayNumber() ? t : null
 }
 
-export function saveTLDaily(s: TLDaily) {
-  write(STATE_KEY, s)
+export function loadTLCareer(): TLCareer {
+  return { ...emptyCareer, ...(read<TLCareer>(CAREER_KEY) ?? {}) }
 }
 
-export function loadTLStats(): TLStats {
-  return read<TLStats>(STATS_KEY) ?? { ...emptyStats }
-}
-
-export function recordTL(points: number): TLStats {
-  const stats = loadTLStats()
+export function recordTLCareer(points: number, score: number): TLCareer {
+  const c = loadTLCareer()
   const today = dayNumber()
-  stats.played += 1
-  stats.best = Math.max(stats.best, points)
-  stats.currentStreak = stats.lastDay === today - 1 ? stats.currentStreak + 1 : 1
-  stats.lastDay = today
-  stats.maxStreak = Math.max(stats.maxStreak, stats.currentStreak)
-  write(STATS_KEY, stats)
-  return stats
+  c.total += points
+  c.best = Math.max(c.best, points)
+  c.bestScore = Math.max(c.bestScore, score)
+  c.days += 1
+  c.streak = c.lastDay === today - 1 ? c.streak + 1 : 1
+  c.lastDay = today
+  c.maxStreak = Math.max(c.maxStreak, c.streak)
+  write(CAREER_KEY, c)
+  write(TODAY_KEY, { day: today, points, score })
+  return c
 }

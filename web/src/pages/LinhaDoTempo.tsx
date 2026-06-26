@@ -3,14 +3,15 @@ import { Link } from 'react-router-dom'
 import { players, type Player } from '../data/players'
 import { dayNumber, seededShuffle } from '../lib/daily'
 import {
-  loadTLDaily,
-  loadTLStats,
-  recordTL,
-  saveTLDaily,
-  type TLStats,
+  loadTLCareer,
+  loadTLToday,
+  recordTLCareer,
+  type TLCareer,
 } from '../lib/timelineStats'
 import { BallMark } from '../components/landing/Icons'
 import { confetti } from '../lib/juice'
+
+const HELP_KEY = 'encyclobol:timeline:help'
 
 type Card = { player: Player; year: number }
 
@@ -18,12 +19,14 @@ function startYear(era: string): number {
   const m = era.match(/\d{4}/)
   return m ? parseInt(m[0], 10) : 0
 }
+const decadeOf = (y: number) => `${Math.floor(y / 10) * 10}s`
 
 function buildDeck(seed: number): Card[] {
   const cards = players.map((p) => ({ player: p, year: startYear(p.era) }))
   return seededShuffle(cards, seed)
 }
 
+// Empate é justo: anos iguais aceitam encaixe de qualquer lado.
 function validSlot(placed: Card[], slot: number, year: number): boolean {
   const okLeft = slot === 0 || placed[slot - 1].year <= year
   const okRight = slot === placed.length || year <= placed[slot].year
@@ -36,7 +39,7 @@ function lowerBound(placed: Card[], year: number): number {
   return i
 }
 
-const dailySaved = loadTLDaily()
+const today = loadTLToday()
 const DAILY_SEED = (dayNumber() + 1) * 40503
 
 export default function LinhaDoTempo() {
@@ -46,27 +49,38 @@ export default function LinhaDoTempo() {
   const [placed, setPlaced] = useState<Card[]>(() => [buildDeck(DAILY_SEED)[0]])
   const [cursor, setCursor] = useState(1)
   const [lives, setLives] = useState(3)
-  const [score, setScore] = useState(dailySaved?.score ?? 0)
-  const [points, setPoints] = useState(dailySaved?.points ?? 0)
+  const [score, setScore] = useState(today?.score ?? 0)
+  const [points, setPoints] = useState(today?.points ?? 0)
   const [combo, setCombo] = useState(0)
-  const [status, setStatus] = useState<'playing' | 'over'>(
-    dailySaved ? 'over' : 'playing',
-  )
+  const [bestCombo, setBestCombo] = useState(0)
+  const [status, setStatus] = useState<'playing' | 'over'>(today ? 'over' : 'playing')
   const [flash, setFlash] = useState('')
-  const [recorded, setRecorded] = useState(!!dailySaved)
-  const [stats, setStats] = useState<TLStats>(() => loadTLStats())
+  const [flashOk, setFlashOk] = useState(true)
+  const [recorded, setRecorded] = useState(!!today)
+  const [career, setCareer] = useState<TLCareer>(() => loadTLCareer())
+  const [prevBest] = useState(() => loadTLCareer().best)
   const [copied, setCopied] = useState(false)
+  const [showHelp, setShowHelp] = useState(() => {
+    try {
+      return !localStorage.getItem(HELP_KEY)
+    } catch {
+      return false
+    }
+  })
 
   const current = cursor < deck.length ? deck[cursor] : null
   const over = status === 'over'
+  const daily = mode === 'daily'
   const maxLives = hard ? 1 : 3
+  const beating = daily && points > prevBest && points > 0
+  const newRecord = over && daily && points > prevBest && points > 0
 
   function finish(finalScore: number, finalPoints: number) {
     setStatus('over')
-    if (finalPoints >= 80) confetti()
-    if (mode === 'daily' && !recorded) {
-      setStats(recordTL(finalPoints))
-      saveTLDaily({ day: dayNumber(), score: finalScore, points: finalPoints })
+    if (daily && finalPoints > prevBest && finalPoints > 0) confetti()
+    else if (finalPoints >= 100) confetti()
+    if (daily && !recorded) {
+      setCareer(recordTLCareer(finalPoints, finalScore))
       setRecorded(true)
     }
   }
@@ -88,12 +102,15 @@ export default function LinhaDoTempo() {
       setScore(newScore)
       setPoints(newPoints)
       setCombo(c)
-      setFlash(`Na mosca! +${gain}${c >= 2 ? ` (x${c})` : ''}`)
+      setBestCombo((b) => Math.max(b, c))
+      setFlashOk(true)
+      setFlash(`Na mosca! +${gain}${c >= 2 ? ` (x${c})` : ''} · ${current.year}`)
     } else {
       newLives = lives - 1
       setLives(newLives)
       setCombo(0)
-      setFlash(`Fora de época — estreou em ${current.year}`)
+      setFlashOk(false)
+      setFlash(`Fora de época — ${current.player.display} surgiu em ${current.year} (${decadeOf(current.year)})`)
     }
 
     const nextCursor = cursor + 1
@@ -113,12 +130,25 @@ export default function LinhaDoTempo() {
     setScore(0)
     setPoints(0)
     setCombo(0)
+    setBestCombo(0)
     setStatus('playing')
     setFlash('')
   }
 
+  function closeHelp() {
+    setShowHelp(false)
+    try {
+      localStorage.setItem(HELP_KEY, '1')
+    } catch {
+      /* ignore */
+    }
+  }
+
   function compartilhar() {
-    const text = `Encyclobol · Linha do Tempo #${dayNumber()} — ${points} pts (${score} cartas)\nencyclobol.com.br`
+    const text =
+      `Encyclobol · Linha do Tempo #${dayNumber()} — ${points} pts (${score} cartas)` +
+      `${newRecord ? ' · novo recorde!' : ''}\n` +
+      `Total: ${career.total} pts · recorde ${career.best}\nencyclobol.com.br`
     navigator.clipboard?.writeText(text).then(
       () => {
         setCopied(true)
@@ -134,13 +164,20 @@ export default function LinhaDoTempo() {
         <div className="container-page flex h-14 items-center justify-between">
           <Link to="/" className="flex items-center gap-2 text-ink-900">
             <BallMark className="h-6 w-6 text-grass-600" />
-            <span className="font-cond text-sm font-600 uppercase tracking-wider">
-              ← Encyclobol
-            </span>
+            <span className="font-cond text-sm font-600 uppercase tracking-wider">← Encyclobol</span>
           </Link>
-          <span className="font-cond text-xs font-500 uppercase tracking-[0.16em] text-ink-600">
-            {mode === 'daily' ? 'Edição diária' : hard ? 'Treino · difícil' : 'Modo treino'}
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="font-cond text-xs font-500 uppercase tracking-[0.16em] text-ink-600">
+              {daily ? 'Linha do dia' : hard ? 'Treino · difícil' : 'Modo treino'}
+            </span>
+            <button
+              onClick={() => setShowHelp(true)}
+              aria-label="Como jogar"
+              className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink-900 font-cond text-sm font-700 text-ink-900 hover:bg-ink-900 hover:text-paper"
+            >
+              ?
+            </button>
+          </div>
         </div>
       </header>
 
@@ -150,17 +187,15 @@ export default function LinhaDoTempo() {
           Linha do Tempo
         </h1>
         <p className="mt-3 max-w-md text-center font-serif text-base italic text-ink-600">
-          Encaixe cada craque na ordem certa da história, pelo ano de estreia.
-          Acertos seguidos valem mais; errou a época, perde uma vida.
+          Empilhe os craques na ordem da história, pelo início de carreira. Acertos
+          seguidos valem mais; errou a época, perde vida. Vá o mais longe que conseguir.
         </p>
 
         {/* Placar / combo / vidas */}
         <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
           <span className="font-display text-2xl text-ink-900">
             {points}
-            <span className="ml-1 font-cond text-xs font-500 uppercase tracking-wide text-ink-500">
-              pts
-            </span>
+            <span className="ml-1 font-cond text-xs font-500 uppercase tracking-wide text-ink-500">pts</span>
           </span>
           <span className="font-cond text-sm font-600 uppercase tracking-wider text-ink-700">
             Cartas: <span className="text-grass-600">{score}</span>
@@ -172,13 +207,21 @@ export default function LinhaDoTempo() {
           )}
           <span className="flex items-center gap-1">
             {Array.from({ length: maxLives }).map((_, i) => (
-              <span
-                key={i}
-                className={`h-2.5 w-2.5 rotate-45 ${i < lives ? 'bg-ochre-500' : 'bg-ink-900/20'}`}
-              />
+              <span key={i} className={`h-2.5 w-2.5 rotate-45 ${i < lives ? 'bg-ochre-500' : 'bg-ink-900/20'}`} />
             ))}
           </span>
         </div>
+
+        {daily && (
+          <div className="mt-2 flex items-center gap-2 font-cond text-xs font-600 uppercase tracking-wider">
+            <span className="text-ink-500">
+              Recorde: <span className="text-ink-800">{prevBest}</span> pts
+            </span>
+            {beating && (
+              <span className="animate-pop rounded-sm bg-grass-600 px-2 py-0.5 text-paper">Novo recorde!</span>
+            )}
+          </div>
+        )}
 
         {/* Carta atual */}
         {!over && current && (
@@ -193,7 +236,9 @@ export default function LinhaDoTempo() {
               </p>
             )}
             {flash && (
-              <p className="mt-2 font-serif text-sm italic text-ochre-600">{flash}</p>
+              <p className={`mt-2 font-serif text-sm italic ${flashOk ? 'text-grass-700' : 'text-ochre-600'}`}>
+                {flash}
+              </p>
             )}
           </div>
         )}
@@ -219,9 +264,7 @@ export default function LinhaDoTempo() {
                     <span className="font-cond text-[11px] font-600 uppercase leading-tight text-ink-900">
                       {placed[slot].player.display}
                     </span>
-                    <span className="mt-1 font-display text-lg text-grass-600">
-                      {placed[slot].year}
-                    </span>
+                    <span className="mt-1 font-display text-lg text-grass-600">{placed[slot].year}</span>
                   </div>
                 )}
               </div>
@@ -233,43 +276,47 @@ export default function LinhaDoTempo() {
         {over && (
           <div className="mt-2 w-full max-w-md border-2 border-ink-900 bg-paper-100 p-6 text-center">
             <p className="kicker">Fim de jogo{mode === 'practice' && (hard ? ' · difícil' : ' · treino')}</p>
+            {newRecord && (
+              <p className="mt-2 animate-pop font-display text-2xl uppercase tracking-tight text-grass-600">
+                Novo recorde!
+              </p>
+            )}
             <p className="mt-1 font-display text-6xl text-ink-900">{points}</p>
             <p className="font-cond text-xs font-500 uppercase tracking-wider text-ink-600">
-              pontos · {score} cartas em sequência
+              pontos · {score} cartas{bestCombo >= 3 ? ` · melhor combo x${bestCombo}` : ''}
             </p>
 
-            {mode === 'daily' && (
-              <div className="mt-5 grid grid-cols-4 gap-px overflow-hidden border-2 border-ink-900 bg-ink-900/15">
-                {[
-                  ['Jogos', stats.played],
-                  ['Recorde', stats.best],
-                  ['Sequência', stats.currentStreak],
-                  ['Melhor', stats.maxStreak],
-                ].map(([k, v]) => (
-                  <div key={k} className="bg-paper-100 px-1 py-2">
-                    <div className="font-display text-2xl text-ink-900">{v}</div>
-                    <div className="font-cond text-[9px] font-500 uppercase tracking-wide text-ink-600">
-                      {k}
+            {daily && (
+              <>
+                <div className="mt-5 grid grid-cols-4 gap-px overflow-hidden border-2 border-ink-900 bg-ink-900/15">
+                  {[
+                    ['Total', career.total],
+                    ['Recorde', career.best],
+                    ['Ofensiva', career.streak],
+                    ['Dias', career.days],
+                  ].map(([k, v]) => (
+                    <div key={k} className="bg-paper-100 px-1 py-2">
+                      <div className="font-display text-2xl text-ink-900">{v}</div>
+                      <div className="font-cond text-[9px] font-500 uppercase tracking-wide text-ink-600">{k}</div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+                <p className="mt-3 font-serif text-sm italic text-ink-600">Volte amanhã pra somar mais ao total.</p>
+                <button
+                  onClick={compartilhar}
+                  className="btn-stamp mt-4 w-full bg-ink-900 px-6 py-2.5 text-paper hover:bg-grass-600"
+                >
+                  {copied ? 'Copiado!' : 'Compartilhar resultado'}
+                </button>
+              </>
             )}
 
-            {mode === 'daily' && (
-              <button
-                onClick={compartilhar}
-                className="btn-stamp mt-5 w-full bg-ink-900 px-6 py-2.5 text-paper hover:bg-grass-600"
-              >
-                {copied ? 'Copiado!' : 'Compartilhar resultado'}
-              </button>
-            )}
             <div className="mt-2 flex gap-2">
               <button
                 onClick={() => restart(false)}
                 className="btn-stamp flex-1 bg-grass-600 px-4 py-2.5 text-paper hover:bg-grass-700"
               >
-                Treinar
+                {daily ? 'Treinar' : 'De novo'}
               </button>
               <button
                 onClick={() => restart(true)}
@@ -287,6 +334,38 @@ export default function LinhaDoTempo() {
           </div>
         )}
       </main>
+
+      {showHelp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/60 p-4" onClick={closeHelp}>
+          <div className="w-full max-w-sm border-2 border-ink-900 bg-paper p-6" onClick={(e) => e.stopPropagation()}>
+            <p className="kicker">Como jogar</p>
+            <h2 className="mt-1 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900">
+              Linha do Tempo
+            </h2>
+            <ul className="mt-4 space-y-3 font-serif text-[15px] leading-snug text-ink-700">
+              <li>
+                Cada craque tem um <strong>início de carreira</strong>. Encaixe a carta no lugar
+                certo da linha, da mais antiga pra mais recente.
+              </li>
+              <li>
+                Acertou, ganha pontos — e <strong>acertos seguidos viram combo</strong> (x2, x3...),
+                valendo cada vez mais. Errou a época, <strong>perde uma vida</strong>.
+              </li>
+              <li>
+                É <strong>infinito</strong>: empilhe o máximo que conseguir até acabarem as 3 vidas.
+                O objetivo é <strong>bater seu recorde</strong>.
+              </li>
+              <li>
+                Empate é justo: craques do <strong>mesmo ano</strong> encaixam de qualquer lado. Os
+                pontos do dia somam num <strong>total</strong> que cresce a cada dia.
+              </li>
+            </ul>
+            <button onClick={closeHelp} className="btn-stamp mt-6 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700">
+              Entendi, bora
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

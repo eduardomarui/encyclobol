@@ -14,7 +14,7 @@ import { dayNumber } from '../lib/daily'
 import { loadCareer, loadCareerToday } from '../lib/stats'
 import { loadCopaStats, loadCopaToday } from '../lib/penaltisStats'
 import { loadConCareer, loadConToday } from '../lib/conexoesStats'
-import { loadTLDaily, loadTLStats } from '../lib/timelineStats'
+import { loadTLCareer, loadTLToday } from '../lib/timelineStats'
 import { loadIntrusoDaily, loadIntrusoStats } from '../lib/intrusoStats'
 import { loadMystDaily, loadMystStats } from '../lib/misteriosoStats'
 
@@ -88,12 +88,13 @@ const games: GameInfo[] = [
     route: '/jogos/linha-do-tempo',
     Icon: TimelineIcon,
     result: () => {
-      const d = loadTLDaily()
+      const t = loadTLToday()
+      const c = loadTLCareer()
       return {
-        played: !!d,
-        streak: loadTLStats().currentStreak,
-        detail: d ? `${d.score} cartas` : '—',
-        good: !!d && d.score >= 5,
+        played: !!t,
+        streak: c.streak,
+        detail: t ? `${t.points} pts` : '—',
+        good: !!t && t.points >= 100,
       }
     },
   },
