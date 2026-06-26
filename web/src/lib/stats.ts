@@ -76,3 +76,14 @@ export function recordResult(won: boolean, attempts: number): Stats {
   write(STATS_KEY, stats)
   return stats
 }
+
+// Recorde do Modo Carreira (escada).
+const CAREER_KEY = 'encyclobol:qse:career'
+
+export function loadCareerBest(): number {
+  return read<number>(CAREER_KEY) ?? 0
+}
+
+export function saveCareerBest(n: number) {
+  write(CAREER_KEY, n)
+}
