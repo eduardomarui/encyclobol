@@ -140,10 +140,10 @@ export const conexoes: Puzzle[] = [
   // Barça) só fecha no Barça; os 4 espanhóis estão espalhados (City e Barça).
   {
     groups: [
-      { color: 'corn', label: 'Jogam no Real Madrid', members: ['Vinícius', 'Bellingham', 'Mbappé', 'Courtois'] },
-      { color: 'grass', label: 'Jogam no Manchester City', members: ['Haaland', 'De Bruyne', 'Foden', 'Rodri'] },
-      { color: 'ochre', label: 'Jogam no Barcelona', members: ['Pedri', 'Gavi', 'Yamal', 'Lewandowski'] },
-      { color: 'ink', label: 'Jogam no Bayern de Munique', members: ['Musiala', 'Kimmich', 'Kane', 'Neuer'] },
+      { color: 'corn', label: 'Jogaram no Real Madrid', members: ['Vinícius', 'Bellingham', 'Mbappé', 'Courtois'] },
+      { color: 'grass', label: 'Jogaram no Manchester City', members: ['Haaland', 'De Bruyne', 'Foden', 'Rodri'] },
+      { color: 'ochre', label: 'Jogaram no Barcelona', members: ['Pedri', 'Gavi', 'Yamal', 'Lewandowski'] },
+      { color: 'ink', label: 'Jogaram no Bayern de Munique', members: ['Musiala', 'Kimmich', 'Kane', 'Neuer'] },
     ],
   },
   // 15 — craques em atividade, por seleção.
