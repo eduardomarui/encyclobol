@@ -1,23 +1,29 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { quiz } from '../data/quiz'
-import { dailySequence, dayNumber, seededShuffle } from '../lib/daily'
+import { dayNumber, seededShuffle } from '../lib/daily'
 import {
-  loadPenDaily,
-  loadPenStats,
-  recordPen,
-  savePenDaily,
-  type PenStats,
+  loadCopaStats,
+  loadCopaToday,
+  recordCopa,
+  type CopaStats,
 } from '../lib/penaltisStats'
 import { BallMark } from '../components/landing/Icons'
 import { confetti } from '../lib/juice'
 import LottieBox from '../components/LottieBox'
 
 const LOTTIE_KEEPER = `${import.meta.env.BASE_URL}lottie/keeper.json`
+const HELP_KEY = 'encyclobol:copa:help'
 
-const ATTACK_SEC = 8 // tempo pra cobrar (mais)
-const DEF_SEC = 5 // tempo pra defender (menos — pressão)
-const secsFor = (i: number) => (i % 2 === 0 ? ATTACK_SEC : DEF_SEC)
+// Copa: 4 fases, cada uma mais difícil (menos tempo).
+const ROUND_NAMES = ['Oitavas', 'Quartas', 'Semifinal', 'Final']
+const RIVALS = ['os Estreantes', 'os Veteranos', 'os Craques', 'as Lendas']
+const ATK = [8, 7, 6, 6] // segundos pra cobrar, por fase
+const DEF = [6, 5, 5, 4] // segundos pra defender, por fase (pressão sobe)
+const ROUND_PTS = [120, 180, 260, 380]
+const CHAMP_BONUS = 500
+const secsFor = (round: number, i: number) =>
+  i % 2 === 0 ? ATK[round - 1] : DEF[round - 1]
 
 type Mark = 'goal' | 'miss'
 type PQ = { q: string; cat: string; options: string[]; correct: number }
@@ -65,7 +71,6 @@ function Keeper({ pose }: { pose: Pose }) {
   return (
     <svg viewBox="0 0 60 64" className="h-24 w-24 overflow-visible">
       <g transform={`rotate(${P.tilt} 30 34)`} style={{ transition: 'transform .14s' }}>
-        {/* pernas (calção curto + perna + chuteira) */}
         {([P.footL, P.footR] as [number, number][]).map((f, i) => (
           <g key={i}>
             <path d={`M30 39 L${f[0]} ${f[1]}`} stroke="#e0b48a" strokeWidth="5.5" strokeLinecap="round" fill="none" />
@@ -73,25 +78,19 @@ function Keeper({ pose }: { pose: Pose }) {
             <ellipse cx={f[0]} cy={f[1] + 1.5} rx="3.4" ry="2" fill="#16130d" />
           </g>
         ))}
-        {/* braços */}
         <path d={`M30 24 L${P.handL[0]} ${P.handL[1]}`} stroke="#caa83a" strokeWidth="6" strokeLinecap="round" fill="none" />
         <path d={`M30 24 L${P.handR[0]} ${P.handR[1]}`} stroke="#caa83a" strokeWidth="6" strokeLinecap="round" fill="none" />
-        {/* tronco / camisa */}
         <path d="M21 21 Q30 17 39 21 L38 40 Q30 43 22 40 Z" fill="#caa83a" />
         <path d="M26 18 Q30 22 34 18" fill="none" stroke="#16130d" strokeWidth="1.4" opacity="0.5" />
         <text x="30" y="34" textAnchor="middle" fontSize="9" fontWeight="700" fill="#16130d" opacity="0.55">1</text>
-        {/* luvas */}
         <circle cx={P.handL[0]} cy={P.handL[1]} r="5" fill="#f2eee2" stroke="#16130d" strokeWidth="1.4" />
         <circle cx={P.handR[0]} cy={P.handR[1]} r="5" fill="#f2eee2" stroke="#16130d" strokeWidth="1.4" />
-        {/* cabeça + cabelo */}
         <circle cx="30" cy="12.5" r="5.4" fill="#e8c39e" />
         <path d="M24.8 11.5 Q30 4 35.2 11.5 Q30 8.5 24.8 11.5 Z" fill="#3a2a1a" />
       </g>
     </svg>
   )
 }
-
-const saved = loadPenDaily()
 
 function prepQ(bi: number, seed: number): PQ {
   const base = quiz[bi]
@@ -115,18 +114,19 @@ function interleave(eIdx: number[], hIdx: number[], seed: number): PQ[] {
   }
   return out
 }
-function dailyPrepared(): PQ[] {
-  const e = dailySequence(EASY.length, 5).map((k) => EASY[k])
-  const h = dailySequence(HARD.length, 5).map((k) => HARD[k])
-  return interleave(e, h, dayNumber() * 101 + 1)
+// Confronto da fase: determinístico no dia (mesmo pra todos), por fase.
+function dailyShootout(round: number): PQ[] {
+  const seed = dayNumber() * 100 + round * 7
+  const e = seededShuffle(EASY, seed + 1).slice(0, 5)
+  const h = seededShuffle(HARD, seed + 2).slice(0, 5)
+  return interleave(e, h, seed)
 }
-function randomPrepared(): PQ[] {
+function randomShootout(): PQ[] {
   const s = Math.floor(Math.random() * 1e9) + 1
   const e = seededShuffle(EASY, s).slice(0, 5)
   const h = seededShuffle(HARD, s + 1).slice(0, 5)
   return interleave(e, h, s)
 }
-// Par extra pra morte súbita (1 cobrança fácil + 1 defesa difícil)
 function extraPair(): PQ[] {
   return [
     prepQ(EASY[Math.floor(Math.random() * EASY.length)], Math.floor(Math.random() * 1e9) + 1),
@@ -151,23 +151,53 @@ function Pip({ mark, team }: { mark?: Mark; team: 'me' | 'op' }) {
   )
 }
 
+function Trophy({ on }: { on: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" className="mx-auto h-12 w-12" aria-hidden>
+      <path
+        d="M7 4h10v3a5 5 0 0 1-10 0V4Zm0 1H4v1a3 3 0 0 0 3 3m10-4h3v1a3 3 0 0 1-3 3M9 12.5h6M12 12v3m-3 4h6l-.5-2h-5L9 19Z"
+        fill="none"
+        stroke={on ? '#caa83a' : 'rgba(22,19,13,0.3)'}
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+const copaToday = loadCopaToday()
+
 export default function Penaltis() {
-  const [mode, setMode] = useState<'daily' | 'practice'>('daily')
-  const [prepared, setPrepared] = useState<PQ[]>(() => dailyPrepared())
+  const [mode, setMode] = useState<'copa' | 'practice'>('copa')
+  const [round, setRound] = useState(copaToday?.round ?? 1)
+  const [prepared, setPrepared] = useState<PQ[]>(() => dailyShootout(1))
   const [index, setIndex] = useState(0)
   const [meus, setMeus] = useState<Mark[]>([])
   const [rival, setRival] = useState<Mark[]>([])
-  const [my, setMy] = useState(saved?.myGoals ?? 0)
-  const [opp, setOpp] = useState(saved?.oppGoals ?? 0)
+  const [my, setMy] = useState(0)
+  const [opp, setOpp] = useState(0)
   const [phase, setPhase] = useState<'ask' | 'shoot'>('ask')
   const [selected, setSelected] = useState<number | null>(null)
-  const [timeLeft, setTimeLeft] = useState(ATTACK_SEC)
+  const [timeLeft, setTimeLeft] = useState(ATK[0])
   const [shot, setShot] = useState<Shot>(null)
-  const [over, setOver] = useState(!!saved)
-  const [won, setWon] = useState(saved?.won ?? false)
-  const [recorded, setRecorded] = useState(!!saved)
-  const [stats, setStats] = useState<PenStats>(() => loadPenStats())
+
+  const [shootoutOver, setShootoutOver] = useState(false)
+  const [bracketResolved, setBracketResolved] = useState(false)
+  const [interRound, setInterRound] = useState(false)
+  const [copaScore, setCopaScore] = useState(copaToday?.points ?? 0)
+  const [lastGain, setLastGain] = useState(0)
+  const [champion, setChampion] = useState(copaToday?.champion ?? false)
+  const [copaDone, setCopaDone] = useState(!!copaToday)
+  const [copa, setCopa] = useState<CopaStats>(() => loadCopaStats())
   const [copied, setCopied] = useState(false)
+  const [showHelp, setShowHelp] = useState(() => {
+    try {
+      return !localStorage.getItem(HELP_KEY)
+    } catch {
+      return false
+    }
+  })
 
   const ballRef = useRef<HTMLDivElement>(null)
   const sceneRef = useRef<HTMLDivElement>(null)
@@ -176,9 +206,13 @@ export default function Penaltis() {
   const attacking = index % 2 === 0
   const pair = Math.floor(index / 2) + 1
   const slots = Math.max(5, meus.length, rival.length)
+  const copaMode = mode === 'copa'
+  const wonShootout = my > opp
+  const showGame = !copaDone && !interRound && !shootoutOver
 
+  // Timer da pergunta.
   useEffect(() => {
-    if (over || phase !== 'ask') return
+    if (shootoutOver || copaDone || interRound || phase !== 'ask') return
     if (timeLeft <= 0) {
       resolve(-1)
       return
@@ -186,8 +220,9 @@ export default function Penaltis() {
     const t = setTimeout(() => setTimeLeft((s) => s - 1), 1000)
     return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeLeft, phase, over])
+  }, [timeLeft, phase, shootoutOver, copaDone, interRound])
 
+  // Arco da bola.
   useEffect(() => {
     const el = ballRef.current
     const scene = sceneRef.current
@@ -210,23 +245,59 @@ export default function Penaltis() {
     return () => anim.cancel()
   }, [shot])
 
-  function finish(myG: number, oppG: number) {
-    const w = myG > oppG
-    setOver(true)
-    setWon(w)
-    if (w) confetti()
-    if (mode === 'daily' && !recorded) {
-      setStats(recordPen(w))
-      savePenDaily({ day: dayNumber(), myGoals: myG, oppGoals: oppG, won: w })
-      setRecorded(true)
+  // Resolve o chaveamento quando uma disputa termina (só na Copa).
+  useEffect(() => {
+    if (!shootoutOver || bracketResolved || !copaMode) return
+    setBracketResolved(true)
+    if (my > opp) {
+      const pts = ROUND_PTS[round - 1] + (my - opp) * 20
+      if (round >= 4) {
+        const total = copaScore + pts + CHAMP_BONUS
+        setCopaScore(total)
+        setChampion(true)
+        setCopaDone(true)
+        setCopa(recordCopa(total, 4, true))
+        confetti()
+      } else {
+        setLastGain(pts)
+        setCopaScore((s) => s + pts)
+        setInterRound(true)
+        confetti()
+      }
+    } else {
+      setCopaDone(true)
+      setCopa(recordCopa(copaScore, round, false))
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shootoutOver, bracketResolved])
+
+  function startShootout(r: number, daily: boolean) {
+    setRound(r)
+    setPrepared(daily ? dailyShootout(r) : randomShootout())
+    setIndex(0)
+    setMeus([])
+    setRival([])
+    setMy(0)
+    setOpp(0)
+    setPhase('ask')
+    setSelected(null)
+    setTimeLeft(secsFor(r, 0))
+    setShot(null)
+    setShootoutOver(false)
+    setBracketResolved(false)
+    setInterRound(false)
+  }
+
+  function finishShootout(myG: number, oppG: number) {
+    setShootoutOver(true)
+    if (!copaMode && myG > oppG) confetti()
   }
 
   function goAsk(i: number) {
     setIndex(i)
     setShot(null)
     setSelected(null)
-    setTimeLeft(secsFor(i))
+    setTimeLeft(secsFor(round, i))
     setPhase('ask')
   }
 
@@ -281,7 +352,7 @@ export default function Penaltis() {
     setTimeout(() => {
       const i = index + 1
       if (i < prepared.length) goAsk(i)
-      else if (myG !== oppG) finish(myG, oppG)
+      else if (myG !== oppG) finishShootout(myG, oppG)
       else {
         setPrepared((pp) => [...pp, ...extraPair()])
         goAsk(i)
@@ -291,28 +362,27 @@ export default function Penaltis() {
 
   function treinar() {
     setMode('practice')
-    setPrepared(randomPrepared())
-    setIndex(0)
-    setMeus([])
-    setRival([])
-    setMy(0)
-    setOpp(0)
-    setPhase('ask')
-    setSelected(null)
-    setTimeLeft(ATTACK_SEC)
-    setShot(null)
-    setOver(false)
-    setWon(false)
+    setRound(1)
+    setCopaDone(false)
+    setChampion(false)
+    startShootout(1, false)
+  }
+
+  function closeHelp() {
+    setShowHelp(false)
+    try {
+      localStorage.setItem(HELP_KEY, '1')
+    } catch {
+      /* ignore */
+    }
   }
 
   function compartilhar() {
-    const board = (arr: Mark[]) =>
-      Array.from({ length: slots })
-        .map((_, i) => (arr[i] === 'goal' ? '🟢' : arr[i] === 'miss' ? '⚪' : '▫️'))
-        .join('')
     const text =
-      `Encyclobol · Pênaltis #${dayNumber()} — ${won ? 'venci' : 'perdi'} ${my}×${opp}\n` +
-      `Você  ${board(meus)}\nRival ${board(rival)}\nencyclobol.com.br`
+      `Encyclobol · Copa de Pênaltis #${dayNumber()}\n` +
+      `${champion ? 'CAMPEÃO!' : 'Parou nas ' + ROUND_NAMES[round - 1]} — ${copaScore} pts\n` +
+      `Total acumulado: ${copa.total} pts · ${copa.cups} copa${copa.cups === 1 ? '' : 's'}\n` +
+      `encyclobol.com.br`
     navigator.clipboard?.writeText(text).then(
       () => {
         setCopied(true)
@@ -333,46 +403,84 @@ export default function Penaltis() {
             <BallMark className="h-6 w-6 text-grass-600" />
             <span className="font-cond text-sm font-600 uppercase tracking-wider">← Encyclobol</span>
           </Link>
-          <span className="font-cond text-xs font-500 uppercase tracking-[0.16em] text-ink-600">
-            {mode === 'daily' ? 'Edição diária' : 'Modo treino'}
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="font-cond text-xs font-500 uppercase tracking-[0.16em] text-ink-600">
+              {copaMode ? 'Copa de Pênaltis' : 'Modo treino'}
+            </span>
+            <button
+              onClick={() => setShowHelp(true)}
+              aria-label="Como jogar"
+              className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink-900 font-cond text-sm font-700 text-ink-900 hover:bg-ink-900 hover:text-paper"
+            >
+              ?
+            </button>
+          </div>
         </div>
       </header>
 
       <main className="container-page flex flex-1 flex-col items-center py-5">
-        {/* PLACAR */}
-        <div className="w-full max-w-sm border-2 border-ink-900 bg-ink-900 text-paper">
-          <div className="flex items-center gap-3 border-b border-paper/15 px-3 py-2">
-            <span className="w-12 font-cond text-xs font-700 uppercase tracking-wider text-grass-400">Você</span>
-            <div className="flex flex-1 flex-wrap gap-1">
-              {Array.from({ length: slots }).map((_, i) => (
-                <Pip key={i} mark={meus[i]} team="me" />
-              ))}
+        {/* Cabeçalho da fase */}
+        {!copaDone && (
+          <div className="mb-3 flex w-full max-w-sm items-center justify-between">
+            <div>
+              <p className="kicker text-ink-500">
+                {copaMode ? `${ROUND_NAMES[round - 1]} · vs ${RIVALS[round - 1]}` : 'Treino livre'}
+              </p>
+              <div className="mt-0.5 flex gap-1">
+                {ROUND_NAMES.map((_, i) => (
+                  <span
+                    key={i}
+                    className={`h-1.5 w-6 rounded-full ${
+                      i < round - 1 ? 'bg-grass-600' : i === round - 1 ? 'bg-ochre-500' : 'bg-ink-900/15'
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
-            <span className="w-7 text-right font-display text-2xl leading-none">{my}</span>
+            {copaMode && (
+              <div className="text-right">
+                <div className="font-display text-2xl leading-none text-ink-900">{copaScore}</div>
+                <div className="font-cond text-[10px] font-500 uppercase tracking-wide text-ink-500">pts na copa</div>
+              </div>
+            )}
           </div>
-          <div className="flex items-center gap-3 px-3 py-2">
-            <span className="w-12 font-cond text-xs font-700 uppercase tracking-wider text-ochre-500">Rival</span>
-            <div className="flex flex-1 flex-wrap gap-1">
-              {Array.from({ length: slots }).map((_, i) => (
-                <Pip key={i} mark={rival[i]} team="op" />
-              ))}
-            </div>
-            <span className="w-7 text-right font-display text-2xl leading-none">{opp}</span>
-          </div>
-        </div>
+        )}
 
-        {!over && (
+        {/* PLACAR */}
+        {!copaDone && (
+          <div className="w-full max-w-sm border-2 border-ink-900 bg-ink-900 text-paper">
+            <div className="flex items-center gap-3 border-b border-paper/15 px-3 py-2">
+              <span className="w-12 font-cond text-xs font-700 uppercase tracking-wider text-grass-400">Você</span>
+              <div className="flex flex-1 flex-wrap gap-1">
+                {Array.from({ length: slots }).map((_, i) => (
+                  <Pip key={i} mark={meus[i]} team="me" />
+                ))}
+              </div>
+              <span className="w-7 text-right font-display text-2xl leading-none">{my}</span>
+            </div>
+            <div className="flex items-center gap-3 px-3 py-2">
+              <span className="w-12 font-cond text-xs font-700 uppercase tracking-wider text-ochre-500">Rival</span>
+              <div className="flex flex-1 flex-wrap gap-1">
+                {Array.from({ length: slots }).map((_, i) => (
+                  <Pip key={i} mark={rival[i]} team="op" />
+                ))}
+              </div>
+              <span className="w-7 text-right font-display text-2xl leading-none">{opp}</span>
+            </div>
+          </div>
+        )}
+
+        {showGame && (
           <p className="mt-2 font-cond text-xs font-600 uppercase tracking-[0.16em] text-ink-500">
             {pair <= 5 ? `Cobrança ${pair}/5` : 'Morte súbita'} ·{' '}
             <span className={attacking ? 'text-grass-600' : 'text-ochre-600'}>
-              {attacking ? 'Você cobra' : `Você defende · difícil · ${DEF_SEC}s`}
+              {attacking ? `Você cobra · ${secsFor(round, index)}s` : `Você defende · difícil · ${secsFor(round, index)}s`}
             </span>
           </p>
         )}
 
         {/* CENA */}
-        {!over && (
+        {showGame && (
           <div
             ref={sceneRef}
             className={`relative mt-3 h-64 w-full max-w-sm overflow-hidden rounded-sm border-2 border-ink-900 ${
@@ -380,15 +488,12 @@ export default function Penaltis() {
             }`}
           >
             <div className="absolute inset-0 bg-gradient-to-b from-[#9ec7d8] via-[#86b98f] to-grass-700" />
-            {/* refletor */}
             <div
               className="absolute inset-0"
               style={{
-                background:
-                  'radial-gradient(120% 55% at 50% 0%, rgba(255,255,255,0.22), transparent 60%)',
+                background: 'radial-gradient(120% 55% at 50% 0%, rgba(255,255,255,0.22), transparent 60%)',
               }}
             />
-            {/* gramado listrado */}
             <div
               className="absolute inset-x-0 bottom-0 top-[52%]"
               style={{
@@ -421,52 +526,31 @@ export default function Penaltis() {
               </svg>
             </div>
 
-            {/* GOLEIRO (poses tipo sprite) */}
             <div
               className="absolute z-10 -translate-x-1/2 -translate-y-1/2"
               style={{ left: `${kx}%`, top: '44%', transition: 'left .4s cubic-bezier(.3,1.4,.5,1)' }}
             >
               <div className={!shot ? 'animate-bob' : ''}>
-                <LottieBox
-                  path={LOTTIE_KEEPER}
-                  className="h-24 w-24"
-                  fallback={<Keeper pose={pose} />}
-                />
+                <LottieBox path={LOTTIE_KEEPER} className="h-24 w-24" fallback={<Keeper pose={pose} />} />
               </div>
             </div>
 
-            {/* poeira do gramado ao chutar */}
             {shot && (
-              <div
-                key={`dust${index}`}
-                className="absolute left-1/2 top-[82%] z-10 -translate-x-1/2 -translate-y-1/2"
-              >
+              <div key={`dust${index}`} className="absolute left-1/2 top-[82%] z-10 -translate-x-1/2 -translate-y-1/2">
                 {Array.from({ length: 6 }).map((_, i) => (
                   <div key={i} className="absolute" style={{ transform: `rotate(${i * 60}deg)` }}>
-                    <span
-                      className="block h-1.5 w-1.5 rounded-full bg-paper/70"
-                      style={{ animation: 'dustfly 0.5s ease-out forwards' }}
-                    />
+                    <span className="block h-1.5 w-1.5 rounded-full bg-paper/70" style={{ animation: 'dustfly 0.5s ease-out forwards' }} />
                   </div>
                 ))}
               </div>
             )}
 
-            {/* flash da torcida no gol */}
             {shot?.net && (
               <div key={`flash${index}`} className="pointer-events-none absolute inset-0 z-20 animate-crowdflash bg-paper" />
             )}
 
-            {/* BOLA */}
-            <div
-              ref={ballRef}
-              className="absolute z-20"
-              style={{ left: '50%', top: '82%', transform: 'translate(-50%,-50%)' }}
-            >
-              <div
-                className="drop-shadow-[0_3px_4px_rgba(0,0,0,0.4)]"
-                style={{ animation: shot ? 'ballspin 0.4s linear infinite' : 'none' }}
-              >
+            <div ref={ballRef} className="absolute z-20" style={{ left: '50%', top: '82%', transform: 'translate(-50%,-50%)' }}>
+              <div className="drop-shadow-[0_3px_4px_rgba(0,0,0,0.4)]" style={{ animation: shot ? 'ballspin 0.4s linear infinite' : 'none' }}>
                 <BallMark className="h-8 w-8 text-paper" />
               </div>
             </div>
@@ -486,14 +570,14 @@ export default function Penaltis() {
         )}
 
         {/* PERGUNTA */}
-        {!over && current && (
+        {showGame && current && (
           <div className="mt-4 w-full max-w-sm">
             <div className="mb-1.5 h-1.5 w-full bg-paper-300">
               <div
                 className={`h-1.5 transition-[width] duration-1000 ease-linear ${
                   timeLeft <= 3 ? 'bg-ochre-500' : 'bg-grass-600'
                 }`}
-                style={{ width: `${(timeLeft / secsFor(index)) * 100}%` }}
+                style={{ width: `${(timeLeft / secsFor(round, index)) * 100}%` }}
               />
             </div>
             <p className="kicker text-ink-500">{current.cat}</p>
@@ -522,45 +606,35 @@ export default function Penaltis() {
           </div>
         )}
 
-        {/* FIM */}
-        {over && (
+        {/* CLASSIFICOU — entre fases */}
+        {interRound && (
           <div className="mt-8 w-full max-w-sm border-2 border-ink-900 bg-paper-100 p-6 text-center">
-            <p className="kicker">{won ? 'Vitória nos pênaltis!' : 'Disputa perdida'}</p>
-            <p className="mt-1 font-display text-6xl text-ink-900">
+            <p className="kicker">Classificado!</p>
+            <p className="mt-1 font-display text-5xl text-ink-900">
               {my} <span className="text-ink-500">×</span> {opp}
             </p>
             <p className="mt-1 font-serif text-base italic text-ink-600">
-              {won ? 'Frieza na cobrança e mão firme na defesa. Craque!' : 'Faltou pontaria. Amanhã tem revanche.'}
+              Passou pelas {ROUND_NAMES[round - 1]} (+{lastGain} pts). Pela frente:{' '}
+              <strong>{ROUND_NAMES[round]}</strong> contra {RIVALS[round]} — mais difícil.
             </p>
-
-            {mode === 'daily' && (
-              <>
-                <div className="mt-5 grid grid-cols-4 gap-px overflow-hidden border-2 border-ink-900 bg-ink-900/15">
-                  {[
-                    ['Jogos', stats.played],
-                    ['Vitórias', stats.wins],
-                    ['Sequência', stats.currentStreak],
-                    ['Melhor', stats.maxStreak],
-                  ].map(([k, v]) => (
-                    <div key={k} className="bg-paper-100 px-1 py-2">
-                      <div className="font-display text-2xl text-ink-900">{v}</div>
-                      <div className="font-cond text-[9px] font-500 uppercase tracking-wide text-ink-600">{k}</div>
-                    </div>
-                  ))}
-                </div>
-                <button
-                  onClick={compartilhar}
-                  className="btn-stamp mt-5 w-full bg-ink-900 px-6 py-2.5 text-paper hover:bg-grass-600"
-                >
-                  {copied ? 'Copiado!' : 'Compartilhar resultado'}
-                </button>
-              </>
-            )}
-
             <button
-              onClick={treinar}
-              className="btn-stamp mt-2 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700"
+              onClick={() => startShootout(round + 1, copaMode)}
+              className="btn-stamp mt-5 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700"
             >
+              Avançar pra {ROUND_NAMES[round]} →
+            </button>
+          </div>
+        )}
+
+        {/* PRÁTICA — fim de disputa solta */}
+        {mode === 'practice' && shootoutOver && (
+          <div className="mt-8 w-full max-w-sm border-2 border-ink-900 bg-paper-100 p-6 text-center">
+            <p className="kicker">{wonShootout ? 'Venceu a disputa!' : 'Disputa perdida'}</p>
+            <p className="mt-1 font-display text-6xl text-ink-900">
+              {my} <span className="text-ink-500">×</span> {opp}
+            </p>
+            <p className="mt-1 font-serif text-base italic text-ink-600">Treino não conta pontos.</p>
+            <button onClick={treinar} className="btn-stamp mt-5 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700">
               Outra disputa
             </button>
             <Link
@@ -571,7 +645,87 @@ export default function Penaltis() {
             </Link>
           </div>
         )}
+
+        {/* COPA ENCERRADA — resumo do dia */}
+        {copaDone && (
+          <div className="mt-6 w-full max-w-sm border-2 border-ink-900 bg-paper-100 p-6 text-center">
+            <Trophy on={champion} />
+            <p className="kicker mt-1">
+              {champion ? 'Campeão da Copa!' : `Eliminado nas ${ROUND_NAMES[round - 1]}`}
+            </p>
+            <p className="mt-1 font-display text-6xl text-ink-900">{copaScore}</p>
+            <p className="font-cond text-xs font-500 uppercase tracking-wider text-ink-600">pontos hoje</p>
+            <p className="mt-2 font-serif text-base italic text-ink-600">
+              {champion
+                ? 'Levantou a taça! Frieza do começo ao fim.'
+                : 'Bom caminho. Amanhã tem outra chance de erguer o caneco.'}
+            </p>
+
+            <div className="mt-5 grid grid-cols-4 gap-px overflow-hidden border-2 border-ink-900 bg-ink-900/15">
+              {[
+                ['Total', copa.total],
+                ['Recorde', copa.best],
+                ['Copas', copa.cups],
+                ['Dias', copa.days],
+              ].map(([k, v]) => (
+                <div key={k} className="bg-paper-100 px-1 py-2">
+                  <div className="font-display text-2xl text-ink-900">{v}</div>
+                  <div className="font-cond text-[9px] font-500 uppercase tracking-wide text-ink-600">{k}</div>
+                </div>
+              ))}
+            </div>
+
+            <p className="mt-3 font-serif text-sm italic text-ink-600">Volte amanhã pra nova Copa.</p>
+
+            <button
+              onClick={compartilhar}
+              className="btn-stamp mt-4 w-full bg-ink-900 px-6 py-2.5 text-paper hover:bg-grass-600"
+            >
+              {copied ? 'Copiado!' : 'Compartilhar resultado'}
+            </button>
+            <button
+              onClick={treinar}
+              className="btn-stamp mt-2 w-full border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-ink-900 hover:text-paper"
+            >
+              Treinar (sem pontos)
+            </button>
+          </div>
+        )}
       </main>
+
+      {showHelp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/60 p-4" onClick={closeHelp}>
+          <div className="w-full max-w-sm border-2 border-ink-900 bg-paper p-6" onClick={(e) => e.stopPropagation()}>
+            <p className="kicker">Como jogar</p>
+            <h2 className="mt-1 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900">
+              Copa de Pênaltis
+            </h2>
+            <ul className="mt-4 space-y-3 font-serif text-[15px] leading-snug text-ink-700">
+              <li>
+                Cada pergunta é uma cobrança. <strong>Quando você cobra:</strong> acertou, é gol;
+                errou, o goleiro defende.
+              </li>
+              <li>
+                <strong>Quando você defende:</strong> acertar a pergunta significa que você{' '}
+                <em>pegou</em>; errar é gol do rival. E o tempo é <strong>mais curto</strong>.
+              </li>
+              <li>Cada confronto é melhor de cinco — empatou, vai pra morte súbita.</li>
+              <li>
+                É um <strong>mata-mata</strong>: Oitavas → Quartas → Semi → Final, cada rival mais
+                difícil (menos tempo). Venceu, avança; perdeu, acabou o dia. Os pontos somam num{' '}
+                <strong>total</strong>. Vença a Final pra levantar a{' '}
+                <span className="inline-block translate-y-1">
+                  <svg viewBox="0 0 24 24" className="inline h-5 w-5"><path d="M7 4h10v3a5 5 0 0 1-10 0V4Zm0 1H4v1a3 3 0 0 0 3 3m10-4h3v1a3 3 0 0 1-3 3M9 12.5h6M12 12v3m-3 4h6l-.5-2h-5L9 19Z" fill="none" stroke="#caa83a" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" /></svg>
+                </span>
+                .
+              </li>
+            </ul>
+            <button onClick={closeHelp} className="btn-stamp mt-6 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700">
+              Entendi, bora
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -12,7 +12,7 @@ import {
 } from '../components/landing/Icons'
 import { dayNumber } from '../lib/daily'
 import { loadCareer, loadCareerToday } from '../lib/stats'
-import { loadPenDaily, loadPenStats } from '../lib/penaltisStats'
+import { loadCopaStats, loadCopaToday } from '../lib/penaltisStats'
 import { loadConDaily, loadConStats } from '../lib/conexoesStats'
 import { loadTLDaily, loadTLStats } from '../lib/timelineStats'
 import { loadIntrusoDaily, loadIntrusoStats } from '../lib/intrusoStats'
@@ -49,17 +49,18 @@ const games: GameInfo[] = [
   },
   {
     n: '02',
-    title: 'Disputa de Pênaltis',
+    title: 'Copa de Pênaltis',
     category: 'Pênaltis',
     route: '/jogos/penaltis',
     Icon: GoalIcon,
     result: () => {
-      const d = loadPenDaily()
+      const t = loadCopaToday()
+      const c = loadCopaStats()
       return {
-        played: !!d,
-        streak: loadPenStats().currentStreak,
-        detail: d ? `${d.myGoals}–${d.oppGoals}` : '—',
-        good: !!d && d.won,
+        played: !!t,
+        streak: c.days,
+        detail: t ? `${t.points} pts` : '—',
+        good: !!t && t.champion,
       }
     },
   },
