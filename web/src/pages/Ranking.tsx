@@ -10,6 +10,9 @@ import {
   addFriend as apiAddFriend,
   globalBoard,
   friendsBoard,
+  sinceForPeriod,
+  GAMES,
+  type Period,
   type Profile,
   type BoardRow,
 } from '../lib/ranking'
@@ -25,10 +28,22 @@ export default function Ranking() {
   const [code, setCode] = useState('')
   const [msg, setMsg] = useState('')
   const [copied, setCopied] = useState(false)
+  const [period, setPeriod] = useState<Period>('all')
+  const [gameFilter, setGameFilter] = useState<string | null>(null)
 
-  async function refreshBoards() {
-    setGlobal(await globalBoard())
-    setFriends(await friendsBoard())
+  async function refreshBoards(g: string | null = gameFilter, p: Period = period) {
+    const since = sinceForPeriod(p)
+    setGlobal(await globalBoard(g, since))
+    setFriends(await friendsBoard(g, since))
+  }
+
+  function changePeriod(p: Period) {
+    setPeriod(p)
+    refreshBoards(gameFilter, p)
+  }
+  function changeGame(g: string | null) {
+    setGameFilter(g)
+    refreshBoards(g, period)
   }
 
   useEffect(() => {
@@ -199,8 +214,46 @@ export default function Ranking() {
             </div>
             {msg && <p className="mt-2 font-cond text-xs uppercase tracking-wider text-ochre-600">{msg}</p>}
 
+            {/* Filtros: período */}
+            <div className="mt-6 flex flex-wrap gap-1.5">
+              {([['all', 'Sempre'], ['week', 'Semana'], ['month', 'Mês']] as const).map(([p, label]) => (
+                <button
+                  key={p}
+                  onClick={() => changePeriod(p)}
+                  className={`border-2 px-3 py-1.5 font-cond text-xs font-700 uppercase tracking-wide transition-colors ${
+                    period === p ? 'border-ink-900 bg-ink-900 text-paper' : 'border-ink-900/30 text-ink-700 hover:border-ink-900'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {/* Filtros: jogo */}
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              <button
+                onClick={() => changeGame(null)}
+                className={`border-2 px-3 py-1.5 font-cond text-xs font-600 uppercase tracking-wide transition-colors ${
+                  gameFilter === null ? 'border-grass-700 bg-grass-600 text-paper' : 'border-ink-900/30 text-ink-700 hover:border-ink-900'
+                }`}
+              >
+                Geral
+              </button>
+              {GAMES.map((g) => (
+                <button
+                  key={g}
+                  onClick={() => changeGame(g)}
+                  className={`border-2 px-3 py-1.5 font-cond text-xs font-600 uppercase tracking-wide transition-colors ${
+                    gameFilter === g ? 'border-grass-700 bg-grass-600 text-paper' : 'border-ink-900/30 text-ink-700 hover:border-ink-900'
+                  }`}
+                >
+                  {g}
+                </button>
+              ))}
+            </div>
+
             {/* Abas */}
-            <div className="mt-6 flex border-b-2 border-ink-900">
+            <div className="mt-4 flex border-b-2 border-ink-900">
               {(['global', 'friends'] as const).map((t) => (
                 <button
                   key={t}

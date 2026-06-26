@@ -80,14 +80,39 @@ export async function syncToday() {
   }
 }
 
-export async function globalBoard(limit = 50): Promise<BoardRow[]> {
+export type Period = 'all' | 'week' | 'month'
+export const GAMES = [
+  'Tira-Teima',
+  'Copa de Pênaltis',
+  'Quarteto',
+  'Linha do Tempo',
+  'O Intruso',
+  'Craque Misterioso',
+] as const
+
+// Converte o período no "dia mínimo" (usa a mesma contagem de dias do app).
+export function sinceForPeriod(period: Period): number {
+  if (period === 'week') return dayNumber() - 6
+  if (period === 'month') return dayNumber() - 29
+  return 0
+}
+
+export async function globalBoard(
+  game: string | null = null,
+  since = 0,
+  limit = 50,
+): Promise<BoardRow[]> {
   if (!supabase) return []
-  const { data } = await supabase.rpc('global_leaderboard', { p_limit: limit })
+  const { data } = await supabase.rpc('global_leaderboard', {
+    p_limit: limit,
+    p_game: game,
+    p_since: since,
+  })
   return (data as BoardRow[]) ?? []
 }
 
-export async function friendsBoard(): Promise<BoardRow[]> {
+export async function friendsBoard(game: string | null = null, since = 0): Promise<BoardRow[]> {
   if (!supabase) return []
-  const { data } = await supabase.rpc('friends_leaderboard')
+  const { data } = await supabase.rpc('friends_leaderboard', { p_game: game, p_since: since })
   return (data as BoardRow[]) ?? []
 }

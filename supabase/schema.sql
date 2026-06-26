@@ -107,8 +107,39 @@ begin
   return fr;
 end; $$;
 
--- Ranking global (soma de pontos de todos os jogos)
-create or replace function public.global_leaderboard(p_limit int default 50)
+-- Trava de sanidade: limita pontos por jogo/dia (anti-trapaça básico).
+-- Não recalcula o jogo (isso seria server-side completo no futuro),
+-- mas impede placares absurdos tipo 999999.
+create or replace function public.clamp_score()
+returns trigger language plpgsql as $$
+declare cap int;
+begin
+  cap := case new.game
+    when 'Linha do Tempo'      then 30000
+    when 'O Intruso'           then 15000
+    when 'Tira-Teima'          then 15000
+    when 'Copa de Pênaltis'    then 4000
+    when 'Quarteto'            then 2000
+    when 'Craque Misterioso'   then 1500
+    else 5000
+  end;
+  if new.points < 0 then new.points := 0; end if;
+  if new.points > cap then new.points := cap; end if;
+  return new;
+end; $$;
+
+drop trigger if exists trg_clamp_score on public.scores;
+create trigger trg_clamp_score before insert or update on public.scores
+for each row execute function public.clamp_score();
+
+-- Ranking global. Filtros opcionais: p_game (null = todos), p_since (dia mínimo).
+drop function if exists public.global_leaderboard(int);
+drop function if exists public.global_leaderboard(int, text, int);
+create function public.global_leaderboard(
+  p_limit int default 50,
+  p_game text default null,
+  p_since int default 0
+)
 returns table(nick text, friend_code text, total bigint, rank bigint)
 language sql security definer set search_path = public as $$
   select p.nick,
@@ -116,14 +147,22 @@ language sql security definer set search_path = public as $$
          coalesce(sum(s.points), 0)::bigint as total,
          rank() over (order by coalesce(sum(s.points), 0) desc)::bigint as rank
   from public.profiles p
-  left join public.scores s on s.user_id = p.id
+  left join public.scores s
+    on s.user_id = p.id
+   and (p_game is null or s.game = p_game)
+   and s.day >= p_since
   group by p.id, p.nick, p.friend_code
   order by total desc
   limit p_limit;
 $$;
 
--- Ranking de amigos (eu + quem eu sigo)
-create or replace function public.friends_leaderboard()
+-- Ranking de amigos (eu + quem eu sigo), com os mesmos filtros.
+drop function if exists public.friends_leaderboard();
+drop function if exists public.friends_leaderboard(text, int);
+create function public.friends_leaderboard(
+  p_game text default null,
+  p_since int default 0
+)
 returns table(nick text, total bigint, is_me boolean, rank bigint)
 language sql security definer set search_path = public as $$
   with ids as (
@@ -137,7 +176,10 @@ language sql security definer set search_path = public as $$
          rank() over (order by coalesce(sum(s.points), 0) desc)::bigint as rank
   from ids
   join public.profiles p on p.id = ids.id
-  left join public.scores s on s.user_id = p.id
+  left join public.scores s
+    on s.user_id = p.id
+   and (p_game is null or s.game = p_game)
+   and s.day >= p_since
   group by p.id, p.nick
   order by total desc;
 $$;

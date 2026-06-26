@@ -172,6 +172,12 @@ export default function Jogos() {
               ? 'Você fechou todas as edições de hoje. Volte amanhã para mais.'
               : `Você jogou ${jogadosHoje} de ${total} hoje. Bora completar o caderno?`}
           </p>
+          <Link
+            to="/ranking"
+            className="btn-stamp mt-4 inline-block bg-grass-600 px-5 py-2.5 text-paper hover:bg-grass-700"
+          >
+            Ver o ranking →
+          </Link>
         </header>
 
         {/* Resumo do dia */}
