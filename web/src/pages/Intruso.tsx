@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { intruso, type IntrusoCat } from '../data/intruso'
 import { dayNumber, seededShuffle } from '../lib/daily'
@@ -91,21 +91,17 @@ export default function Intruso() {
     }
   }
 
-  // Após revelar, avança a rodada (ou encerra se acabaram as vidas).
-  useEffect(() => {
-    if (step !== 'revealed') return
-    const t = setTimeout(() => {
-      if (lives <= 0) finish()
-      else {
-        setIndex((i) => i + 1)
-        setStep('intruder')
-        setSelIntruder(null)
-        setSelReason(null)
-      }
-    }, 1700)
-    return () => clearTimeout(t)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step])
+  // Avança a rodada (ou encerra se acabaram as vidas) — no clique do jogador.
+  function advance() {
+    if (lives <= 0) {
+      finish()
+      return
+    }
+    setIndex((i) => i + 1)
+    setStep('intruder')
+    setSelIntruder(null)
+    setSelReason(null)
+  }
 
   function pickIntruder(i: number) {
     if (step !== 'intruder' || !current) return
@@ -294,17 +290,27 @@ export default function Intruso() {
             )}
 
             {step === 'revealed' && (
-              <p className="mt-4 text-center font-serif text-base italic text-ink-700">
-                {selIntruder === current.intruderIdx ? (
-                  <span className="text-grass-700">
-                    +{lastGain}
-                    {reasonGot ? ' +50' : ''} ·{' '}
-                  </span>
-                ) : (
-                  <span className="text-ochre-600">Perdeu uma vida · </span>
-                )}
-                {current.rule}
-              </p>
+              <div className="mt-4 text-center">
+                <p className="font-serif text-base italic text-ink-700">
+                  {selIntruder === current.intruderIdx ? (
+                    <span className="text-grass-700">
+                      Acertou! +{lastGain}
+                      {reasonGot ? ' +50 (elo certo)' : ' (elo errado)'} ·{' '}
+                    </span>
+                  ) : (
+                    <span className="text-ochre-600">
+                      Era <strong>{current.players[current.intruderIdx]}</strong> · perdeu uma vida ·{' '}
+                    </span>
+                  )}
+                  {current.rule}
+                </p>
+                <button
+                  onClick={advance}
+                  className="btn-stamp mt-4 bg-grass-600 px-8 py-2.5 text-paper hover:bg-grass-700"
+                >
+                  {lives <= 0 ? 'Ver resultado →' : 'Continuar →'}
+                </button>
+              </div>
             )}
           </div>
         )}
