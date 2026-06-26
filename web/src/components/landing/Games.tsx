@@ -72,7 +72,7 @@ const games: Game[] = [
     Icon: MysteryIcon,
     category: 'Detetive',
     title: 'Craque Misterioso',
-    desc: 'Há um craque secreto. Chute nomes e use as pistas — seleção, posição e época — pra desvendar quem é.',
+    desc: 'Há um craque secreto. Chute nomes e leia as pistas — seleção, continente, posição e época. Menos chutes valem mais pontos.',
     status: 'Edição de hoje',
     to: '/jogos/craque-misterioso',
   },

@@ -1,28 +1,31 @@
-// Persistência local do Craque Misterioso: resultado do dia + estatísticas.
+// Persistência local do Craque Misterioso: corrida diária + total acumulado.
 import { dayNumber } from './daily'
 
-export type MystDaily = {
+export type MystToday = {
   day: number
   won: boolean
   guesses: number
+  points: number
   rows: string[][] // feedback (emojis) por palpite, para o compartilhamento
 }
 
-export type MystStats = {
-  played: number
-  wins: number
-  currentStreak: number
+export type MystCareer = {
+  total: number
+  best: number // recorde de pontos num dia
+  days: number
+  streak: number // dias seguidos desvendando
   maxStreak: number
   lastDayWon: number | null
 }
 
-const STATE_KEY = 'encyclobol:misterioso:state'
-const STATS_KEY = 'encyclobol:misterioso:stats'
+const TODAY_KEY = 'encyclobol:misterioso:today'
+const CAREER_KEY = 'encyclobol:misterioso:career'
 
-const emptyStats: MystStats = {
-  played: 0,
-  wins: 0,
-  currentStreak: 0,
+const emptyCareer: MystCareer = {
+  total: 0,
+  best: 0,
+  days: 0,
+  streak: 0,
   maxStreak: 0,
   lastDayWon: null,
 }
@@ -44,31 +47,29 @@ function write(key: string, value: unknown) {
   }
 }
 
-export function loadMystDaily(): MystDaily | null {
-  const s = read<MystDaily>(STATE_KEY)
-  return s && s.day === dayNumber() ? s : null
+export function loadMystToday(): MystToday | null {
+  const t = read<MystToday>(TODAY_KEY)
+  return t && t.day === dayNumber() ? t : null
 }
 
-export function saveMystDaily(s: MystDaily) {
-  write(STATE_KEY, s)
+export function loadMystCareer(): MystCareer {
+  return { ...emptyCareer, ...(read<MystCareer>(CAREER_KEY) ?? {}) }
 }
 
-export function loadMystStats(): MystStats {
-  return read<MystStats>(STATS_KEY) ?? { ...emptyStats }
-}
-
-export function recordMyst(won: boolean): MystStats {
-  const stats = loadMystStats()
-  const today = dayNumber()
-  stats.played += 1
-  if (won) {
-    stats.wins += 1
-    stats.currentStreak = stats.lastDayWon === today - 1 ? stats.currentStreak + 1 : 1
-    stats.lastDayWon = today
-    stats.maxStreak = Math.max(stats.maxStreak, stats.currentStreak)
+export function recordMystCareer(today: Omit<MystToday, 'day'>): MystCareer {
+  const c = loadMystCareer()
+  const day = dayNumber()
+  c.total += today.points
+  c.best = Math.max(c.best, today.points)
+  c.days += 1
+  if (today.won) {
+    c.streak = c.lastDayWon === day - 1 ? c.streak + 1 : 1
+    c.lastDayWon = day
+    c.maxStreak = Math.max(c.maxStreak, c.streak)
   } else {
-    stats.currentStreak = 0
+    c.streak = 0
   }
-  write(STATS_KEY, stats)
-  return stats
+  write(CAREER_KEY, c)
+  write(TODAY_KEY, { day, ...today })
+  return c
 }

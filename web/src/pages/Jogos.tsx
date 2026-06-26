@@ -16,7 +16,7 @@ import { loadCopaStats, loadCopaToday } from '../lib/penaltisStats'
 import { loadConCareer, loadConToday } from '../lib/conexoesStats'
 import { loadTLCareer, loadTLToday } from '../lib/timelineStats'
 import { loadIntrusoCareer, loadIntrusoToday } from '../lib/intrusoStats'
-import { loadMystDaily, loadMystStats } from '../lib/misteriosoStats'
+import { loadMystCareer, loadMystToday } from '../lib/misteriosoStats'
 
 type Result = { played: boolean; streak: number; detail: string; good: boolean }
 
@@ -122,12 +122,13 @@ const games: GameInfo[] = [
     route: '/jogos/craque-misterioso',
     Icon: MysteryIcon,
     result: () => {
-      const d = loadMystDaily()
+      const t = loadMystToday()
+      const c = loadMystCareer()
       return {
-        played: !!d,
-        streak: loadMystStats().currentStreak,
-        detail: d ? (d.won ? `${d.guesses} chutes` : 'X') : '—',
-        good: !!d && d.won,
+        played: !!t,
+        streak: c.streak,
+        detail: t ? `${t.points} pts` : '—',
+        good: !!t && t.won,
       }
     },
   },
