@@ -46,6 +46,8 @@ const CONTINENT: Record<string, string> = {
   Noruega: 'Europa',
   Dinamarca: 'Europa',
   Bulgária: 'Europa',
+  Hungria: 'Europa',
+  Eslováquia: 'Europa',
   Sérvia: 'Europa',
   Bósnia: 'Europa',
   Geórgia: 'Europa',
@@ -63,6 +65,7 @@ const CONTINENT: Record<string, string> = {
   Argélia: 'África',
   Gana: 'África',
   Mali: 'África',
+  Togo: 'África',
   'Coreia do Sul': 'Ásia',
   Japão: 'Ásia',
 }
