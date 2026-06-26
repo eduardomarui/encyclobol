@@ -10,6 +10,7 @@ import {
 } from '../lib/timelineStats'
 import { BallMark } from '../components/landing/Icons'
 import { confetti } from '../lib/juice'
+import { shareScoreImage } from '../lib/shareCard'
 
 const HELP_KEY = 'encyclobol:timeline:help'
 
@@ -144,18 +145,19 @@ export default function LinhaDoTempo() {
     }
   }
 
-  function compartilhar() {
-    const text =
-      `Encyclobol · Linha do Tempo #${dayNumber()} — ${points} pts (${score} cartas)` +
-      `${newRecord ? ' · novo recorde!' : ''}\n` +
-      `Total: ${career.total} pts · recorde ${career.best}\nencyclobol.com.br`
-    navigator.clipboard?.writeText(text).then(
-      () => {
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
-      },
-      () => {},
-    )
+  async function compartilhar() {
+    const r = await shareScoreImage({
+      game: 'Linha do Tempo',
+      headline: String(points),
+      sub: newRecord ? 'novo recorde!' : 'pontos',
+      lines: [`${score} cartas em sequência`, `Total ${career.total} pts`],
+      edition: `Edição #${dayNumber()}`,
+      text: `Encyclobol · Linha do Tempo #${dayNumber()} — ${points} pts (${score} cartas) · encyclobol.com.br`,
+    })
+    if (r !== 'error') {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2500)
+    }
   }
 
   return (
@@ -306,7 +308,7 @@ export default function LinhaDoTempo() {
                   onClick={compartilhar}
                   className="btn-stamp mt-4 w-full bg-ink-900 px-6 py-2.5 text-paper hover:bg-grass-600"
                 >
-                  {copied ? 'Copiado!' : 'Compartilhar resultado'}
+                  {copied ? 'Imagem pronta!' : 'Compartilhar imagem'}
                 </button>
               </>
             )}

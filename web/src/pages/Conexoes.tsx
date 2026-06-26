@@ -10,6 +10,7 @@ import {
 } from '../lib/conexoesStats'
 import { BallMark } from '../components/landing/Icons'
 import { confetti } from '../lib/juice'
+import { shareScoreImage, type Sq } from '../lib/shareCard'
 
 const MAX_MISTAKES = 4
 const SOLVE_PTS = 100
@@ -25,12 +26,7 @@ const solvedBg: Record<GroupColor, string> = {
   ochre: 'bg-ochre-500',
   ink: 'bg-ink-700',
 }
-const emoji: Record<GroupColor, string> = {
-  corn: '🟨',
-  grass: '🟩',
-  ochre: '🟥',
-  ink: '⬛',
-}
+const sqColor: Record<GroupColor, Sq> = { corn: 'y', grass: 'g', ochre: 'o', ink: 'k' }
 
 function computePoints(
   solvedCount: number,
@@ -185,19 +181,21 @@ export default function Conexoes() {
     }
   }
 
-  function compartilhar() {
-    const head = `Encyclobol · Quarteto #${dayNumber()} — ${points} pts${
-      perfect ? ' (limpo!)' : won ? '' : ' (X)'
-    }`
-    const grid = rows.map((row) => row.map((c) => emoji[c as GroupColor]).join('')).join('\n')
-    const text = `${head}\n${grid}\nTotal: ${career.total} pts\nencyclobol.com.br`
-    navigator.clipboard?.writeText(text).then(
-      () => {
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
-      },
-      () => {},
-    )
+  async function compartilhar() {
+    const squares = rows.map((row) => row.map((c) => sqColor[c as GroupColor])) as Sq[][]
+    const r = await shareScoreImage({
+      game: 'Quarteto',
+      headline: String(points),
+      sub: perfect ? 'sem erros!' : won ? 'pontos hoje' : 'não fechou',
+      squares,
+      lines: [`Total ${career.total} pts`],
+      edition: `Edição #${dayNumber()}`,
+      text: `Encyclobol · Quarteto #${dayNumber()} — ${points} pts · encyclobol.com.br`,
+    })
+    if (r !== 'error') {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2500)
+    }
   }
 
   return (
@@ -361,7 +359,7 @@ export default function Conexoes() {
                     onClick={compartilhar}
                     className="btn-stamp mt-4 w-full bg-ink-900 px-6 py-2.5 text-paper hover:bg-grass-600"
                   >
-                    {copied ? 'Copiado!' : 'Compartilhar resultado'}
+                    {copied ? 'Imagem pronta!' : 'Compartilhar imagem'}
                   </button>
                 </>
               )}

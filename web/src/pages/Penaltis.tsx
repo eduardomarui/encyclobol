@@ -10,6 +10,7 @@ import {
 } from '../lib/penaltisStats'
 import { BallMark } from '../components/landing/Icons'
 import { confetti } from '../lib/juice'
+import { shareScoreImage } from '../lib/shareCard'
 import LottieBox from '../components/LottieBox'
 
 const LOTTIE_KEEPER = `${import.meta.env.BASE_URL}lottie/keeper.json`
@@ -386,19 +387,22 @@ export default function Penaltis() {
     }
   }
 
-  function compartilhar() {
-    const text =
-      `Encyclobol · Copa de Pênaltis #${dayNumber()}\n` +
-      `${champion ? 'CAMPEÃO!' : 'Parou nas ' + ROUND_NAMES[round - 1]} — ${copaScore} pts\n` +
-      `Total acumulado: ${copa.total} pts · ${copa.cups} copa${copa.cups === 1 ? '' : 's'}\n` +
-      `encyclobol.com.br`
-    navigator.clipboard?.writeText(text).then(
-      () => {
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
-      },
-      () => {},
-    )
+  async function compartilhar() {
+    const r = await shareScoreImage({
+      game: 'Copa de Pênaltis',
+      headline: champion ? 'CAMPEÃO' : String(copaScore),
+      sub: champion ? 'campeão da copa' : 'pontos hoje',
+      lines: [
+        champion ? `${copaScore} pts` : `Parou nas ${ROUND_NAMES[round - 1]}`,
+        `Total ${copa.total} pts · ${copa.cups} copa${copa.cups === 1 ? '' : 's'}`,
+      ],
+      edition: `Edição #${dayNumber()}`,
+      text: `Encyclobol · Copa de Pênaltis #${dayNumber()} — ${champion ? 'CAMPEÃO' : copaScore + ' pts'} · encyclobol.com.br`,
+    })
+    if (r !== 'error') {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2500)
+    }
   }
 
   const kx = shot ? shot.kx : 50
@@ -690,7 +694,7 @@ export default function Penaltis() {
               onClick={compartilhar}
               className="btn-stamp mt-4 w-full bg-ink-900 px-6 py-2.5 text-paper hover:bg-grass-600"
             >
-              {copied ? 'Copiado!' : 'Compartilhar resultado'}
+              {copied ? 'Imagem pronta!' : 'Compartilhar imagem'}
             </button>
             <button
               onClick={treinar}

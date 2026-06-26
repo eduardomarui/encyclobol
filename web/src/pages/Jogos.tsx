@@ -11,6 +11,7 @@ import {
   MysteryIcon,
 } from '../components/landing/Icons'
 import { dayNumber } from '../lib/daily'
+import { shareScoreImage, type Sq } from '../lib/shareCard'
 import { loadCareer, loadCareerToday } from '../lib/stats'
 import { loadCopaStats, loadCopaToday } from '../lib/penaltisStats'
 import { loadConCareer, loadConToday } from '../lib/conexoesStats'
@@ -141,22 +142,20 @@ export default function Jogos() {
   const jogadosHoje = entries.filter((g) => g.played).length
   const fechou = jogadosHoje === total
 
-  function compartilharDia() {
-    const head = fechou
-      ? `Encyclobol · Fechei o dia! (Edição #${dayNumber()})`
-      : `Encyclobol · Edição #${dayNumber()} — ${jogadosHoje}/${total} jogos`
-    const lines = entries.map((g) => {
-      const mark = !g.played ? '⬜' : g.good ? '🟩' : '🟥'
-      return `${mark} ${g.title}: ${g.detail}`
+  async function compartilharDia() {
+    const squares: Sq[][] = [entries.map((g) => (!g.played ? 'k' : g.good ? 'g' : 'o'))]
+    const r = await shareScoreImage({
+      game: 'Caderno de Jogos',
+      headline: `${jogadosHoje}/${total}`,
+      sub: fechou ? 'fechei o dia!' : 'jogos de hoje',
+      squares,
+      edition: `Edição #${dayNumber()}`,
+      text: `Encyclobol · ${fechou ? 'Fechei o dia!' : `${jogadosHoje}/${total} jogos`} #${dayNumber()} · encyclobol.com.br`,
     })
-    const text = `${head}\n${lines.join('\n')}\nencyclobol.com.br`
-    navigator.clipboard?.writeText(text).then(
-      () => {
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
-      },
-      () => {},
-    )
+    if (r !== 'error') {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2500)
+    }
   }
 
   return (
@@ -205,7 +204,7 @@ export default function Jogos() {
             disabled={jogadosHoje === 0}
             className="btn-stamp mt-5 w-full bg-ink-900 px-6 py-3 text-paper hover:bg-grass-600 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {copied ? 'Copiado!' : fechou ? 'Compartilhar o dia' : 'Compartilhar meu progresso'}
+            {copied ? 'Imagem pronta!' : fechou ? 'Compartilhar o dia' : 'Compartilhar meu progresso'}
           </button>
         </section>
 

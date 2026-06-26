@@ -12,6 +12,7 @@ import {
 } from '../lib/misteriosoStats'
 import { BallMark } from '../components/landing/Icons'
 import { confetti } from '../lib/juice'
+import { shareScoreImage, type Sq } from '../lib/shareCard'
 
 const MAX_GUESSES = 8
 const HINT_COST = 75
@@ -234,18 +235,26 @@ export default function Misterioso() {
     }
   }
 
-  function compartilhar() {
-    const text =
-      `Encyclobol · Craque Misterioso #${dayNumber()} — ${won ? `${points} pts (${shareRows.length}/${MAX_GUESSES})` : 'X'}` +
-      `${newRecord ? ' · recorde!' : ''}\n` +
-      `${shareRows.map((r) => r[0]).join('\n')}\nTotal: ${career.total} pts\nencyclobol.com.br`
-    navigator.clipboard?.writeText(text).then(
-      () => {
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
-      },
-      () => {},
-    )
+  async function compartilhar() {
+    const squares: Sq[][] = rows.map((r) => [
+      r.natOk ? 'g' : 'k',
+      r.contOk ? 'g' : 'k',
+      r.posOk ? 'g' : 'k',
+      r.decadeOk ? 'g' : r.close ? 'y' : 'k',
+    ])
+    const res = await shareScoreImage({
+      game: 'Craque Misterioso',
+      headline: won ? String(points) : 'X',
+      sub: won ? `${shareRows.length}/${MAX_GUESSES} chutes` : 'não desvendou',
+      squares,
+      lines: [`Total ${career.total} pts`],
+      edition: `Edição #${dayNumber()}`,
+      text: `Encyclobol · Craque Misterioso #${dayNumber()} — ${won ? points + ' pts' : 'X'} · encyclobol.com.br`,
+    })
+    if (res !== 'error') {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2500)
+    }
   }
 
   const cellOk = 'bg-grass-600 text-paper border-grass-700'
@@ -401,7 +410,7 @@ export default function Misterioso() {
                     onClick={compartilhar}
                     className="btn-stamp mt-4 w-full bg-ink-900 px-6 py-2.5 text-paper hover:bg-grass-600"
                   >
-                    {copied ? 'Copiado!' : 'Compartilhar resultado'}
+                    {copied ? 'Imagem pronta!' : 'Compartilhar imagem'}
                   </button>
                 </>
               )}

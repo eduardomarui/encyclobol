@@ -10,6 +10,7 @@ import {
 } from '../lib/stats'
 import { BallMark } from '../components/landing/Icons'
 import { confetti } from '../lib/juice'
+import { shareScoreImage } from '../lib/shareCard'
 
 const MAX_ATTEMPTS = 6
 const ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM']
@@ -252,17 +253,19 @@ export default function QuemSouEle() {
     }
   }
 
-  function compartilhar() {
-    const text =
-      `Encyclobol · Tira-Teima (Carreira) #${dayNumber()} — ${careerScore} pts · estágio ${stage}\n` +
-      `Total acumulado: ${career.total} pts\nencyclobol.com.br`
-    navigator.clipboard?.writeText(text).then(
-      () => {
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
-      },
-      () => {},
-    )
+  async function compartilhar() {
+    const r = await shareScoreImage({
+      game: 'Tira-Teima · Carreira',
+      headline: String(careerScore),
+      sub: 'pontos hoje',
+      lines: [`Estágio ${stage}`, `Total ${career.total} pts`],
+      edition: `Edição #${dayNumber()}`,
+      text: `Encyclobol · Tira-Teima #${dayNumber()} — ${careerScore} pts · encyclobol.com.br`,
+    })
+    if (r !== 'error') {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2500)
+    }
   }
 
   const tileFont =
@@ -446,7 +449,7 @@ export default function QuemSouEle() {
                   onClick={compartilhar}
                   className="btn-stamp mt-4 w-full bg-ink-900 px-6 py-2.5 text-paper hover:bg-grass-600"
                 >
-                  {copied ? 'Copiado!' : 'Compartilhar resultado'}
+                  {copied ? 'Imagem pronta!' : 'Compartilhar imagem'}
                 </button>
                 <button
                   onClick={praticar}

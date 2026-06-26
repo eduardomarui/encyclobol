@@ -10,6 +10,7 @@ import {
 } from '../lib/intrusoStats'
 import { BallMark } from '../components/landing/Icons'
 import { confetti } from '../lib/juice'
+import { shareScoreImage } from '../lib/shareCard'
 
 const LIVES = 3
 const REASON_BONUS = 50
@@ -155,18 +156,19 @@ export default function Intruso() {
     }
   }
 
-  function compartilhar() {
-    const text =
-      `Encyclobol · O Intruso #${dayNumber()} — ${points} pts · ${caught} caçados` +
-      `${newRecord ? ' · novo recorde!' : ''}\n` +
-      `Total: ${career.total} pts\nencyclobol.com.br`
-    navigator.clipboard?.writeText(text).then(
-      () => {
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
-      },
-      () => {},
-    )
+  async function compartilhar() {
+    const r = await shareScoreImage({
+      game: 'O Intruso',
+      headline: String(points),
+      sub: newRecord ? 'novo recorde!' : 'pontos',
+      lines: [`${caught} intrusos caçados`, `Total ${career.total} pts`],
+      edition: `Edição #${dayNumber()}`,
+      text: `Encyclobol · O Intruso #${dayNumber()} — ${points} pts · ${caught} caçados · encyclobol.com.br`,
+    })
+    if (r !== 'error') {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2500)
+    }
   }
 
   return (
@@ -349,7 +351,7 @@ export default function Intruso() {
                   onClick={compartilhar}
                   className="btn-stamp mt-4 w-full bg-ink-900 px-6 py-2.5 text-paper hover:bg-grass-600"
                 >
-                  {copied ? 'Copiado!' : 'Compartilhar resultado'}
+                  {copied ? 'Imagem pronta!' : 'Compartilhar imagem'}
                 </button>
               </>
             )}
