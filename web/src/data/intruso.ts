@@ -139,4 +139,21 @@ export const intruso: IntrusoPuzzle[] = [
     cat: 'Nacionalidade',
     rule: 'Os outros jogam por seleções africanas; Lukaku é belga.',
   },
+
+  // ===== Expansão =====
+  { players: ['Buffon', 'Casillas', 'Neuer', 'Cafu'], intruder: 'Cafu', cat: 'Posição', rule: 'Os outros são goleiros; Cafu é lateral.' },
+  { players: ['Ronaldo', 'Romário', 'Bebeto', 'Figo'], intruder: 'Figo', cat: 'Nacionalidade', rule: 'Os outros são atacantes brasileiros; Figo é português.' },
+  { players: ['Crespo', 'Batistuta', 'Kempes', 'Forlán'], intruder: 'Forlán', cat: 'Nacionalidade', rule: 'Os outros são argentinos; Forlán é uruguaio.' },
+  { players: ['Pirlo', 'Iniesta', 'Xavi', 'Buffon'], intruder: 'Buffon', cat: 'Posição', rule: 'Os outros eram meias; Buffon é goleiro.' },
+  { players: ['Lewandowski', 'Haaland', 'Kane', 'Van Dijk'], intruder: 'Van Dijk', cat: 'Posição', rule: 'Os outros são centroavantes; Van Dijk é zagueiro.' },
+  { players: ['Zidane', 'Henry', 'Platini', 'Maldini'], intruder: 'Maldini', cat: 'Nacionalidade', rule: 'Os outros são franceses; Maldini é italiano.' },
+  { players: ['Yashin', 'Banks', 'Zoff', 'Beckenbauer'], intruder: 'Beckenbauer', cat: 'Posição', rule: 'Os outros são goleiros; Beckenbauer é zagueiro.' },
+  { players: ['Vinícius', 'Rodrygo', 'Raphinha', 'Messi'], intruder: 'Messi', cat: 'Nacionalidade', rule: 'Os outros são brasileiros; Messi é argentino.' },
+  { players: ['Robben', 'Figo', 'Bale', 'Shearer'], intruder: 'Shearer', cat: 'Posição', rule: 'Os outros são pontas; Shearer é centroavante.' },
+  { players: ['Totti', 'Del Piero', 'Baggio', 'Raúl'], intruder: 'Raúl', cat: 'Nacionalidade', rule: 'Os outros são italianos; Raúl é espanhol.' },
+  { players: ['Klose', 'Völler', 'Bierhoff', 'Cruyff'], intruder: 'Cruyff', cat: 'Nacionalidade', rule: 'Os outros são alemães; Cruyff é holandês.' },
+  { players: ['Cafu', 'Roberto Carlos', 'Maicon', 'Pirlo'], intruder: 'Pirlo', cat: 'Posição', rule: 'Os outros são laterais; Pirlo é meia.' },
+  { players: ['Pedri', 'Gavi', 'Modrić', 'Haaland'], intruder: 'Haaland', cat: 'Posição', rule: 'Os outros são meias; Haaland é atacante.' },
+  { players: ['Neuer', 'Courtois', 'Ochoa', 'Vinícius'], intruder: 'Vinícius', cat: 'Posição', rule: 'Os outros são goleiros; Vinícius é atacante.' },
+  { players: ['Xavi', 'Iniesta', 'Casillas', 'Cannavaro'], intruder: 'Cannavaro', cat: 'Nacionalidade', rule: 'Os outros são espanhóis; Cannavaro é italiano.' },
 ]

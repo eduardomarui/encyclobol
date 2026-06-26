@@ -194,4 +194,23 @@ export const conexoes: Puzzle[] = [
       { color: 'ink', label: 'Jogaram no Real Madrid', members: ['Modrić', 'Benzema', 'Marcelo', 'Raúl'] },
     ],
   },
+  // 20 — por seleção (estrelas atuais), posições misturadas de propósito.
+  {
+    groups: [
+      { color: 'corn', label: 'Brasileiros', members: ['Vinícius', 'Rodrygo', 'Raphinha', 'Endrick'] },
+      { color: 'grass', label: 'Argentinos', members: ['Messi', 'Dybala', 'Lautaro', 'Julián Álvarez'] },
+      { color: 'ochre', label: 'Franceses', members: ['Mbappé', 'Griezmann', 'Dembélé', 'Giroud'] },
+      { color: 'ink', label: 'Portugueses', members: ['Cristiano Ronaldo', 'Bruno Fernandes', 'Bernardo Silva', 'João Félix'] },
+    ],
+  },
+  // 21 — quatro clubes clássicos. Iscas: Salah (tb Chelsea), Robben (tb Real/
+  // Chelsea), Vieira (tb City/Inter) — nenhum desses é grupo aqui.
+  {
+    groups: [
+      { color: 'corn', label: 'Jogaram no Milan', members: ['Maldini', 'Baresi', 'Gattuso', 'Pirlo'] },
+      { color: 'grass', label: 'Jogaram no Liverpool', members: ['Gerrard', 'Salah', 'Suárez', 'Fernando Torres'] },
+      { color: 'ochre', label: 'Jogaram no Bayern de Munique', members: ['Lahm', 'Gerd Müller', 'Robben', 'Ribéry'] },
+      { color: 'ink', label: 'Jogaram no Arsenal', members: ['Henry', 'Bergkamp', 'Vieira', 'Pirès'] },
+    ],
+  },
 ]
