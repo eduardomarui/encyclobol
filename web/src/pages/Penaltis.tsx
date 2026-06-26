@@ -349,9 +349,18 @@ export default function Penaltis() {
     })
     setPhase('shoot')
 
+    // Decisão antecipada (como na disputa real): se a vantagem já não pode
+    // ser alcançada com as cobranças que faltam na melhor de 5, acabou.
+    const myKicks = Math.floor(index / 2) + 1
+    const rivalKicks = Math.floor((index + 1) / 2)
+    const myRem = Math.max(0, 5 - myKicks)
+    const rivalRem = Math.max(0, 5 - rivalKicks)
+    const clinched = index < 10 && (myG > oppG + rivalRem || oppG > myG + myRem)
+
     setTimeout(() => {
       const i = index + 1
-      if (i < prepared.length) goAsk(i)
+      if (clinched) finishShootout(myG, oppG)
+      else if (i < prepared.length) goAsk(i)
       else if (myG !== oppG) finishShootout(myG, oppG)
       else {
         setPrepared((pp) => [...pp, ...extraPair()])
