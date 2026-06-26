@@ -362,4 +362,139 @@ export const players: Player[] = [
   { answer: 'PARKJISUNG', display: 'Park Ji-sung', nat: 'Coreia do Sul', pos: 'Meia', era: '2000–2014' },
   { answer: 'SON', display: 'Son Heung-min', nat: 'Coreia do Sul', pos: 'Atacante', era: '2010–presente' },
   { answer: 'NAKATA', display: 'Hidetoshi Nakata', nat: 'Japão', pos: 'Meia', era: '1995–2006' },
+
+  // ===== Expansão da base =====
+  // Brasil
+  { answer: 'ZAGALLO', display: 'Mário Zagallo', nat: 'Brasil', pos: 'Ponta', era: '1950–1965' },
+  { answer: 'DJALMASANTOS', display: 'Djalma Santos', nat: 'Brasil', pos: 'Lateral', era: '1948–1970' },
+  { answer: 'NILTONSANTOS', display: 'Nílton Santos', nat: 'Brasil', pos: 'Lateral', era: '1948–1964' },
+  { answer: 'GERSON', display: 'Gérson', nat: 'Brasil', pos: 'Meia', era: '1959–1972' },
+  { answer: 'CEREZO', display: 'Toninho Cerezo', nat: 'Brasil', pos: 'Meia', era: '1972–1994' },
+  { answer: 'RAI', display: 'Raí', nat: 'Brasil', pos: 'Meia', era: '1985–2000' },
+  { answer: 'DUNGA', display: 'Dunga', nat: 'Brasil', pos: 'Meia', era: '1983–2000' },
+  { answer: 'ALDAIR', display: 'Aldair', nat: 'Brasil', pos: 'Zagueiro', era: '1985–2005' },
+  { answer: 'LEONARDO', display: 'Leonardo', nat: 'Brasil', pos: 'Meia', era: '1987–2003' },
+  { answer: 'EDMUNDO', display: 'Edmundo', nat: 'Brasil', pos: 'Atacante', era: '1992–2008' },
+  { answer: 'ZEROBERTO', display: 'Zé Roberto', nat: 'Brasil', pos: 'Meia', era: '1991–2017' },
+  { answer: 'JUNINHO', display: 'Juninho Pernambucano', nat: 'Brasil', pos: 'Meia', era: '1993–2013' },
+  { answer: 'GILBERTOSILVA', display: 'Gilberto Silva', nat: 'Brasil', pos: 'Meia', era: '1997–2013' },
+  { answer: 'EMERSON', display: 'Emerson', nat: 'Brasil', pos: 'Meia', era: '1994–2010' },
+  { answer: 'DANIALVES', display: 'Dani Alves', nat: 'Brasil', pos: 'Lateral', era: '2001–2022' },
+  { answer: 'ROBINHO', display: 'Robinho', nat: 'Brasil', pos: 'Atacante', era: '2002–2020' },
+  { answer: 'PATO', display: 'Alexandre Pato', nat: 'Brasil', pos: 'Atacante', era: '2006–2023' },
+  { answer: 'GANSO', display: 'Paulo Henrique Ganso', nat: 'Brasil', pos: 'Meia', era: '2008–presente' },
+  { answer: 'OSCAR', display: 'Oscar', nat: 'Brasil', pos: 'Meia', era: '2008–presente' },
+  { answer: 'WILLIAN', display: 'Willian', nat: 'Brasil', pos: 'Ponta', era: '2006–presente' },
+  { answer: 'LUCASMOURA', display: 'Lucas Moura', nat: 'Brasil', pos: 'Ponta', era: '2007–presente' },
+  { answer: 'RODRYGO', display: 'Rodrygo', nat: 'Brasil', pos: 'Atacante', era: '2017–presente' },
+
+  // Argentina
+  { answer: 'DISTEFANO', display: 'Alfredo Di Stéfano', nat: 'Argentina', pos: 'Atacante', era: '1945–1966' },
+  { answer: 'FILLOL', display: 'Ubaldo Fillol', nat: 'Argentina', pos: 'Goleiro', era: '1969–1991' },
+  { answer: 'ARDILES', display: 'Osvaldo Ardiles', nat: 'Argentina', pos: 'Meia', era: '1975–1991' },
+  { answer: 'CAMBIASSO', display: 'Esteban Cambiasso', nat: 'Argentina', pos: 'Meia', era: '1998–2017' },
+  { answer: 'ZABALETA', display: 'Pablo Zabaleta', nat: 'Argentina', pos: 'Lateral', era: '2001–2020' },
+  { answer: 'OTAMENDI', display: 'Nicolás Otamendi', nat: 'Argentina', pos: 'Zagueiro', era: '2007–presente' },
+  { answer: 'DYBALA', display: 'Paulo Dybala', nat: 'Argentina', pos: 'Atacante', era: '2011–presente' },
+
+  // Uruguai / Chile / Colômbia / Peru / México
+  { answer: 'BRAVO', display: 'Claudio Bravo', nat: 'Chile', pos: 'Goleiro', era: '2002–presente' },
+  { answer: 'CUADRADO', display: 'Juan Cuadrado', nat: 'Colômbia', pos: 'Ponta', era: '2008–presente' },
+  { answer: 'GUERRERO', display: 'Paolo Guerrero', nat: 'Peru', pos: 'Atacante', era: '2002–presente' },
+  { answer: 'BLANCO', display: 'Cuauhtémoc Blanco', nat: 'México', pos: 'Atacante', era: '1992–2016' },
+  { answer: 'OCHOA', display: 'Guillermo Ochoa', nat: 'México', pos: 'Goleiro', era: '2004–presente' },
+
+  // Inglaterra
+  { answer: 'SHILTON', display: 'Peter Shilton', nat: 'Inglaterra', pos: 'Goleiro', era: '1966–1997' },
+  { answer: 'GASCOIGNE', display: 'Paul Gascoigne', nat: 'Inglaterra', pos: 'Meia', era: '1985–2004' },
+  { answer: 'ASHLEYCOLE', display: 'Ashley Cole', nat: 'Inglaterra', pos: 'Lateral', era: '1998–2019' },
+  { answer: 'FODEN', display: 'Phil Foden', nat: 'Inglaterra', pos: 'Meia', era: '2017–presente' },
+  { answer: 'PALMER', display: 'Cole Palmer', nat: 'Inglaterra', pos: 'Meia', era: '2020–presente' },
+
+  // França
+  { answer: 'BARTHEZ', display: 'Fabien Barthez', nat: 'França', pos: 'Goleiro', era: '1990–2007' },
+  { answer: 'DESAILLY', display: 'Marcel Desailly', nat: 'França', pos: 'Zagueiro', era: '1986–2006' },
+  { answer: 'LIZARAZU', display: 'Bixente Lizarazu', nat: 'França', pos: 'Lateral', era: '1988–2006' },
+  { answer: 'PETIT', display: 'Emmanuel Petit', nat: 'França', pos: 'Meia', era: '1989–2005' },
+  { answer: 'MAKELELE', display: 'Claude Makélélé', nat: 'França', pos: 'Meia', era: '1991–2011' },
+  { answer: 'LLORIS', display: 'Hugo Lloris', nat: 'França', pos: 'Goleiro', era: '2005–presente' },
+  { answer: 'VARANE', display: 'Raphaël Varane', nat: 'França', pos: 'Zagueiro', era: '2010–2024' },
+  { answer: 'THEO', display: 'Theo Hernández', nat: 'França', pos: 'Lateral', era: '2016–presente' },
+
+  // Itália
+  { answer: 'SCIREA', display: 'Gaetano Scirea', nat: 'Itália', pos: 'Zagueiro', era: '1972–1988' },
+  { answer: 'TARDELLI', display: 'Marco Tardelli', nat: 'Itália', pos: 'Meia', era: '1972–1988' },
+  { answer: 'SCHILLACI', display: 'Salvatore Schillaci', nat: 'Itália', pos: 'Atacante', era: '1982–1999' },
+  { answer: 'ZAMBROTTA', display: 'Gianluca Zambrotta', nat: 'Itália', pos: 'Lateral', era: '1997–2014' },
+  { answer: 'MATERAZZI', display: 'Marco Materazzi', nat: 'Itália', pos: 'Zagueiro', era: '1995–2011' },
+  { answer: 'VERRATTI', display: 'Marco Verratti', nat: 'Itália', pos: 'Meia', era: '2010–presente' },
+  { answer: 'DONNARUMMA', display: 'Gianluigi Donnarumma', nat: 'Itália', pos: 'Goleiro', era: '2015–presente' },
+  { answer: 'CHIESA', display: 'Federico Chiesa', nat: 'Itália', pos: 'Ponta', era: '2016–presente' },
+
+  // Alemanha
+  { answer: 'SEELER', display: 'Uwe Seeler', nat: 'Alemanha', pos: 'Atacante', era: '1953–1972' },
+  { answer: 'BREITNER', display: 'Paul Breitner', nat: 'Alemanha', pos: 'Meia', era: '1970–1983' },
+  { answer: 'VOLLER', display: 'Rudi Völler', nat: 'Alemanha', pos: 'Atacante', era: '1977–1996' },
+  { answer: 'BIERHOFF', display: 'Oliver Bierhoff', nat: 'Alemanha', pos: 'Atacante', era: '1986–2003' },
+  { answer: 'GOTZE', display: 'Mario Götze', nat: 'Alemanha', pos: 'Meia', era: '2009–presente' },
+  { answer: 'REUS', display: 'Marco Reus', nat: 'Alemanha', pos: 'Meia', era: '2006–presente' },
+  { answer: 'HUMMELS', display: 'Mats Hummels', nat: 'Alemanha', pos: 'Zagueiro', era: '2006–presente' },
+  { answer: 'GUNDOGAN', display: 'İlkay Gündoğan', nat: 'Alemanha', pos: 'Meia', era: '2009–presente' },
+  { answer: 'SANE', display: 'Leroy Sané', nat: 'Alemanha', pos: 'Ponta', era: '2013–presente' },
+
+  // Holanda
+  { answer: 'VANPERSIE', display: 'Robin van Persie', nat: 'Holanda', pos: 'Atacante', era: '2001–2019' },
+  { answer: 'WIJNALDUM', display: 'Georginio Wijnaldum', nat: 'Holanda', pos: 'Meia', era: '2007–presente' },
+
+  // Portugal
+  { answer: 'PAULETA', display: 'Pedro Pauleta', nat: 'Portugal', pos: 'Atacante', era: '1996–2008' },
+  { answer: 'QUARESMA', display: 'Ricardo Quaresma', nat: 'Portugal', pos: 'Ponta', era: '2002–2023' },
+  { answer: 'CARVALHO', display: 'Ricardo Carvalho', nat: 'Portugal', pos: 'Zagueiro', era: '1997–2018' },
+  { answer: 'MOUTINHO', display: 'João Moutinho', nat: 'Portugal', pos: 'Meia', era: '2004–2024' },
+  { answer: 'RUIPATRICIO', display: 'Rui Patrício', nat: 'Portugal', pos: 'Goleiro', era: '2006–presente' },
+
+  // Espanha
+  { answer: 'BUTRAGUENO', display: 'Emilio Butragueño', nat: 'Espanha', pos: 'Atacante', era: '1983–1998' },
+  { answer: 'GUARDIOLA', display: 'Pep Guardiola', nat: 'Espanha', pos: 'Meia', era: '1990–2006' },
+  { answer: 'LUISENRIQUE', display: 'Luis Enrique', nat: 'Espanha', pos: 'Meia', era: '1989–2004' },
+  { answer: 'VALDES', display: 'Víctor Valdés', nat: 'Espanha', pos: 'Goleiro', era: '2002–2017' },
+  { answer: 'PIQUE', display: 'Gerard Piqué', nat: 'Espanha', pos: 'Zagueiro', era: '2004–2022' },
+  { answer: 'JORDIALBA', display: 'Jordi Alba', nat: 'Espanha', pos: 'Lateral', era: '2007–presente' },
+  { answer: 'ISCO', display: 'Isco', nat: 'Espanha', pos: 'Meia', era: '2010–presente' },
+  { answer: 'MORATA', display: 'Álvaro Morata', nat: 'Espanha', pos: 'Atacante', era: '2010–presente' },
+
+  // África
+  { answer: 'YEKINI', display: 'Rashidi Yekini', nat: 'Nigéria', pos: 'Atacante', era: '1984–2005' },
+  { answer: 'OSIMHEN', display: 'Victor Osimhen', nat: 'Nigéria', pos: 'Atacante', era: '2015–presente' },
+  { answer: 'YAYATOURE', display: 'Yaya Touré', nat: 'Costa do Marfim', pos: 'Meia', era: '2001–2018' },
+  { answer: 'ABEDIPELE', display: 'Abedi Pelé', nat: 'Gana', pos: 'Meia', era: '1978–2000' },
+  { answer: 'ESSIEN', display: 'Michael Essien', nat: 'Gana', pos: 'Meia', era: '2000–2020' },
+  { answer: 'GYAN', display: 'Asamoah Gyan', nat: 'Gana', pos: 'Atacante', era: '2003–2021' },
+  { answer: 'DIOUF', display: 'El Hadji Diouf', nat: 'Senegal', pos: 'Atacante', era: '1999–2015' },
+  { answer: 'KANOUTE', display: 'Frédéric Kanouté', nat: 'Mali', pos: 'Atacante', era: '1997–2012' },
+
+  // Leste Europeu / Bálcãs
+  { answer: 'BONIEK', display: 'Zbigniew Boniek', nat: 'Polônia', pos: 'Meia', era: '1975–1990' },
+  { answer: 'LATO', display: 'Grzegorz Lato', nat: 'Polônia', pos: 'Ponta', era: '1971–1987' },
+  { answer: 'BLOKHIN', display: 'Oleh Blokhin', nat: 'União Soviética', pos: 'Atacante', era: '1969–1990' },
+  { answer: 'DASAEV', display: 'Rinat Dasaev', nat: 'União Soviética', pos: 'Goleiro', era: '1977–1990' },
+  { answer: 'STOJKOVIC', display: 'Dragan Stojković', nat: 'Sérvia', pos: 'Meia', era: '1981–2001' },
+  { answer: 'MIHAJLOVIC', display: 'Siniša Mihajlović', nat: 'Sérvia', pos: 'Zagueiro', era: '1990–2006' },
+  { answer: 'DZEKO', display: 'Edin Džeko', nat: 'Bósnia', pos: 'Atacante', era: '2003–presente' },
+  { answer: 'KVARATSKHELIA', display: 'Khvicha Kvaratskhelia', nat: 'Geórgia', pos: 'Ponta', era: '2017–presente' },
+  { answer: 'VLAHOVIC', display: 'Dušan Vlahović', nat: 'Sérvia', pos: 'Atacante', era: '2016–presente' },
+
+  // Escandinávia
+  { answer: 'LARSSON', display: 'Henrik Larsson', nat: 'Suécia', pos: 'Atacante', era: '1992–2009' },
+  { answer: 'SCHMEICHEL', display: 'Peter Schmeichel', nat: 'Dinamarca', pos: 'Goleiro', era: '1981–2003' },
+  { answer: 'ERIKSEN', display: 'Christian Eriksen', nat: 'Dinamarca', pos: 'Meia', era: '2008–presente' },
+  { answer: 'ODEGAARD', display: 'Martin Ødegaard', nat: 'Noruega', pos: 'Meia', era: '2014–presente' },
+
+  // Bélgica / Ilhas Britânicas
+  { answer: 'KOMPANY', display: 'Vincent Kompany', nat: 'Bélgica', pos: 'Zagueiro', era: '2003–2019' },
+  { answer: 'BEST', display: 'George Best', nat: 'Irlanda do Norte', pos: 'Ponta', era: '1963–1984' },
+  { answer: 'KEANE', display: 'Roy Keane', nat: 'Irlanda', pos: 'Meia', era: '1990–2006' },
+  { answer: 'GIGGS', display: 'Ryan Giggs', nat: 'País de Gales', pos: 'Ponta', era: '1990–2014' },
+  { answer: 'RUSH', display: 'Ian Rush', nat: 'País de Gales', pos: 'Atacante', era: '1980–1998' },
+  { answer: 'DALGLISH', display: 'Kenny Dalglish', nat: 'Escócia', pos: 'Atacante', era: '1970–1990' },
 ]
