@@ -25,9 +25,9 @@ const games: Game[] = [
   {
     n: '01',
     Icon: PlayerIcon,
-    category: 'Adivinhação',
+    category: 'Carreira',
     title: 'Tira-Teima',
-    desc: 'Seis tentativas pra cravar o nome do craque. Errou? O alfabeto vai pintando de verde e amarelo até você acertar.',
+    desc: 'Carreira diária: adivinhe craques cada vez mais difíceis com 3 vidas. Erre o nome e perde vida; os pontos somam num total que cresce todo dia.',
     status: 'Edição de hoje',
     to: '/jogos/quem-sou-ele',
   },

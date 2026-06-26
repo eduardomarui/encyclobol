@@ -1,17 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { players } from '../data/players'
-import { dailyIndex, dayNumber } from '../lib/daily'
+import { dayNumber } from '../lib/daily'
 import {
   loadCareer,
   loadCareerToday,
-  loadDailyState,
-  loadStats,
   recordCareer,
-  recordResult,
-  saveDailyState,
   type Career,
-  type Stats,
 } from '../lib/stats'
 import { BallMark } from '../components/landing/Icons'
 import { confetti } from '../lib/juice'
@@ -19,8 +14,9 @@ import { confetti } from '../lib/juice'
 const MAX_ATTEMPTS = 6
 const ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM']
 const CAREER_LIVES = 3
+const HELP_KEY = 'encyclobol:qse:help'
 
-type Mode = 'daily' | 'practice' | 'carreira'
+type Mode = 'carreira' | 'practice'
 type Cell = 'correct' | 'present' | 'absent'
 
 function evaluate(guess: string, answer: string): Cell[] {
@@ -56,8 +52,6 @@ const keyClass: Record<Cell | 'idle', string> = {
   idle: 'bg-paper-200 text-ink-900 hover:bg-paper-300',
 }
 
-const HELP_KEY = 'encyclobol:qse:help'
-
 function Heart({ on }: { on: boolean }) {
   return (
     <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden>
@@ -71,7 +65,6 @@ function Heart({ on }: { on: boolean }) {
   )
 }
 
-// Dificuldade da escada: nomes curtos no começo, longos no fim.
 function lenWindow(stage: number): [number, number] {
   if (stage <= 2) return [3, 5]
   if (stage <= 4) return [5, 6]
@@ -79,7 +72,7 @@ function lenWindow(stage: number): [number, number] {
   if (stage <= 9) return [7, 10]
   return [4, 30]
 }
-// Escada DETERMINÍSTICA do dia: todo mundo pega a mesma sequência hoje.
+// Escada determinística do dia (mesma sequência pra todos).
 function ladderPick(stage: number, used: number[]): number {
   const [lo, hi] = lenWindow(stage)
   const pool = players
@@ -91,17 +84,27 @@ function ladderPick(stage: number, used: number[]): number {
   return arr[h % arr.length]
 }
 
-const saved = loadDailyState()
+const today = loadCareerToday()
 
 export default function QuemSouEle() {
-  const [mode, setMode] = useState<Mode>('daily')
-  const [pick, setPick] = useState(() => saved?.pick ?? dailyIndex(players.length))
-  const [guesses, setGuesses] = useState<string[]>(() => saved?.guesses ?? [])
+  const [mode, setMode] = useState<Mode>('carreira')
+  const [pick, setPick] = useState(() => ladderPick(1, []))
+  const [guesses, setGuesses] = useState<string[]>([])
   const [current, setCurrent] = useState('')
-  const [stats, setStats] = useState<Stats>(() => loadStats())
-  const [recorded, setRecorded] = useState(() => !!saved)
+
+  const [stage, setStage] = useState(today?.stage ?? 1)
+  const [lives, setLives] = useState(CAREER_LIVES)
+  const [careerScore, setCareerScore] = useState(today?.score ?? 0)
+  const [career, setCareerInfo] = useState<Career>(() => loadCareer())
+  const [careerDoneToday, setCareerDoneToday] = useState(!!today)
+  const [revealCount, setRevealCount] = useState(1)
+  const [skipCount, setSkipCount] = useState(1)
+  const [revealed, setRevealed] = useState(0)
+  const [usedPicks, setUsedPicks] = useState<number[]>([])
+  const [roundDone, setRoundDone] = useState(false)
+  const [lastGain, setLastGain] = useState(0)
+  const [celebrated, setCelebrated] = useState(false)
   const [copied, setCopied] = useState(false)
-  const [celebrated, setCelebrated] = useState(() => !!saved)
   const [showHelp, setShowHelp] = useState(() => {
     try {
       return !localStorage.getItem(HELP_KEY)
@@ -109,19 +112,6 @@ export default function QuemSouEle() {
       return false
     }
   })
-
-  // Modo Carreira (corrida diária acumulativa)
-  const [stage, setStage] = useState(1)
-  const [lives, setLives] = useState(CAREER_LIVES)
-  const [careerScore, setCareerScore] = useState(0)
-  const [career, setCareerInfo] = useState<Career>(() => loadCareer())
-  const [careerDoneToday, setCareerDoneToday] = useState(false)
-  const [revealCount, setRevealCount] = useState(1)
-  const [skipCount, setSkipCount] = useState(1)
-  const [revealed, setRevealed] = useState(0)
-  const [usedPicks, setUsedPicks] = useState<number[]>([])
-  const [roundDone, setRoundDone] = useState(false)
-  const [lastGain, setLastGain] = useState(0)
 
   const player = players[pick]
   const answer = player.answer
@@ -145,7 +135,7 @@ export default function QuemSouEle() {
     return map
   }, [guesses, answer])
 
-  // Comemora vitória (diário/treino).
+  // Confete no treino.
   useEffect(() => {
     if (!careerMode && won && !celebrated) {
       confetti()
@@ -172,16 +162,6 @@ export default function QuemSouEle() {
       }
     }
   }, [careerMode, careerDoneToday, over, roundDone])
-
-  // Registra o diário, uma vez.
-  useEffect(() => {
-    if (mode === 'daily' && over && !recorded) {
-      const attempts = won ? guesses.length : MAX_ATTEMPTS
-      setStats(recordResult(won, attempts))
-      saveDailyState({ day: dayNumber(), pick, guesses, status: won ? 'won' : 'lost' })
-      setRecorded(true)
-    }
-  }, [mode, over, recorded, won, guesses, pick])
 
   const submit = useCallback(() => {
     if (current.length !== answer.length) return
@@ -224,43 +204,18 @@ export default function QuemSouEle() {
     setCelebrated(false)
   }
 
-  function voltarParaHoje() {
-    const s = loadDailyState()
-    setMode('daily')
-    setCareerDoneToday(false)
-    setPick(s?.pick ?? dailyIndex(players.length))
-    setGuesses(s?.guesses ?? [])
-    setCurrent('')
-    setRecorded(!!s)
-    setCelebrated(!!s)
-  }
-
-  function iniciarCarreira() {
+  function voltarCarreira() {
     setMode('carreira')
     setCareerInfo(loadCareer())
     const done = loadCareerToday()
     if (done) {
-      // Já jogou a corrida de hoje — mostra o resumo.
       setCareerDoneToday(true)
       setCareerScore(done.score)
       setStage(done.stage)
-      setRoundDone(true)
       return
     }
+    // (não deveria cair aqui se já jogou; corrida nova só amanhã)
     setCareerDoneToday(false)
-    setStage(1)
-    setLives(CAREER_LIVES)
-    setCareerScore(0)
-    setRevealCount(1)
-    setSkipCount(1)
-    setRevealed(0)
-    setUsedPicks([])
-    setRoundDone(false)
-    setLastGain(0)
-    setPick(ladderPick(1, []))
-    setGuesses([])
-    setCurrent('')
-    setCelebrated(false)
   }
 
   function avancar() {
@@ -288,27 +243,6 @@ export default function QuemSouEle() {
     setRevealed((r) => r + 1)
   }
 
-  function compartilhar() {
-    const head = `Encyclobol · Tira-Teima #${dayNumber()} — ${
-      won ? `${guesses.length}/${MAX_ATTEMPTS}` : `X/${MAX_ATTEMPTS}`
-    }`
-    const grid = guesses
-      .map((g) =>
-        evaluate(g, answer)
-          .map((c) => (c === 'correct' ? '🟩' : c === 'present' ? '🟨' : '⬛'))
-          .join(''),
-      )
-      .join('\n')
-    const text = `${head}\n${grid}\nencyclobol.com.br`
-    navigator.clipboard?.writeText(text).then(
-      () => {
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
-      },
-      () => {},
-    )
-  }
-
   function closeHelp() {
     setShowHelp(false)
     try {
@@ -318,9 +252,19 @@ export default function QuemSouEle() {
     }
   }
 
-  const winRate = stats.played ? Math.round((stats.wins / stats.played) * 100) : 0
-  const maxDist = Math.max(1, ...stats.dist)
-  // Fonte das peças encolhe pra nomes grandes caberem na tela.
+  function compartilhar() {
+    const text =
+      `Encyclobol · Tira-Teima (Carreira) #${dayNumber()} — ${careerScore} pts · estágio ${stage}\n` +
+      `Total acumulado: ${career.total} pts\nencyclobol.com.br`
+    navigator.clipboard?.writeText(text).then(
+      () => {
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      },
+      () => {},
+    )
+  }
+
   const tileFont =
     answer.length >= 11 ? '0.95rem' : answer.length >= 9 ? '1.15rem' : answer.length >= 7 ? '1.4rem' : '1.7rem'
 
@@ -336,7 +280,7 @@ export default function QuemSouEle() {
           </Link>
           <div className="flex items-center gap-3">
             <span className="font-cond text-xs font-500 uppercase tracking-[0.16em] text-ink-600">
-              {mode === 'daily' ? 'Edição diária' : careerMode ? 'Carreira do dia' : 'Modo treino'}
+              {careerMode ? 'Carreira do dia' : 'Modo treino'}
             </span>
             <button
               onClick={() => setShowHelp(true)}
@@ -350,7 +294,7 @@ export default function QuemSouEle() {
       </header>
 
       <main className="container-page flex flex-1 flex-col items-center py-8">
-        <p className="kicker">Adivinhação · jogo 01</p>
+        <p className="kicker">Carreira · jogo 01</p>
         <h1 className="mt-3 font-display text-4xl uppercase leading-[1.05] tracking-tight text-ink-900 sm:text-5xl">
           Tira-Teima
         </h1>
@@ -373,14 +317,13 @@ export default function QuemSouEle() {
           </div>
         )}
 
-        {!careerMode && (
-          <p className="mt-3 max-w-md text-center font-serif text-base italic text-ink-600">
-            Adivinhe o craque pelo nome que ele é conhecido — primeiro nome,
-            apelido ou sobrenome.
+        {mode === 'practice' && (
+          <p className="mt-3 font-cond text-xs font-500 uppercase tracking-wider text-ink-500">
+            Treino · não conta pontos
           </p>
         )}
 
-        {/* Conteúdo do jogo (escondido no resumo da carreira) */}
+        {/* Conteúdo do jogo (escondido no resumo) */}
         {!(careerMode && careerDoneToday) && (
           <>
             <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
@@ -398,8 +341,7 @@ export default function QuemSouEle() {
               ))}
             </div>
             <p className="mt-3 font-serif text-sm italic text-ink-500">
-              {answer.length} letras · {MAX_ATTEMPTS} tentativas
-              {mode === 'practice' && ' · treino não conta pro placar'}
+              {answer.length} letras, sem espaço · {MAX_ATTEMPTS} tentativas
             </p>
 
             {careerMode && revealed > 0 && (
@@ -501,16 +443,16 @@ export default function QuemSouEle() {
                   Volte amanhã pra somar mais à sua carreira.
                 </p>
                 <button
-                  onClick={praticar}
-                  className="btn-stamp mt-4 w-full border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-ink-900 hover:text-paper"
+                  onClick={compartilhar}
+                  className="btn-stamp mt-4 w-full bg-ink-900 px-6 py-2.5 text-paper hover:bg-grass-600"
                 >
-                  Treinar (sem pontos)
+                  {copied ? 'Copiado!' : 'Compartilhar resultado'}
                 </button>
                 <button
-                  onClick={voltarParaHoje}
-                  className="btn-stamp mt-2 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700"
+                  onClick={praticar}
+                  className="btn-stamp mt-2 w-full border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-ink-900 hover:text-paper"
                 >
-                  Edição de hoje
+                  Treinar (sem pontos)
                 </button>
               </>
             ) : careerMode ? (
@@ -538,71 +480,18 @@ export default function QuemSouEle() {
                 <p className="mt-1 font-serif text-sm italic text-ink-600">
                   {player.nat} · {player.pos} · {player.era}
                 </p>
-
-                {mode === 'daily' && (
-                  <>
-                    <div className="mt-5 grid grid-cols-4 gap-px overflow-hidden border-2 border-ink-900 bg-ink-900/15">
-                      {[
-                        ['Jogos', stats.played],
-                        ['% Vitória', winRate],
-                        ['Sequência', stats.currentStreak],
-                        ['Melhor', stats.maxStreak],
-                      ].map(([k, v]) => (
-                        <div key={k} className="bg-paper-100 px-1 py-2">
-                          <div className="font-display text-2xl text-ink-900">{v}</div>
-                          <div className="font-cond text-[9px] font-500 uppercase tracking-wide text-ink-600">{k}</div>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="mt-4 space-y-1 text-left">
-                      <p className="font-cond text-[10px] font-600 uppercase tracking-wider text-ink-500">
-                        Distribuição de tentativas
-                      </p>
-                      {stats.dist.map((n, i) => (
-                        <div key={i} className="flex items-center gap-2">
-                          <span className="w-3 font-cond text-xs text-ink-600">{i + 1}</span>
-                          <div className="h-4 flex-1 bg-paper-300">
-                            <div
-                              className="flex h-4 items-center justify-end bg-grass-600 px-1.5 font-cond text-[10px] font-600 text-paper"
-                              style={{ width: `${Math.max((n / maxDist) * 100, n ? 12 : 0)}%` }}
-                            >
-                              {n > 0 ? n : ''}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    <button
-                      onClick={compartilhar}
-                      className="btn-stamp mt-5 w-full bg-ink-900 px-6 py-2.5 text-paper hover:bg-grass-600"
-                    >
-                      {copied ? 'Copiado!' : 'Compartilhar resultado'}
-                    </button>
-                  </>
-                )}
-
-                <button
-                  onClick={iniciarCarreira}
-                  className="btn-stamp mt-2 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700"
-                >
-                  Carreira do dia
-                </button>
                 <button
                   onClick={praticar}
-                  className="btn-stamp mt-2 w-full border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-ink-900 hover:text-paper"
+                  className="btn-stamp mt-4 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700"
                 >
                   Sortear outro
                 </button>
-                {mode === 'practice' && (
-                  <button
-                    onClick={voltarParaHoje}
-                    className="btn-stamp mt-2 w-full border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-ink-900 hover:text-paper"
-                  >
-                    Edição de hoje
-                  </button>
-                )}
+                <button
+                  onClick={voltarCarreira}
+                  className="btn-stamp mt-2 w-full border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-ink-900 hover:text-paper"
+                >
+                  Voltar pra carreira
+                </button>
               </>
             )}
           </div>
@@ -661,22 +550,24 @@ export default function QuemSouEle() {
             </h2>
             <ul className="mt-4 space-y-3 font-serif text-[15px] leading-snug text-ink-700">
               <li>
-                Digite o <strong>nome pelo qual o craque é conhecido</strong> — tudo
-                junto, <strong>sem espaço e sem acento</strong>. Ex: <em>Thiago Silva</em>{' '}
-                → <span className="font-cond tracking-wide">THIAGOSILVA</span>.
+                Adivinhe o craque digitando o <strong>nome pelo qual ele é conhecido</strong> —
+                tudo junto, <strong>sem espaço e sem acento</strong>. Ex: <em>Thiago Silva</em> →{' '}
+                <span className="font-cond tracking-wide">THIAGOSILVA</span>.
               </li>
               <li>
-                <span className="inline-block h-3 w-3 translate-y-0.5 bg-grass-600" /> verde:
-                letra certa no lugar certo.{' '}
+                <span className="inline-block h-3 w-3 translate-y-0.5 bg-grass-600" /> verde: letra
+                certa no lugar.{' '}
                 <span className="inline-block h-3 w-3 translate-y-0.5 bg-corn-500" /> amarelo:
-                existe, mas no lugar errado.{' '}
-                <span className="inline-block h-3 w-3 translate-y-0.5 bg-ink-700" /> escuro: não
-                tem no nome.
+                existe, lugar errado.{' '}
+                <span className="inline-block h-3 w-3 translate-y-0.5 bg-ink-700" /> escuro: não tem.
               </li>
-              <li>Use as dicas (seleção, posição, época) pra deduzir. São 6 tentativas.</li>
+              <li>Use as dicas (seleção, posição, época). São 6 tentativas por craque.</li>
               <li>
-                <strong>Modo Carreira:</strong> uma corrida por dia (3 vidas), craques cada vez
-                mais difíceis. Os pontos somam num total que cresce a cada dia.
+                É uma <strong>carreira</strong>: uma corrida por dia com <strong>3 vidas</strong>{' '}
+                <span className="inline-block translate-y-0.5">
+                  <Heart on />
+                </span>
+                , craques cada vez mais difíceis. Os pontos somam num total que cresce a cada dia.
               </li>
             </ul>
             <button

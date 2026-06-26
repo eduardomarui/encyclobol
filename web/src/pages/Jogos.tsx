@@ -11,7 +11,7 @@ import {
   MysteryIcon,
 } from '../components/landing/Icons'
 import { dayNumber } from '../lib/daily'
-import { loadDailyState, loadStats } from '../lib/stats'
+import { loadCareer, loadCareerToday } from '../lib/stats'
 import { loadPenDaily, loadPenStats } from '../lib/penaltisStats'
 import { loadConDaily, loadConStats } from '../lib/conexoesStats'
 import { loadTLDaily, loadTLStats } from '../lib/timelineStats'
@@ -33,16 +33,17 @@ const games: GameInfo[] = [
   {
     n: '01',
     title: 'Tira-Teima',
-    category: 'Adivinhação',
+    category: 'Carreira',
     route: '/jogos/quem-sou-ele',
     Icon: PlayerIcon,
     result: () => {
-      const d = loadDailyState()
+      const t = loadCareerToday()
+      const c = loadCareer()
       return {
-        played: !!d,
-        streak: loadStats().currentStreak,
-        detail: d ? (d.status === 'won' ? `${d.guesses.length}/6` : 'X/6') : '—',
-        good: d?.status === 'won',
+        played: !!t,
+        streak: c.days,
+        detail: t ? `${t.score} pts` : '—',
+        good: !!t,
       }
     },
   },
