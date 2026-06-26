@@ -8,6 +8,7 @@ const BASE = import.meta.env.BASE_URL
 
 const links: NavLink[] = [
   { label: 'Os jogos', to: '/jogos' },
+  { label: 'Ranking', to: '/ranking' },
   { label: 'Como se joga', href: `${BASE}#como-funciona` },
   { label: 'Assine', href: `${BASE}#planos` },
 ]

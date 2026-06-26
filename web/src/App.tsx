@@ -7,6 +7,7 @@ import Conexoes from './pages/Conexoes'
 import LinhaDoTempo from './pages/LinhaDoTempo'
 import Intruso from './pages/Intruso'
 import Misterioso from './pages/Misterioso'
+import Ranking from './pages/Ranking'
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/jogos" element={<Jogos />} />
+        <Route path="/ranking" element={<Ranking />} />
         <Route path="/jogos/quem-sou-ele" element={<QuemSouEle />} />
         <Route path="/jogos/penaltis" element={<Penaltis />} />
         <Route path="/jogos/conexoes" element={<Conexoes />} />
