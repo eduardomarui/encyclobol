@@ -63,7 +63,7 @@ const games: Game[] = [
     Icon: IntruderIcon,
     category: 'Dedução',
     title: 'O Intruso',
-    desc: 'Quatro craques, três com algo em comum e um infiltrado. Ache quem não pertence — cuidado com as pistas falsas.',
+    desc: 'Três craques têm algo em comum, um não. Ache o infiltrado e crave o porquê. Sobrevivência: cace o máximo até acabarem as vidas.',
     status: 'Edição de hoje',
     to: '/jogos/o-intruso',
   },

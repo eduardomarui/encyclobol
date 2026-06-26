@@ -15,7 +15,7 @@ import { loadCareer, loadCareerToday } from '../lib/stats'
 import { loadCopaStats, loadCopaToday } from '../lib/penaltisStats'
 import { loadConCareer, loadConToday } from '../lib/conexoesStats'
 import { loadTLCareer, loadTLToday } from '../lib/timelineStats'
-import { loadIntrusoDaily, loadIntrusoStats } from '../lib/intrusoStats'
+import { loadIntrusoCareer, loadIntrusoToday } from '../lib/intrusoStats'
 import { loadMystDaily, loadMystStats } from '../lib/misteriosoStats'
 
 type Result = { played: boolean; streak: number; detail: string; good: boolean }
@@ -105,12 +105,13 @@ const games: GameInfo[] = [
     route: '/jogos/o-intruso',
     Icon: IntruderIcon,
     result: () => {
-      const d = loadIntrusoDaily()
+      const t = loadIntrusoToday()
+      const c = loadIntrusoCareer()
       return {
-        played: !!d,
-        streak: loadIntrusoStats().currentStreak,
-        detail: d ? `${d.score}/5` : '—',
-        good: !!d && d.score >= 3,
+        played: !!t,
+        streak: c.streak,
+        detail: t ? `${t.points} pts` : '—',
+        good: !!t && t.points >= 300,
       }
     },
   },
