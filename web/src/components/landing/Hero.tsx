@@ -33,6 +33,11 @@ export default function Hero() {
 
       <div className="container-page py-16 sm:py-24">
         <div className="mx-auto max-w-4xl text-center">
+          <img
+            src={`${import.meta.env.BASE_URL}logo.png`}
+            alt="Encyclobol"
+            className="mx-auto mb-6 h-40 w-auto drop-shadow-[0_6px_10px_rgba(22,19,13,0.18)] sm:h-52"
+          />
           <p className="kicker">Desafio diário · desde a Copa de 1950</p>
 
           <h1 className="mt-5 font-display text-5xl uppercase leading-[0.92] tracking-tight text-ink-900 sm:text-7xl md:text-8xl">

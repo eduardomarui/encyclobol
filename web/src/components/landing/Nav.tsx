@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { BallMark } from './Icons'
 
 type NavLink = { label: string; to?: string; href?: string }
 
@@ -34,7 +33,7 @@ export default function Nav() {
     <header className="sticky top-0 z-50 border-b-2 border-ink-900 bg-paper/95 backdrop-blur-sm">
       <nav className="container-page flex h-14 items-center justify-between">
         <Link to="/" className="flex items-center gap-2 text-ink-900">
-          <BallMark className="h-7 w-7 text-grass-600" />
+          <img src={`${BASE}logo.png`} alt="" className="h-9 w-auto" />
           <span className="font-display text-2xl uppercase tracking-tight">
             Encyclobol
           </span>
