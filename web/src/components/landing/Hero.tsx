@@ -26,7 +26,7 @@ export default function Hero() {
       {/* refletores */}
       <div
         className="pointer-events-none absolute inset-0"
-        style={{ background: 'radial-gradient(120% 60% at 50% -10%, rgba(43,179,255,0.20), transparent 60%)' }}
+        style={{ background: 'radial-gradient(120% 60% at 50% -10%, rgba(224,176,58,0.18), transparent 60%)' }}
       />
       {/* gramado listrado */}
       <div
@@ -57,14 +57,14 @@ export default function Hero() {
             alt="Encyclobol"
             className="mx-auto mb-6 h-40 w-auto drop-shadow-[0_10px_24px_rgba(0,0,0,0.45)] sm:h-52"
           />
-          <p className="font-cond text-xs font-600 uppercase tracking-[0.22em] text-[#2bb3ff]">
+          <p className="font-cond text-xs font-600 uppercase tracking-[0.22em] text-[#e6b73e]">
             Desafio diário · desde a Copa de 1950
           </p>
 
           <h1 className="mt-5 font-display text-5xl uppercase leading-[0.92] tracking-tight text-[#eef5f1] sm:text-7xl md:text-8xl">
             Você acha que sabe
             <br />
-            <span className="text-[#2bb3ff]">de futebol?</span>
+            <span className="text-[#e6b73e]">de futebol?</span>
           </h1>
 
           <p className="mx-auto mt-7 max-w-2xl font-serif text-xl italic leading-relaxed text-[#bdd2c9] sm:text-2xl">
@@ -75,7 +75,7 @@ export default function Hero() {
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <a
               href="#jogos"
-              className="btn-stamp bg-[#2bb3ff] px-7 py-3.5 text-base text-[#06243a] hover:bg-[#5cc6ff]"
+              className="btn-stamp bg-[#e0b03a] px-7 py-3.5 text-base text-[#1c2b1f] hover:bg-[#efc760]"
             >
               Começar a edição de hoje
             </a>
