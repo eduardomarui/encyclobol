@@ -16,7 +16,8 @@ import {
   type Move,
 } from '../lib/duel'
 
-const DUEL_SEC = 10
+const ATTACK_SEC = 10 // tempo pra cobrar
+const DEF_SEC = 6 // tempo pra defender (menos — pressão; e perguntas mais difíceis)
 type Phase = 'lobby' | 'waiting' | 'play' | 'done'
 type Kind = 'goal' | 'save' | 'out'
 
@@ -135,7 +136,7 @@ export default function Duelo() {
   const [moves, setMoves] = useState<Move[]>([])
   const [shown, setShown] = useState(0)
   const [revealing, setRevealing] = useState(false)
-  const [timeLeft, setTimeLeft] = useState(DUEL_SEC)
+  const [timeLeft, setTimeLeft] = useState(ATTACK_SEC)
   const [code, setCode] = useState('')
   const [msg, setMsg] = useState('')
   const [copied, setCopied] = useState(false)
@@ -259,7 +260,7 @@ export default function Duelo() {
     setMoves([])
     setShown(0)
     setRevealing(false)
-    setTimeLeft(DUEL_SEC)
+    setTimeLeft(ATTACK_SEC)
     setMsg('')
   }
 
@@ -285,7 +286,6 @@ export default function Duelo() {
       setRevealing(true)
       revealTimer.current = setTimeout(() => {
         setRevealing(false)
-        setTimeLeft(DUEL_SEC)
         setShown((s) => s + 1)
       }, 2100)
     }
@@ -301,6 +301,14 @@ export default function Duelo() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shown, resolved, revealing, phase, match])
+
+  // A cada nova cobrança, reinicia o tempo conforme o papel (defesa = menos).
+  useEffect(() => {
+    if (!match || !me) return
+    const iKick = (me === match.host_id) === (shown % 2 === 0)
+    setTimeLeft(iKick ? ATTACK_SEC : DEF_SEC)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shown, matchId, me])
 
   // Timer da minha resposta (ambos respondem ao mesmo tempo).
   useEffect(() => {
@@ -453,7 +461,7 @@ export default function Duelo() {
             ) : question ? (
               <>
                 <div className="mx-auto mt-2 h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-paper-300">
-                  <div className={`h-full transition-[width] duration-1000 ease-linear ${timeLeft <= 3 ? 'bg-ochre-500' : 'bg-grass-600'}`} style={{ width: `${(timeLeft / DUEL_SEC) * 100}%` }} />
+                  <div className={`h-full transition-[width] duration-1000 ease-linear ${timeLeft <= 3 ? 'bg-ochre-500' : 'bg-grass-600'}`} style={{ width: `${(timeLeft / (amKicker ? ATTACK_SEC : DEF_SEC)) * 100}%` }} />
                 </div>
                 <p className="mt-4 kicker text-ink-500">{amKicker ? 'Sua cobrança' : 'Sua defesa (difícil)'} · {question.cat}</p>
                 <h2 className="mt-1 font-serif text-xl leading-snug text-ink-900 sm:text-2xl">{question.q}</h2>
