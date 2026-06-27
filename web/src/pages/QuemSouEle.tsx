@@ -13,6 +13,11 @@ import { shareScoreImage } from '../lib/shareCard'
 
 const MAX_ATTEMPTS = 6
 const ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM']
+
+// Cronômetro por craque: começa em 60s e aperta a cada estágio (mín. 25s).
+const TIME_BASE = 60
+const TIME_MIN = 25
+const timeForStage = (s: number) => Math.max(TIME_MIN, TIME_BASE - (s - 1) * 4)
 const CAREER_LIVES = 3
 const HELP_KEY = 'encyclobol:qse:help'
 
@@ -105,6 +110,8 @@ export default function QuemSouEle() {
   const [lastGain, setLastGain] = useState(0)
   const [celebrated, setCelebrated] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [timeLeft, setTimeLeft] = useState(() => timeForStage(today?.stage ?? 1))
+  const [timedOut, setTimedOut] = useState(false)
   const [showHelp, setShowHelp] = useState(() => {
     try {
       return !localStorage.getItem(HELP_KEY)
@@ -118,7 +125,7 @@ export default function QuemSouEle() {
   const careerMode = mode === 'carreira'
 
   const won = guesses.includes(answer)
-  const lost = !won && guesses.length >= MAX_ATTEMPTS
+  const lost = timedOut || (!won && guesses.length >= MAX_ATTEMPTS)
   const over = won || lost
   const ended = over || (careerMode && careerDoneToday)
 
@@ -163,6 +170,17 @@ export default function QuemSouEle() {
     }
   }, [careerMode, careerDoneToday, over, roundDone])
 
+  // Cronômetro do craque (só na carreira). Estourar = perde o craque.
+  useEffect(() => {
+    if (!careerMode || careerDoneToday || over || showHelp) return
+    if (timeLeft <= 0) {
+      setTimedOut(true)
+      return
+    }
+    const t = setTimeout(() => setTimeLeft((s) => s - 1), 1000)
+    return () => clearTimeout(t)
+  }, [timeLeft, careerMode, careerDoneToday, over, showHelp])
+
   const submit = useCallback(() => {
     if (current.length !== answer.length) return
     setGuesses((g) => [...g, current])
@@ -202,6 +220,7 @@ export default function QuemSouEle() {
     setGuesses([])
     setCurrent('')
     setCelebrated(false)
+    setTimedOut(false)
   }
 
   function voltarCarreira() {
@@ -228,6 +247,8 @@ export default function QuemSouEle() {
     setCurrent('')
     setRevealed(0)
     setRoundDone(false)
+    setTimedOut(false)
+    setTimeLeft(timeForStage(ns))
     if (ns % 3 === 1) setRevealCount((c) => c + 1)
   }
 
@@ -316,6 +337,24 @@ export default function QuemSouEle() {
                 <Heart key={i} on={i < lives} />
               ))}
             </span>
+          </div>
+        )}
+
+        {/* Cronômetro do craque */}
+        {careerMode && !careerDoneToday && !over && (
+          <div className="mx-auto mt-3 w-full max-w-xs">
+            <div className="flex justify-between font-cond text-[11px] font-600 uppercase tracking-wider">
+              <span className="text-ink-500">Tempo</span>
+              <span className={timeLeft <= 10 ? 'text-ochre-600' : 'text-ink-700'}>{timeLeft}s</span>
+            </div>
+            <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-ink-900/10">
+              <div
+                className={`h-full transition-[width] duration-1000 ease-linear ${
+                  timeLeft <= 10 ? 'bg-ochre-500' : 'bg-grass-600'
+                }`}
+                style={{ width: `${(timeLeft / timeForStage(stage)) * 100}%` }}
+              />
+            </div>
           </div>
         )}
 
@@ -459,7 +498,13 @@ export default function QuemSouEle() {
               </>
             ) : careerMode ? (
               <>
-                <p className="kicker">{won ? `Cravou! +${lastGain} pts` : 'Errou — perdeu uma vida'}</p>
+                <p className="kicker">
+                  {won
+                    ? `Cravou! +${lastGain} pts`
+                    : timedOut
+                      ? 'Tempo esgotado — perdeu uma vida'
+                      : 'Errou — perdeu uma vida'}
+                </p>
                 <p className="mt-1 font-display text-3xl uppercase tracking-tight text-ink-900">
                   {player.display}
                 </p>
@@ -564,6 +609,10 @@ export default function QuemSouEle() {
                 <span className="inline-block h-3 w-3 translate-y-0.5 bg-ink-700" /> escuro: não tem.
               </li>
               <li>Use as dicas (seleção, posição, época). São 6 tentativas por craque.</li>
+              <li>
+                Corra contra o <strong>relógio</strong>: cada craque tem um tempo que{' '}
+                <strong>aperta a cada estágio</strong>. Se o tempo zerar, você perde uma vida.
+              </li>
               <li>
                 É uma <strong>carreira</strong>: uma corrida por dia com <strong>3 vidas</strong>{' '}
                 <span className="inline-block translate-y-0.5">
