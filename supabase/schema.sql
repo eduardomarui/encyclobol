@@ -252,7 +252,7 @@ begin
   return m;
 end; $$;
 
--- Entra numa sala pelo código
+-- Entra numa sala pelo código (tolerante a reentrada/refresh)
 create or replace function public.join_match(p_code text)
 returns public.matches
 language plpgsql security definer set search_path = public as $$
@@ -261,9 +261,13 @@ begin
   if uid is null then raise exception 'nao autenticado'; end if;
   select nick into n from public.profiles where id = uid;
   if n is null then raise exception 'defina um apelido primeiro'; end if;
-  select * into m from public.matches where code = upper(trim(p_code)) and status = 'waiting';
+  select * into m from public.matches where code = upper(trim(p_code));
   if m.id is null then raise exception 'partida nao encontrada'; end if;
-  if m.host_id = uid then raise exception 'voce criou essa partida'; end if;
+  if m.host_id = uid then return m; end if;           -- dono reentrando
+  if m.status = 'done' then raise exception 'partida ja encerrada'; end if;
+  if m.guest_id is not null and m.guest_id <> uid then
+    raise exception 'partida cheia';                   -- já tem dois jogadores
+  end if;
   update public.matches set guest_id = uid, guest_nick = n, status = 'playing'
    where id = m.id returning * into m;
   return m;

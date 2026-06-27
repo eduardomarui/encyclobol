@@ -272,7 +272,15 @@ export default function Duelo() {
       syncMatch(m)
     } catch (e) {
       const t = (e as Error).message
-      setMsg(t.includes('nao encontrada') ? 'Partida não encontrada.' : t)
+      setMsg(
+        t.includes('nao encontrada')
+          ? 'Partida não encontrada — confira o código.'
+          : t.includes('cheia')
+            ? 'Essa sala já está cheia.'
+            : t.includes('encerrada')
+              ? 'Essa partida já terminou.'
+              : t,
+      )
     }
     setBusy(false)
   }
