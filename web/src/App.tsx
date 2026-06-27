@@ -9,6 +9,7 @@ import Intruso from './pages/Intruso'
 import Misterioso from './pages/Misterioso'
 import Ranking from './pages/Ranking'
 import Duelo from './pages/Duelo'
+import Perfil from './pages/Perfil'
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/jogos" element={<Jogos />} />
         <Route path="/ranking" element={<Ranking />} />
+        <Route path="/perfil" element={<Perfil />} />
         <Route path="/jogos/quem-sou-ele" element={<QuemSouEle />} />
         <Route path="/jogos/penaltis" element={<Penaltis />} />
         <Route path="/jogos/penaltis/online" element={<Duelo />} />
