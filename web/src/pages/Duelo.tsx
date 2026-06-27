@@ -4,6 +4,7 @@ import { rankingEnabled, ensureSession, getProfile, setNick as apiSetNick } from
 import {
   createMatch,
   joinMatch,
+  getMatch,
   getMoves,
   submitMove,
   subscribeMatch,
@@ -140,6 +141,33 @@ export default function Duelo() {
   const [copied, setCopied] = useState(false)
   const [busy, setBusy] = useState(false)
   const cleanup = useRef<(() => void) | null>(null)
+  const matchId = match?.id
+
+  // Rede de segurança: revalida jogadas/estado periodicamente e ao voltar pra aba
+  // (cobre Realtime perdido quando o navegador suspende a aba em segundo plano).
+  useEffect(() => {
+    if (!matchId || (phase !== 'play' && phase !== 'waiting')) return
+    const tick = async () => {
+      mergeMoves(await getMoves(matchId))
+      const m = await getMatch(matchId)
+      if (m) {
+        setMatch(m)
+        if (m.status === 'playing') setPhase((ph) => (ph === 'waiting' ? 'play' : ph))
+      }
+    }
+    const iv = setInterval(tick, 2500)
+    const onVis = () => {
+      if (!document.hidden) tick()
+    }
+    document.addEventListener('visibilitychange', onVis)
+    window.addEventListener('focus', onVis)
+    return () => {
+      clearInterval(iv)
+      document.removeEventListener('visibilitychange', onVis)
+      window.removeEventListener('focus', onVis)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, matchId])
 
   useEffect(() => {
     if (!rankingEnabled) return
@@ -155,6 +183,14 @@ export default function Duelo() {
     setMoves((prev) =>
       prev.some((x) => x.round === m.round && x.player_id === m.player_id) ? prev : [...prev, m],
     )
+  }
+  function mergeMoves(list: Move[]) {
+    setMoves((prev) => {
+      const key = (m: Move) => `${m.round}:${m.player_id}`
+      const map = new Map(prev.map((m) => [key(m), m]))
+      for (const m of list) if (!map.has(key(m))) map.set(key(m), m)
+      return Array.from(map.values())
+    })
   }
   function listen(id: string) {
     cleanup.current?.()
@@ -264,6 +300,7 @@ export default function Duelo() {
   useEffect(() => {
     if (phase !== 'play' || !match || revealing || iMoved) return
     if (timeLeft <= 0) {
+      if (me) mergeMove({ match_id: match.id, round: shown, player_id: me, choice: -1, correct: false })
       submitMove(match.id, shown, -1, false)
       return
     }
@@ -273,8 +310,10 @@ export default function Duelo() {
   }, [phase, timeLeft, revealing, iMoved, match, shown])
 
   function responder(i: number) {
-    if (!match || !question || iMoved) return
-    submitMove(match.id, shown, i, i === question.correct)
+    if (!match || !question || iMoved || !me) return
+    const correct = i === question.correct
+    mergeMove({ match_id: match.id, round: shown, player_id: me, choice: i, correct })
+    submitMove(match.id, shown, i, correct)
   }
 
   function convidar() {
