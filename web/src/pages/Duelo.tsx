@@ -249,6 +249,8 @@ export default function Duelo() {
     setBusy(true)
     setMsg('')
     try {
+      await ensureSession()
+      setMe(await myId())
       const m = await createMatch(5)
       setMatch(m)
       setMoves([])
@@ -256,22 +258,30 @@ export default function Duelo() {
       setPhase('waiting')
       listen(m.id)
     } catch (e) {
-      setMsg((e as Error).message)
+      setMsg((e as Error).message || 'Não foi possível criar a sala.')
+    } finally {
+      setBusy(false)
     }
-    setBusy(false)
   }
   async function entrar() {
+    const c = code.trim()
+    if (c.length < 4) {
+      setMsg('Digite o código da sala.')
+      return
+    }
     setBusy(true)
     setMsg('')
     try {
-      const m = await joinMatch(code)
+      await ensureSession()
+      setMe(await myId())
+      const m = await joinMatch(c)
       const mv = await getMoves(m.id)
       setMoves(mv)
       setShown(resolvedCount(mv, m))
       listen(m.id)
       syncMatch(m)
     } catch (e) {
-      const t = (e as Error).message
+      const t = (e as Error).message || ''
       setMsg(
         t.includes('nao encontrada')
           ? 'Partida não encontrada — confira o código.'
@@ -279,10 +289,13 @@ export default function Duelo() {
             ? 'Essa sala já está cheia.'
             : t.includes('encerrada')
               ? 'Essa partida já terminou.'
-              : t,
+              : t.includes('apelido')
+                ? 'Defina um apelido primeiro.'
+                : t || 'Não foi possível entrar.',
       )
+    } finally {
+      setBusy(false)
     }
-    setBusy(false)
   }
   function resetToLobby() {
     cleanup.current?.()
@@ -454,7 +467,7 @@ export default function Duelo() {
         {nick && phase === 'lobby' && (
           <div className="mt-8 w-full max-w-sm space-y-4">
             <button onClick={criar} disabled={busy} className="btn-stamp w-full bg-grass-600 px-6 py-3 text-paper hover:bg-grass-700 disabled:opacity-50">
-              Criar partida
+              {busy ? 'Criando…' : 'Criar partida'}
             </button>
             <div className="border-2 border-ink-900 bg-paper-100 p-4">
               <p className="kicker">Entrar numa sala</p>
@@ -466,7 +479,7 @@ export default function Duelo() {
                   className="flex-1 border-2 border-ink-900 bg-paper px-4 py-2.5 font-cond uppercase tracking-[0.2em] text-ink-900 outline-none"
                 />
                 <button onClick={entrar} disabled={busy} className="btn-stamp border-2 border-ink-900 px-5 py-2.5 text-ink-900 hover:bg-ink-900 hover:text-paper disabled:opacity-50">
-                  Entrar
+                  {busy ? 'Entrando…' : 'Entrar'}
                 </button>
               </div>
             </div>

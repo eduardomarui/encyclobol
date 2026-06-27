@@ -60,14 +60,16 @@ export async function myId(): Promise<string | null> {
 export async function createMatch(rounds = 5): Promise<Match> {
   if (!supabase) throw new Error('online indisponível')
   const { data, error } = await supabase.rpc('create_match', { p_rounds: rounds })
-  if (error) throw new Error(error.message)
+  if (error) throw new Error(error.message || 'falha ao criar a partida')
+  if (!data) throw new Error('falha ao criar a partida')
   return data as Match
 }
 
 export async function joinMatch(code: string): Promise<Match> {
   if (!supabase) throw new Error('online indisponível')
   const { data, error } = await supabase.rpc('join_match', { p_code: code.trim().toUpperCase() })
-  if (error) throw new Error(error.message)
+  if (error) throw new Error(error.message || 'falha ao entrar na partida')
+  if (!data) throw new Error('partida nao encontrada')
   return data as Match
 }
 
