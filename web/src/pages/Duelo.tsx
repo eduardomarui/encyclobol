@@ -6,6 +6,7 @@ import {
   joinMatch,
   getMatch,
   getMoves,
+  rematch,
   submitMove,
   subscribeMatch,
   finishMatch,
@@ -143,7 +144,23 @@ export default function Duelo() {
   const [busy, setBusy] = useState(false)
   const cleanup = useRef<(() => void) | null>(null)
   const revealTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const seedRef = useRef<number | null>(null)
   const matchId = match?.id
+
+  // Aplica atualização da sala; detecta revanche (seed novo) e zera o jogo.
+  function syncMatch(m: Match) {
+    setMatch(m)
+    if (m.status === 'playing') {
+      if (seedRef.current !== null && seedRef.current !== m.seed) {
+        setMoves([])
+        setShown(0)
+        setRevealing(false)
+        if (revealTimer.current) clearTimeout(revealTimer.current)
+      }
+      seedRef.current = m.seed
+      setPhase((ph) => (ph === 'waiting' || ph === 'done' ? 'play' : ph))
+    }
+  }
 
   useEffect(() => () => {
     if (revealTimer.current) clearTimeout(revealTimer.current)
@@ -156,10 +173,7 @@ export default function Duelo() {
     const tick = async () => {
       mergeMoves(await getMoves(matchId))
       const m = await getMatch(matchId)
-      if (m) {
-        setMatch(m)
-        if (m.status === 'playing') setPhase((ph) => (ph === 'waiting' ? 'play' : ph))
-      }
+      if (m) syncMatch(m)
     }
     tick() // imediato, não espera o primeiro intervalo
     const iv = setInterval(tick, 2000)
@@ -201,14 +215,7 @@ export default function Duelo() {
   }
   function listen(id: string) {
     cleanup.current?.()
-    cleanup.current = subscribeMatch(
-      id,
-      (m) => {
-        setMatch(m)
-        if (m.status === 'playing') setPhase((ph) => (ph === 'waiting' ? 'play' : ph))
-      },
-      mergeMove,
-    )
+    cleanup.current = subscribeMatch(id, syncMatch, mergeMove)
   }
 
   async function salvarNick() {
@@ -242,11 +249,10 @@ export default function Duelo() {
     try {
       const m = await joinMatch(code)
       const mv = await getMoves(m.id)
-      setMatch(m)
       setMoves(mv)
       setShown(resolvedCount(mv, m))
-      setPhase('play')
       listen(m.id)
+      syncMatch(m)
     } catch (e) {
       const t = (e as Error).message
       setMsg(t.includes('nao encontrada') ? 'Partida não encontrada.' : t)
@@ -255,6 +261,7 @@ export default function Duelo() {
   }
   function resetToLobby() {
     cleanup.current?.()
+    seedRef.current = null
     setPhase('lobby')
     setMatch(null)
     setMoves([])
@@ -262,6 +269,22 @@ export default function Duelo() {
     setRevealing(false)
     setTimeLeft(ATTACK_SEC)
     setMsg('')
+  }
+
+  async function pedirRevanche() {
+    if (!match) return
+    try {
+      const m = await rematch(match.id)
+      if (revealTimer.current) clearTimeout(revealTimer.current)
+      setMoves([])
+      setShown(0)
+      setRevealing(false)
+      seedRef.current = m.seed
+      setMatch(m)
+      setPhase('play')
+    } catch (e) {
+      setMsg((e as Error).message)
+    }
   }
 
   const resolved = match ? resolvedCount(moves, match) : 0
@@ -495,8 +518,12 @@ export default function Duelo() {
             <p className="mt-1 font-serif text-base italic text-ink-600">
               {myScore > oppScore ? 'Frieza na cobrança e mão firme na defesa!' : 'Faltou pontaria. Revanche?'}
             </p>
-            <button onClick={resetToLobby} className="btn-stamp mt-5 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700">
-              Jogar de novo
+            <button onClick={pedirRevanche} className="btn-stamp mt-5 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700">
+              Revanche
+            </button>
+            {msg && <p className="mt-2 font-cond text-xs uppercase tracking-wider text-ochre-600">{msg}</p>}
+            <button onClick={resetToLobby} className="btn-stamp mt-2 w-full border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-ink-900 hover:text-paper">
+              Sair da sala
             </button>
             <Link to="/jogos/penaltis" className="btn-stamp mt-2 block border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-ink-900 hover:text-paper">
               Voltar

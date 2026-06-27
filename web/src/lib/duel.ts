@@ -71,6 +71,13 @@ export async function joinMatch(code: string): Promise<Match> {
   return data as Match
 }
 
+export async function rematch(matchId: string): Promise<Match> {
+  if (!supabase) throw new Error('online indisponível')
+  const { data, error } = await supabase.rpc('rematch', { p_match_id: matchId })
+  if (error) throw new Error(error.message)
+  return data as Match
+}
+
 export async function getMatch(id: string): Promise<Match | null> {
   if (!supabase) return null
   const { data } = await supabase.from('matches').select('*').eq('id', id).maybeSingle()

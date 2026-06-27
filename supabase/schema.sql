@@ -268,3 +268,23 @@ begin
    where id = m.id returning * into m;
   return m;
 end; $$;
+
+-- Revanche: limpa as jogadas e gera novo seed (mesma sala/jogadores)
+create or replace function public.rematch(p_match_id uuid)
+returns public.matches
+language plpgsql security definer set search_path = public as $$
+declare uid uuid := auth.uid(); m public.matches;
+begin
+  if uid is null then raise exception 'nao autenticado'; end if;
+  select * into m from public.matches where id = p_match_id;
+  if m.id is null then raise exception 'partida nao encontrada'; end if;
+  if uid <> m.host_id and uid <> coalesce(m.guest_id, '00000000-0000-0000-0000-000000000000'::uuid) then
+    raise exception 'nao participa dessa partida';
+  end if;
+  delete from public.match_moves where match_id = p_match_id;
+  update public.matches
+     set seed = (floor(random() * 1000000000))::int, status = 'playing'
+   where id = p_match_id
+   returning * into m;
+  return m;
+end; $$;
