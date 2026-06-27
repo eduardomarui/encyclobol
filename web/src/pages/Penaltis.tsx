@@ -329,7 +329,7 @@ export default function Penaltis() {
             <button
               onClick={() => setShowHelp(true)}
               aria-label="Como jogar"
-              className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink-900 font-cond text-sm font-700 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
+              className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white/20 font-cond text-sm font-700 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
             >
               ?
             </button>
@@ -367,7 +367,7 @@ export default function Penaltis() {
 
         {/* PLACAR */}
         {!copaDone && (
-          <div className="w-full max-w-sm border-2 border-ink-900 bg-grass-700 text-ink-900">
+          <div className="w-full max-w-sm border-2 border-white/20 bg-grass-700 text-ink-900">
             <div className="flex items-center gap-3 border-b border-paper/15 px-3 py-2">
               <span className="w-12 font-cond text-xs font-700 uppercase tracking-wider text-grass-400">Você</span>
               <div className="flex flex-1 flex-wrap gap-1">
@@ -420,7 +420,7 @@ export default function Penaltis() {
             <h2 className="mt-1 font-serif text-xl leading-snug text-ink-900 sm:text-2xl">{current.q}</h2>
             <div className="mt-3 grid gap-2">
               {current.options.map((opt, i) => {
-                let cls = 'border-ink-900/25 bg-paper hover:border-ink-900 hover:bg-paper-100'
+                let cls = 'border-ink-900/25 bg-paper hover:border-white/20 hover:bg-paper-100'
                 if (phase === 'shoot') {
                   if (i === current.correct) cls = 'border-grass-700 bg-grass-600 text-ink-900'
                   else if (i === selected) cls = 'border-ochre-600 bg-ochre-500 text-ink-900'
@@ -444,7 +444,7 @@ export default function Penaltis() {
 
         {/* CLASSIFICOU — entre fases */}
         {interRound && (
-          <div className="mt-8 w-full max-w-sm border-2 border-ink-900 bg-paper-100 p-6 text-center">
+          <div className="mt-8 w-full max-w-sm border-2 border-white/20 bg-paper-100 p-6 text-center">
             <p className="kicker">Classificado!</p>
             <p className="mt-1 font-display text-5xl text-ink-900">
               {my} <span className="text-ink-500">×</span> {opp}
@@ -464,7 +464,7 @@ export default function Penaltis() {
 
         {/* PRÁTICA — fim de disputa solta */}
         {mode === 'practice' && shootoutOver && (
-          <div className="mt-8 w-full max-w-sm border-2 border-ink-900 bg-paper-100 p-6 text-center">
+          <div className="mt-8 w-full max-w-sm border-2 border-white/20 bg-paper-100 p-6 text-center">
             <p className="kicker">{wonShootout ? 'Venceu a disputa!' : 'Disputa perdida'}</p>
             <p className="mt-1 font-display text-6xl text-ink-900">
               {my} <span className="text-ink-500">×</span> {opp}
@@ -475,7 +475,7 @@ export default function Penaltis() {
             </button>
             <Link
               to="/"
-              className="btn-stamp mt-2 block border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
+              className="btn-stamp mt-2 block border-2 border-white/20 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
             >
               Voltar pro almanaque
             </Link>
@@ -484,7 +484,7 @@ export default function Penaltis() {
 
         {/* COPA ENCERRADA — resumo do dia */}
         {copaDone && (
-          <div className="mt-6 w-full max-w-sm border-2 border-ink-900 bg-paper-100 p-6 text-center">
+          <div className="mt-6 w-full max-w-sm border-2 border-white/20 bg-paper-100 p-6 text-center">
             <Trophy on={champion} />
             <p className="kicker mt-1">
               {champion ? 'Campeão da Copa!' : `Eliminado nas ${ROUND_NAMES[round - 1]}`}
@@ -497,7 +497,7 @@ export default function Penaltis() {
                 : 'Bom caminho. Amanhã tem outra chance de erguer o caneco.'}
             </p>
 
-            <div className="mt-5 grid grid-cols-4 gap-px overflow-hidden border-2 border-ink-900 bg-ink-900/15">
+            <div className="mt-5 grid grid-cols-4 gap-px overflow-hidden border-2 border-white/20 bg-ink-900/15">
               {[
                 ['Total', copa.total],
                 ['Recorde', copa.best],
@@ -521,7 +521,7 @@ export default function Penaltis() {
             </button>
             <button
               onClick={treinar}
-              className="btn-stamp mt-2 w-full border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
+              className="btn-stamp mt-2 w-full border-2 border-white/20 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
             >
               Treinar (sem pontos)
             </button>
@@ -531,7 +531,7 @@ export default function Penaltis() {
 
       {showHelp && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={closeHelp}>
-          <div className="w-full max-w-sm border-2 border-ink-900 bg-paper p-6" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-sm border-2 border-white/20 bg-paper p-6" onClick={(e) => e.stopPropagation()}>
             <p className="kicker">Como jogar</p>
             <h2 className="mt-1 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900">
               Copa de Pênaltis

@@ -31,7 +31,7 @@
     @apply border-t border-ink-900/15;
   }
   .rule-strong {
-    @apply border-t-2 border-ink-900;
+    @apply border-t-2 border-white/20;
   }
   .rule-double {
     border-top: 3px double rgba(238, 245, 241, 0.4);

@@ -181,7 +181,7 @@ export default function Jogos() {
         </header>
 
         {/* Resumo do dia */}
-        <section className="mt-6 border-2 border-ink-900 bg-paper-100 p-5 sm:p-6">
+        <section className="mt-6 border-2 border-white/20 bg-paper-100 p-5 sm:p-6">
           <div className="flex items-center justify-between">
             <p className="kicker">{fechou ? 'Fechei o dia' : 'Meu dia'}</p>
             <span className="font-cond text-xs font-600 uppercase tracking-wider text-ink-600">

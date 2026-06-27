@@ -185,7 +185,7 @@ export default function Intruso() {
             <button
               onClick={() => setShowHelp(true)}
               aria-label="Como jogar"
-              className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink-900 font-cond text-sm font-700 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
+              className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white/20 font-cond text-sm font-700 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
             >
               ?
             </button>
@@ -242,7 +242,7 @@ export default function Intruso() {
 
             <div className="mt-4 grid grid-cols-2 gap-2.5">
               {current.players.map((name, i) => {
-                let cls = 'border-ink-900/25 bg-paper hover:border-ink-900 hover:bg-paper-100'
+                let cls = 'border-ink-900/25 bg-paper hover:border-white/20 hover:bg-paper-100'
                 if (step !== 'intruder') {
                   if (i === current.intruderIdx) cls = 'animate-pop border-grass-700 bg-grass-600 text-ink-900'
                   else if (i === selIntruder) cls = 'border-ochre-600 bg-ochre-500 text-ink-900'
@@ -269,7 +269,7 @@ export default function Intruso() {
                 </p>
                 <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
                   {CATS.map((c) => {
-                    let cls = 'border-ink-900/25 bg-paper hover:border-ink-900 hover:bg-paper-100'
+                    let cls = 'border-ink-900/25 bg-paper hover:border-white/20 hover:bg-paper-100'
                     if (step === 'revealed') {
                       if (c === current.cat) cls = 'border-grass-700 bg-grass-600 text-ink-900'
                       else if (c === selReason) cls = 'border-ochre-600 bg-ochre-500 text-ink-900'
@@ -318,7 +318,7 @@ export default function Intruso() {
 
         {/* Fim de jogo */}
         {over && (
-          <div className="mt-8 w-full max-w-md border-2 border-ink-900 bg-paper-100 p-6 text-center">
+          <div className="mt-8 w-full max-w-md border-2 border-white/20 bg-paper-100 p-6 text-center">
             <p className="kicker">Fim da caçada{mode === 'practice' && ' · treino'}</p>
             {newRecord && (
               <p className="mt-2 animate-pop font-display text-2xl uppercase tracking-tight text-grass-600">
@@ -332,7 +332,7 @@ export default function Intruso() {
 
             {daily && (
               <>
-                <div className="mt-5 grid grid-cols-4 gap-px overflow-hidden border-2 border-ink-900 bg-ink-900/15">
+                <div className="mt-5 grid grid-cols-4 gap-px overflow-hidden border-2 border-white/20 bg-ink-900/15">
                   {[
                     ['Total', career.total],
                     ['Recorde', career.best],
@@ -363,7 +363,7 @@ export default function Intruso() {
             </button>
             <Link
               to="/"
-              className="btn-stamp mt-2 block border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
+              className="btn-stamp mt-2 block border-2 border-white/20 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
             >
               Voltar pro almanaque
             </Link>
@@ -373,7 +373,7 @@ export default function Intruso() {
 
       {showHelp && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={closeHelp}>
-          <div className="w-full max-w-sm border-2 border-ink-900 bg-paper p-6" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-sm border-2 border-white/20 bg-paper p-6" onClick={(e) => e.stopPropagation()}>
             <p className="kicker">Como jogar</p>
             <h2 className="mt-1 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900">
               O Intruso

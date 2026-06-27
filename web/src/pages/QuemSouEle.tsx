@@ -308,7 +308,7 @@ export default function QuemSouEle() {
             <button
               onClick={() => setShowHelp(true)}
               aria-label="Como jogar"
-              className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink-900 font-cond text-sm font-700 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
+              className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white/20 font-cond text-sm font-700 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
             >
               ?
             </button>
@@ -442,14 +442,14 @@ export default function QuemSouEle() {
                 <button
                   onClick={revelar}
                   disabled={revealCount <= 0 || revealed >= answer.length}
-                  className="btn-stamp border-2 border-ink-900 px-4 py-2 text-ink-900 hover:bg-grass-700 hover:text-ink-900 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="btn-stamp border-2 border-white/20 px-4 py-2 text-ink-900 hover:bg-grass-700 hover:text-ink-900 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   Revelar letra ({revealCount})
                 </button>
                 <button
                   onClick={pular}
                   disabled={skipCount <= 0}
-                  className="btn-stamp border-2 border-ink-900 px-4 py-2 text-ink-900 hover:bg-grass-700 hover:text-ink-900 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="btn-stamp border-2 border-white/20 px-4 py-2 text-ink-900 hover:bg-grass-700 hover:text-ink-900 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   Pular ({skipCount})
                 </button>
@@ -460,7 +460,7 @@ export default function QuemSouEle() {
 
         {/* ===== Fim de rodada ===== */}
         {ended && (
-          <div className="mt-6 w-full max-w-md border-2 border-ink-900 bg-paper-100 p-5 text-center">
+          <div className="mt-6 w-full max-w-md border-2 border-white/20 bg-paper-100 p-5 text-center">
             {careerMode && careerDoneToday ? (
               <>
                 <p className="kicker">Carreira de hoje</p>
@@ -468,7 +468,7 @@ export default function QuemSouEle() {
                 <p className="font-cond text-xs font-500 uppercase tracking-wider text-ink-600">
                   pontos hoje · chegou ao estágio {stage}
                 </p>
-                <div className="mt-5 grid grid-cols-3 gap-px overflow-hidden border-2 border-ink-900 bg-ink-900/15">
+                <div className="mt-5 grid grid-cols-3 gap-px overflow-hidden border-2 border-white/20 bg-ink-900/15">
                   {[
                     ['Total', career.total],
                     ['Recorde/dia', career.best],
@@ -491,7 +491,7 @@ export default function QuemSouEle() {
                 </button>
                 <button
                   onClick={praticar}
-                  className="btn-stamp mt-2 w-full border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
+                  className="btn-stamp mt-2 w-full border-2 border-white/20 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
                 >
                   Treinar (sem pontos)
                 </button>
@@ -535,7 +535,7 @@ export default function QuemSouEle() {
                 </button>
                 <button
                   onClick={voltarCarreira}
-                  className="btn-stamp mt-2 w-full border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
+                  className="btn-stamp mt-2 w-full border-2 border-white/20 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
                 >
                   Voltar pra carreira
                 </button>
@@ -588,7 +588,7 @@ export default function QuemSouEle() {
           onClick={closeHelp}
         >
           <div
-            className="w-full max-w-sm border-2 border-ink-900 bg-paper p-6"
+            className="w-full max-w-sm border-2 border-white/20 bg-paper p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <p className="kicker">Como jogar</p>

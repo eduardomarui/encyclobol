@@ -19,7 +19,7 @@ export default function NaoEncontrado() {
         </Link>
         <Link
           to="/"
-          className="btn-stamp border-2 border-ink-900 px-7 py-3 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
+          className="btn-stamp border-2 border-white/20 px-7 py-3 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
         >
           Voltar ao início
         </Link>

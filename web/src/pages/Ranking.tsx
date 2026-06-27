@@ -133,7 +133,7 @@ export default function Ranking() {
 
         {/* Sem backend configurado */}
         {!rankingEnabled && (
-          <div className="mt-8 border-2 border-ink-900 bg-paper-100 p-8 text-center">
+          <div className="mt-8 border-2 border-white/20 bg-paper-100 p-8 text-center">
             <p className="font-display text-3xl uppercase tracking-tight text-ink-900">Em breve</p>
             <p className="mx-auto mt-2 max-w-md font-serif text-base italic text-ink-600">
               O ranking global e de amigos está chegando. Continue somando pontos — quando ligar, seu
@@ -150,7 +150,7 @@ export default function Ranking() {
 
         {/* Definir apelido */}
         {rankingEnabled && !loading && !profile && (
-          <div className="mt-8 border-2 border-ink-900 bg-paper-100 p-6">
+          <div className="mt-8 border-2 border-white/20 bg-paper-100 p-6">
             <p className="kicker">Entre no ranking</p>
             <h2 className="mt-1 font-display text-2xl uppercase tracking-tight text-ink-900">
               Escolha seu apelido
@@ -163,7 +163,7 @@ export default function Ranking() {
                 value={nick}
                 onChange={(e) => setNick(e.target.value.slice(0, 20))}
                 placeholder="Seu apelido"
-                className="flex-1 border-2 border-ink-900 bg-paper px-4 py-2.5 font-cond text-base uppercase tracking-wide text-ink-900 outline-none placeholder:text-ink-500"
+                className="flex-1 border-2 border-white/20 bg-paper px-4 py-2.5 font-cond text-base uppercase tracking-wide text-ink-900 outline-none placeholder:text-ink-500"
               />
               <button
                 onClick={salvarApelido}
@@ -181,7 +181,7 @@ export default function Ranking() {
         {rankingEnabled && !loading && profile && (
           <>
             {/* Cartão do jogador */}
-            <div className="mt-6 flex flex-col gap-3 border-2 border-ink-900 bg-paper-100 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mt-6 flex flex-col gap-3 border-2 border-white/20 bg-paper-100 p-5 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="kicker text-ink-500">Você</p>
                 <p className="font-display text-2xl uppercase tracking-tight text-ink-900">{profile.nick}</p>
@@ -203,11 +203,11 @@ export default function Ranking() {
                 value={code}
                 onChange={(e) => setCode(e.target.value.toUpperCase().slice(0, 6))}
                 placeholder="Código do amigo"
-                className="flex-1 border-2 border-ink-900 bg-paper px-4 py-2.5 font-cond text-base uppercase tracking-[0.2em] text-ink-900 outline-none placeholder:tracking-wider placeholder:text-ink-500"
+                className="flex-1 border-2 border-white/20 bg-paper px-4 py-2.5 font-cond text-base uppercase tracking-[0.2em] text-ink-900 outline-none placeholder:tracking-wider placeholder:text-ink-500"
               />
               <button
                 onClick={adicionarAmigo}
-                className="btn-stamp border-2 border-ink-900 px-5 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
+                className="btn-stamp border-2 border-white/20 px-5 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
               >
                 Adicionar
               </button>
@@ -221,7 +221,7 @@ export default function Ranking() {
                   key={p}
                   onClick={() => changePeriod(p)}
                   className={`border-2 px-3 py-1.5 font-cond text-xs font-700 uppercase tracking-wide transition-colors ${
-                    period === p ? 'border-ink-900 bg-grass-700 text-ink-900' : 'border-ink-900/30 text-ink-700 hover:border-ink-900'
+                    period === p ? 'border-white/20 bg-grass-700 text-ink-900' : 'border-ink-900/30 text-ink-700 hover:border-white/20'
                   }`}
                 >
                   {label}
@@ -234,7 +234,7 @@ export default function Ranking() {
               <button
                 onClick={() => changeGame(null)}
                 className={`border-2 px-3 py-1.5 font-cond text-xs font-600 uppercase tracking-wide transition-colors ${
-                  gameFilter === null ? 'border-grass-700 bg-grass-600 text-ink-900' : 'border-ink-900/30 text-ink-700 hover:border-ink-900'
+                  gameFilter === null ? 'border-grass-700 bg-grass-600 text-ink-900' : 'border-ink-900/30 text-ink-700 hover:border-white/20'
                 }`}
               >
                 Geral
@@ -244,7 +244,7 @@ export default function Ranking() {
                   key={g}
                   onClick={() => changeGame(g)}
                   className={`border-2 px-3 py-1.5 font-cond text-xs font-600 uppercase tracking-wide transition-colors ${
-                    gameFilter === g ? 'border-grass-700 bg-grass-600 text-ink-900' : 'border-ink-900/30 text-ink-700 hover:border-ink-900'
+                    gameFilter === g ? 'border-grass-700 bg-grass-600 text-ink-900' : 'border-ink-900/30 text-ink-700 hover:border-white/20'
                   }`}
                 >
                   {g}
@@ -268,7 +268,7 @@ export default function Ranking() {
             </div>
 
             {/* Tabela */}
-            <div className="mt-3 overflow-hidden border-2 border-ink-900">
+            <div className="mt-3 overflow-hidden border-2 border-white/20">
               {rows.length === 0 && (
                 <p className="bg-paper-100 px-4 py-6 text-center font-serif text-sm italic text-ink-600">
                   {tab === 'friends'

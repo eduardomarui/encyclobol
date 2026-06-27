@@ -212,7 +212,7 @@ export default function Conexoes() {
             <button
               onClick={() => setShowHelp(true)}
               aria-label="Como jogar"
-              className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink-900 font-cond text-sm font-700 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
+              className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white/20 font-cond text-sm font-700 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
             >
               ?
             </button>
@@ -262,8 +262,8 @@ export default function Conexoes() {
                     onClick={() => toggle(name)}
                     className={`flex min-h-[60px] items-center justify-center rounded-sm border-2 px-1 py-2 text-center font-cond text-[11px] font-600 uppercase leading-tight transition-colors sm:text-sm ${
                       on
-                        ? 'border-ink-900 bg-grass-700 text-ink-900'
-                        : 'border-ink-900/25 bg-paper text-ink-900 hover:border-ink-900'
+                        ? 'border-white/20 bg-grass-700 text-ink-900'
+                        : 'border-ink-900/25 bg-paper text-ink-900 hover:border-white/20'
                     }`}
                   >
                     {name}
@@ -292,13 +292,13 @@ export default function Conexoes() {
             <div className="mt-4 flex flex-wrap justify-center gap-2">
               <button
                 onClick={() => setOrder((o) => seededShuffle(o, Math.floor(Math.random() * 1e9) + 1))}
-                className="btn-stamp border-2 border-ink-900 px-5 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
+                className="btn-stamp border-2 border-white/20 px-5 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
               >
                 Embaralhar
               </button>
               <button
                 onClick={() => setSelected([])}
-                className="btn-stamp border-2 border-ink-900 px-5 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
+                className="btn-stamp border-2 border-white/20 px-5 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
               >
                 Limpar
               </button>
@@ -313,7 +313,7 @@ export default function Conexoes() {
           )}
 
           {over && (
-            <div className="mt-4 border-2 border-ink-900 bg-paper-100 p-6 text-center">
+            <div className="mt-4 border-2 border-white/20 bg-paper-100 p-6 text-center">
               <p className="kicker">
                 {won ? 'Cravou os quatro grupos!' : 'Acabaram as tentativas'}
                 {!daily && ' · treino'}
@@ -331,7 +331,7 @@ export default function Conexoes() {
                     </span>
                   )}
                   {ordered && (
-                    <span className="border border-ink-900 bg-grass-700 px-2 py-0.5 font-cond text-[10px] font-700 uppercase tracking-wide text-ink-900">
+                    <span className="border border-white/20 bg-grass-700 px-2 py-0.5 font-cond text-[10px] font-700 uppercase tracking-wide text-ink-900">
                       Na ordem +{ORDER_BONUS}
                     </span>
                   )}
@@ -340,7 +340,7 @@ export default function Conexoes() {
 
               {daily && (
                 <>
-                  <div className="mt-5 grid grid-cols-4 gap-px overflow-hidden border-2 border-ink-900 bg-ink-900/15">
+                  <div className="mt-5 grid grid-cols-4 gap-px overflow-hidden border-2 border-white/20 bg-ink-900/15">
                     {[
                       ['Total', career.total],
                       ['Recorde', career.best],
@@ -371,7 +371,7 @@ export default function Conexoes() {
               </button>
               <Link
                 to="/"
-                className="btn-stamp mt-2 block border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
+                className="btn-stamp mt-2 block border-2 border-white/20 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
               >
                 Voltar pro almanaque
               </Link>
@@ -382,7 +382,7 @@ export default function Conexoes() {
 
       {showHelp && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={closeHelp}>
-          <div className="w-full max-w-sm border-2 border-ink-900 bg-paper p-6" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-sm border-2 border-white/20 bg-paper p-6" onClick={(e) => e.stopPropagation()}>
             <p className="kicker">Como jogar</p>
             <h2 className="mt-1 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900">
               Quarteto

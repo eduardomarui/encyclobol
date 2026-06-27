@@ -94,7 +94,7 @@ function StatusTag({ status }: { status: Status }) {
 
 export default function Games() {
   return (
-    <section id="jogos" className="border-t-2 border-ink-900 bg-paper-100">
+    <section id="jogos" className="border-t border-white/10 bg-paper-100">
       <div className="container-page py-16 sm:py-20">
         <header className="flex flex-col items-baseline justify-between gap-3 border-b border-ink-900/15 pb-5 sm:flex-row">
           <div>

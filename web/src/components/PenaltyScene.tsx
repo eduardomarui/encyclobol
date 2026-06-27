@@ -159,7 +159,7 @@ export function PenaltyScene({
   return (
     <div
       ref={sceneRef}
-      className={`relative ${compact ? 'h-52 sm:h-60' : 'h-64'} w-full max-w-sm overflow-hidden rounded-sm border-2 border-ink-900 ${shot?.net ? 'animate-shake' : ''}`}
+      className={`relative ${compact ? 'h-52 sm:h-60' : 'h-64'} w-full max-w-sm overflow-hidden rounded-sm border-2 border-white/20 ${shot?.net ? 'animate-shake' : ''}`}
     >
       <div className="absolute inset-0 bg-gradient-to-b from-[#9ec7d8] via-[#86b98f] to-grass-700" />
       <div className="absolute inset-0" style={{ background: 'radial-gradient(120% 55% at 50% 0%, rgba(255,255,255,0.22), transparent 60%)' }} />

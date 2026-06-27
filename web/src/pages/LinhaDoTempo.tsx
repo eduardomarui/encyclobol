@@ -174,7 +174,7 @@ export default function LinhaDoTempo() {
             <button
               onClick={() => setShowHelp(true)}
               aria-label="Como jogar"
-              className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink-900 font-cond text-sm font-700 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
+              className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white/20 font-cond text-sm font-700 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
             >
               ?
             </button>
@@ -226,7 +226,7 @@ export default function LinhaDoTempo() {
 
         {/* Carta atual */}
         {!over && current && (
-          <div className="mt-6 w-full max-w-sm border-2 border-ink-900 bg-paper-100 p-5 text-center">
+          <div className="mt-6 w-full max-w-sm border-2 border-white/20 bg-paper-100 p-5 text-center">
             <p className="kicker">Onde ele se encaixa?</p>
             <p className="mt-2 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900">
               {current.player.display}
@@ -261,7 +261,7 @@ export default function LinhaDoTempo() {
                   <span className="w-1.5 flex-none" />
                 )}
                 {slot < placed.length && (
-                  <div className="flex w-[84px] flex-none flex-col items-center justify-between border-2 border-ink-900 bg-paper p-2 text-center">
+                  <div className="flex w-[84px] flex-none flex-col items-center justify-between border-2 border-white/20 bg-paper p-2 text-center">
                     <span className="font-cond text-[11px] font-600 uppercase leading-tight text-ink-900">
                       {placed[slot].player.display}
                     </span>
@@ -275,7 +275,7 @@ export default function LinhaDoTempo() {
 
         {/* Fim de jogo */}
         {over && (
-          <div className="mt-2 w-full max-w-md border-2 border-ink-900 bg-paper-100 p-6 text-center">
+          <div className="mt-2 w-full max-w-md border-2 border-white/20 bg-paper-100 p-6 text-center">
             <p className="kicker">Fim de jogo{mode === 'practice' && (hard ? ' · difícil' : ' · treino')}</p>
             {newRecord && (
               <p className="mt-2 animate-pop font-display text-2xl uppercase tracking-tight text-grass-600">
@@ -289,7 +289,7 @@ export default function LinhaDoTempo() {
 
             {daily && (
               <>
-                <div className="mt-5 grid grid-cols-4 gap-px overflow-hidden border-2 border-ink-900 bg-ink-900/15">
+                <div className="mt-5 grid grid-cols-4 gap-px overflow-hidden border-2 border-white/20 bg-ink-900/15">
                   {[
                     ['Total', career.total],
                     ['Recorde', career.best],
@@ -321,14 +321,14 @@ export default function LinhaDoTempo() {
               </button>
               <button
                 onClick={() => restart(true)}
-                className="btn-stamp flex-1 border-2 border-ink-900 px-4 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
+                className="btn-stamp flex-1 border-2 border-white/20 px-4 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
               >
                 Difícil
               </button>
             </div>
             <Link
               to="/"
-              className="btn-stamp mt-2 block border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
+              className="btn-stamp mt-2 block border-2 border-white/20 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
             >
               Voltar pro almanaque
             </Link>
@@ -338,7 +338,7 @@ export default function LinhaDoTempo() {
 
       {showHelp && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={closeHelp}>
-          <div className="w-full max-w-sm border-2 border-ink-900 bg-paper p-6" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-sm border-2 border-white/20 bg-paper p-6" onClick={(e) => e.stopPropagation()}>
             <p className="kicker">Como jogar</p>
             <h2 className="mt-1 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900">
               Linha do Tempo

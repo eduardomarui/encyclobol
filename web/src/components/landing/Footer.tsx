@@ -38,7 +38,7 @@ const cols: { title: string; links: FLink[] }[] = [
 
 export default function Footer() {
   return (
-    <footer className="border-t-2 border-ink-900 bg-grass-700 text-ink-900">
+    <footer className="border-t border-white/10 bg-grass-700 text-ink-900">
       <div className="container-page py-14">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>

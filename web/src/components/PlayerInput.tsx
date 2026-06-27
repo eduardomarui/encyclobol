@@ -78,7 +78,7 @@ export default function PlayerInput({
           placeholder={placeholder}
           autoFocus
           autoComplete="off"
-          className="flex-1 border-2 border-ink-900 bg-paper px-4 py-3 font-serif text-base text-ink-900 outline-none placeholder:text-ink-500 focus:bg-paper-100"
+          className="flex-1 border-2 border-white/20 bg-paper px-4 py-3 font-serif text-base text-ink-900 outline-none placeholder:text-ink-500 focus:bg-paper-100"
         />
         <button
           type="button"
@@ -90,7 +90,7 @@ export default function PlayerInput({
       </div>
 
       {open && matches.length > 0 && (
-        <ul className="absolute left-0 right-0 top-full z-20 mt-1 max-h-64 overflow-auto border-2 border-ink-900 bg-paper shadow-lg">
+        <ul className="absolute left-0 right-0 top-full z-20 mt-1 max-h-64 overflow-auto border-2 border-white/20 bg-paper shadow-lg">
           {matches.map((o, i) => (
             <li key={o.display}>
               <button

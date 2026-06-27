@@ -38,7 +38,7 @@ function Bullet() {
 
 export default function Pricing() {
   return (
-    <section id="planos" className="border-t-2 border-ink-900 halftone">
+    <section id="planos" className="border-t border-white/10 halftone">
       <div className="container-page py-16 sm:py-20">
         <header className="mx-auto max-w-2xl text-center">
           <p className="kicker">Faça sua assinatura</p>
@@ -51,7 +51,7 @@ export default function Pricing() {
           </p>
         </header>
 
-        <div className="mx-auto mt-12 grid max-w-3xl gap-px overflow-hidden border-2 border-ink-900 bg-ink-900/15 sm:grid-cols-2">
+        <div className="mx-auto mt-12 grid max-w-3xl gap-px overflow-hidden border-2 border-white/20 bg-ink-900/15 sm:grid-cols-2">
           {plans.map((p) => (
             <div
               key={p.name}

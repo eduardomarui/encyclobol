@@ -35,7 +35,7 @@ export default function Perfil() {
         </header>
 
         {/* Resumão */}
-        <div className="mt-6 grid grid-cols-3 gap-px overflow-hidden border-2 border-ink-900 bg-ink-900/15">
+        <div className="mt-6 grid grid-cols-3 gap-px overflow-hidden border-2 border-white/20 bg-ink-900/15">
           {[
             ['Pontos no total', total.toLocaleString('pt-BR')],
             ['Conquistas', `${unlocked}/${achievements.length}`],
@@ -63,7 +63,7 @@ export default function Perfil() {
             <div
               key={a.id}
               className={`flex items-center gap-3 border-2 p-3 ${
-                a.unlocked ? 'border-ink-900 bg-paper-100' : 'border-ink-900/15 bg-paper opacity-60'
+                a.unlocked ? 'border-white/20 bg-paper-100' : 'border-ink-900/15 bg-paper opacity-60'
               }`}
             >
               <Medal on={a.unlocked} />
@@ -83,7 +83,7 @@ export default function Perfil() {
             <Link
               key={g.key}
               to={g.route}
-              className="group flex flex-col border-2 border-ink-900 bg-paper-100 p-4 transition-colors hover:bg-paper"
+              className="group flex flex-col border-2 border-white/20 bg-paper-100 p-4 transition-colors hover:bg-paper"
             >
               <div className="flex items-center justify-between">
                 <span className="font-cond text-sm font-700 uppercase tracking-wide text-ink-900">{g.name}</span>

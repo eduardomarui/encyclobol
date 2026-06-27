@@ -55,7 +55,7 @@ export default function Nav() {
           </Link>
           <button
             onClick={() => setOpen((o) => !o)}
-            className="flex h-9 w-9 items-center justify-center border-2 border-ink-900 text-ink-900 md:hidden"
+            className="flex h-9 w-9 items-center justify-center border-2 border-white/20 text-ink-900 md:hidden"
             aria-label="Abrir menu"
             aria-expanded={open}
           >

@@ -23,7 +23,7 @@ const rules = [
 
 export default function HowItWorks() {
   return (
-    <section id="como-funciona" className="border-t-2 border-ink-900 bg-grass-700 text-ink-900">
+    <section id="como-funciona" className="border-t border-white/10 bg-grass-700 text-ink-900">
       <div className="container-page py-16 sm:py-20">
         <header className="border-b border-paper/20 pb-5">
           <p className="font-cond text-xs font-600 uppercase tracking-[0.18em] text-grass-400">
