@@ -183,3 +183,88 @@ language sql security definer set search_path = public as $$
   group by p.id, p.nick
   order by total desc;
 $$;
+
+-- ============================================================
+-- Duelo de Pênaltis em tempo real
+-- ============================================================
+create table if not exists public.matches (
+  id uuid primary key default gen_random_uuid(),
+  code text unique not null,
+  host_id uuid not null references auth.users(id) on delete cascade,
+  guest_id uuid references auth.users(id) on delete cascade,
+  host_nick text not null,
+  guest_nick text,
+  seed int not null,
+  rounds int not null default 5,
+  status text not null default 'waiting', -- waiting | playing | done
+  created_at timestamptz default now()
+);
+
+create table if not exists public.match_moves (
+  match_id uuid not null references public.matches(id) on delete cascade,
+  round int not null,
+  player_id uuid not null references auth.users(id) on delete cascade,
+  choice int not null,      -- índice escolhido; -1 = tempo esgotado
+  correct boolean not null,
+  created_at timestamptz default now(),
+  primary key (match_id, round, player_id)
+);
+
+alter table public.matches     enable row level security;
+alter table public.match_moves enable row level security;
+
+drop policy if exists matches_read   on public.matches;
+drop policy if exists matches_insert on public.matches;
+drop policy if exists matches_update on public.matches;
+create policy matches_read   on public.matches for select using (true);
+create policy matches_insert on public.matches for insert with check (auth.uid() = host_id);
+create policy matches_update on public.matches for update using (auth.uid() = host_id or auth.uid() = guest_id);
+
+drop policy if exists moves_read   on public.match_moves;
+drop policy if exists moves_insert on public.match_moves;
+create policy moves_read   on public.match_moves for select using (true);
+create policy moves_insert on public.match_moves for insert with check (auth.uid() = player_id);
+
+-- Habilita Realtime nas duas tabelas (ignora se já estiverem habilitadas)
+do $$ begin
+  alter publication supabase_realtime add table public.matches;
+exception when others then null; end $$;
+do $$ begin
+  alter publication supabase_realtime add table public.match_moves;
+exception when others then null; end $$;
+
+-- Cria uma sala (host = quem chama); gera código e seed
+create or replace function public.create_match(p_rounds int default 5)
+returns public.matches
+language plpgsql security definer set search_path = public as $$
+declare uid uuid := auth.uid(); n text; v_code text; m public.matches;
+begin
+  if uid is null then raise exception 'nao autenticado'; end if;
+  select nick into n from public.profiles where id = uid;
+  if n is null then raise exception 'defina um apelido primeiro'; end if;
+  loop
+    v_code := public.gen_friend_code();
+    exit when not exists (select 1 from public.matches where code = v_code and status <> 'done');
+  end loop;
+  insert into public.matches(code, host_id, host_nick, seed, rounds)
+  values (v_code, uid, n, (floor(random() * 1000000000))::int, p_rounds)
+  returning * into m;
+  return m;
+end; $$;
+
+-- Entra numa sala pelo código
+create or replace function public.join_match(p_code text)
+returns public.matches
+language plpgsql security definer set search_path = public as $$
+declare uid uuid := auth.uid(); n text; m public.matches;
+begin
+  if uid is null then raise exception 'nao autenticado'; end if;
+  select nick into n from public.profiles where id = uid;
+  if n is null then raise exception 'defina um apelido primeiro'; end if;
+  select * into m from public.matches where code = upper(trim(p_code)) and status = 'waiting';
+  if m.id is null then raise exception 'partida nao encontrada'; end if;
+  if m.host_id = uid then raise exception 'voce criou essa partida'; end if;
+  update public.matches set guest_id = uid, guest_nick = n, status = 'playing'
+   where id = m.id returning * into m;
+  return m;
+end; $$;

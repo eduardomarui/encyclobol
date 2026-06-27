@@ -417,6 +417,12 @@ export default function Penaltis() {
             <span className="font-cond text-sm font-600 uppercase tracking-wider">← Encyclobol</span>
           </Link>
           <div className="flex items-center gap-3">
+            <Link
+              to="/jogos/penaltis/online"
+              className="font-cond text-xs font-700 uppercase tracking-wider text-grass-600 hover:text-grass-700"
+            >
+              1×1 online
+            </Link>
             <span className="font-cond text-xs font-500 uppercase tracking-[0.16em] text-ink-600">
               {copaMode ? 'Copa de Pênaltis' : 'Modo treino'}
             </span>
