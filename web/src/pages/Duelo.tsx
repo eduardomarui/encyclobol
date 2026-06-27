@@ -155,7 +155,8 @@ export default function Duelo() {
         if (m.status === 'playing') setPhase((ph) => (ph === 'waiting' ? 'play' : ph))
       }
     }
-    const iv = setInterval(tick, 2500)
+    tick() // imediato, não espera o primeiro intervalo
+    const iv = setInterval(tick, 2000)
     const onVis = () => {
       if (!document.hidden) tick()
     }
