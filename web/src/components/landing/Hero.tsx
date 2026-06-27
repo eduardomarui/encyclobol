@@ -1,8 +1,13 @@
+import { players } from '../../data/players'
+import { quiz } from '../../data/quiz'
+
+// Números reais, calculados da própria base — nunca desatualizam.
+const nacoes = new Set(players.map((p) => p.nat)).size
 const stats = [
-  { value: '5.729', label: 'jogadores catalogados' },
-  { value: '250', label: 'elencos históricos' },
-  { value: '52', label: 'seleções' },
-  { value: '8', label: 'modos de jogo' },
+  { value: players.length.toLocaleString('pt-BR'), label: 'craques catalogados' },
+  { value: String(nacoes), label: 'seleções' },
+  { value: quiz.length.toLocaleString('pt-BR'), label: 'perguntas no quiz' },
+  { value: '6', label: 'modos de jogo' },
 ]
 
 function dateline() {
@@ -26,7 +31,7 @@ export default function Hero() {
           </span>
           <span className="hidden text-ink-900/30 sm:inline">|</span>
           <span className="font-cond text-[11px] font-500 uppercase tracking-[0.2em] text-ink-600">
-            Edição diária · PT · ES · EN
+            Edição diária · em português
           </span>
         </div>
       </div>
