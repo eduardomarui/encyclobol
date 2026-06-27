@@ -1,17 +1,38 @@
-const BASE = import.meta.env.BASE_URL
+import { Link } from 'react-router-dom'
 
-const cols = [
+const BASE = import.meta.env.BASE_URL
+const GH = 'https://github.com/eduardomarui/encyclobol'
+
+type FLink = { label: string; to?: string; href?: string }
+
+const cols: { title: string; links: FLink[] }[] = [
   {
     title: 'O caderno',
-    links: ['Tira-Teima', 'Copa de Pênaltis', 'Quarteto', 'Linha do Tempo', 'O Intruso', 'Craque Misterioso'],
+    links: [
+      { label: 'Tira-Teima', to: '/jogos/quem-sou-ele' },
+      { label: 'Copa de Pênaltis', to: '/jogos/penaltis' },
+      { label: 'Quarteto', to: '/jogos/conexoes' },
+      { label: 'Linha do Tempo', to: '/jogos/linha-do-tempo' },
+      { label: 'O Intruso', to: '/jogos/o-intruso' },
+      { label: 'Craque Misterioso', to: '/jogos/craque-misterioso' },
+    ],
   },
   {
     title: 'A casa',
-    links: ['Como se joga', 'Assine', 'Ranking', 'Quem faz'],
+    links: [
+      { label: 'Os jogos', to: '/jogos' },
+      { label: 'Ranking', to: '/ranking' },
+      { label: 'Meu perfil', to: '/perfil' },
+      { label: 'Como se joga', href: `${BASE}#como-funciona` },
+    ],
   },
   {
     title: 'Miudezas',
-    links: ['Termos de uso', 'Privacidade', 'Fale com a redação'],
+    links: [
+      { label: 'Termos de uso', to: '/termos' },
+      { label: 'Privacidade', to: '/privacidade' },
+      { label: 'Fale com a gente', href: GH },
+    ],
   },
 ]
 
@@ -39,16 +60,22 @@ export default function Footer() {
                 {c.title}
               </h4>
               <ul className="mt-4 space-y-2.5">
-                {c.links.map((l) => (
-                  <li key={l}>
-                    <a
-                      href="#"
-                      className="font-serif text-[15px] text-paper/70 transition-colors hover:text-paper"
-                    >
-                      {l}
-                    </a>
-                  </li>
-                ))}
+                {c.links.map((l) => {
+                  const cls = 'font-serif text-[15px] text-paper/70 transition-colors hover:text-paper'
+                  return (
+                    <li key={l.label}>
+                      {l.to ? (
+                        <Link to={l.to} className={cls}>
+                          {l.label}
+                        </Link>
+                      ) : (
+                        <a href={l.href} className={cls} target={l.href?.startsWith('http') ? '_blank' : undefined} rel="noopener noreferrer">
+                          {l.label}
+                        </a>
+                      )}
+                    </li>
+                  )
+                })}
               </ul>
             </div>
           ))}
