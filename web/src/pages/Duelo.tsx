@@ -16,12 +16,12 @@ import {
   type Match,
   type Move,
 } from '../lib/duel'
+import { PenaltyScene, shotFromOutcome, type Kind } from '../components/PenaltyScene'
 
 const ATTACK_SEC = 10 // tempo pra cobrar
 const DEF_SEC = 6 // tempo pra defender (menos — pressão; e perguntas mais difíceis)
 const HELP_KEY = 'encyclobol:duelo:help'
 type Phase = 'lobby' | 'waiting' | 'play' | 'done'
-type Kind = 'goal' | 'save' | 'out'
 
 // ---------- Helpers puros (mesma conta nos dois clientes) ----------
 const findMove = (moves: Move[], r: number, pid: string | null) =>
@@ -57,76 +57,6 @@ function scoresOf(moves: Move[], match: Match) {
     }
   }
   return s
-}
-
-// ---------- Cena animada ----------
-function Scene({ kind, dir }: { kind: Kind; dir: 0 | 1 | 2 }) {
-  const [go, setGo] = useState(false)
-  useEffect(() => {
-    const t = setTimeout(() => setGo(true), 60)
-    return () => clearTimeout(t)
-  }, [])
-  const sideX = [22, 50, 78][dir]
-  // bola: 'out' vai por cima; 'goal'/'save' vão pro canto
-  const ballX = kind === 'out' ? sideX : sideX
-  const ballY = kind === 'out' ? 4 : 30
-  // goleiro: defende = no canto da bola; gol = canto oposto; fora = chuta a esmo
-  const keeperX = kind === 'save' ? sideX : kind === 'goal' ? [78, 50, 22][dir] : [50, 22, 78][dir]
-  const label = kind === 'goal' ? 'GOL!' : kind === 'save' ? 'DEFENDEU!' : 'PRA FORA!'
-  return (
-    <div className={`relative mx-auto h-52 w-full max-w-sm overflow-hidden rounded-sm border-2 border-ink-900 ${go && kind !== 'out' ? 'animate-shake' : ''}`}>
-      <div className="absolute inset-0 bg-gradient-to-b from-[#9ec7d8] via-[#86b98f] to-grass-700" />
-      {/* gol */}
-      <div className="absolute left-[10%] top-[14%] w-[80%]">
-        <svg viewBox="0 0 100 44" preserveAspectRatio="none" className="h-24 w-full">
-          <g stroke="#f2eee2" strokeWidth="0.4" opacity="0.5">
-            {Array.from({ length: 11 }).map((_, i) => (
-              <line key={i} x1={4 + i * 9.2} y1="4" x2={4 + i * 9.2} y2="42" />
-            ))}
-            {Array.from({ length: 5 }).map((_, i) => (
-              <line key={`h${i}`} x1="4" y1={4 + i * 8} x2="96" y2={4 + i * 8} />
-            ))}
-          </g>
-          <path d="M4 42 V4 H96 V42" fill="none" stroke="#f2eee2" strokeWidth="3" strokeLinejoin="round" />
-        </svg>
-      </div>
-      {/* goleiro */}
-      <div
-        className="absolute z-10 -translate-x-1/2 -translate-y-1/2"
-        style={{ left: `${go ? keeperX : 50}%`, top: '42%', transition: 'left .5s cubic-bezier(.3,1.2,.5,1)' }}
-      >
-        <svg viewBox="0 0 40 44" className="h-20 w-20">
-          <circle cx="20" cy="9" r="5" fill="#e8c39e" />
-          <path d="M13 16 Q20 12 27 16 L26 32 Q20 35 14 32 Z" fill="#caa83a" />
-          <path d="M20 18 L6 14" stroke="#caa83a" strokeWidth="5" strokeLinecap="round" />
-          <path d="M20 18 L34 14" stroke="#caa83a" strokeWidth="5" strokeLinecap="round" />
-          <circle cx="6" cy="14" r="4" fill="#f2eee2" stroke="#16130d" strokeWidth="1" />
-          <circle cx="34" cy="14" r="4" fill="#f2eee2" stroke="#16130d" strokeWidth="1" />
-        </svg>
-      </div>
-      {/* bola */}
-      <div
-        className="absolute z-20 -translate-x-1/2 -translate-y-1/2"
-        style={{
-          left: `${go ? ballX : 50}%`,
-          top: `${go ? ballY : 86}%`,
-          transition: 'left .6s ease-out, top .6s ease-out',
-        }}
-      >
-        <div style={{ animation: go ? 'ballspin .4s linear infinite' : 'none' }}>
-          <svg viewBox="0 0 24 24" className="h-7 w-7 text-paper drop-shadow">
-            <circle cx="12" cy="12" r="10" fill="currentColor" stroke="#16130d" strokeWidth="1.5" />
-            <path d="M12 6l3 2-1 3h-4l-1-3z" fill="#16130d" />
-          </svg>
-        </div>
-      </div>
-      <div className="absolute inset-x-0 bottom-3 z-30 flex justify-center">
-        <span className={`animate-pop rounded-sm px-4 py-1.5 font-display text-2xl uppercase tracking-tight text-paper ${kind === 'goal' ? 'bg-grass-600' : 'bg-ochre-500'}`}>
-          {label}
-        </span>
-      </div>
-    </div>
-  )
 }
 
 export default function Duelo() {
@@ -434,8 +364,8 @@ export default function Duelo() {
   }
 
   const pairNo = Math.floor(shown / 2) + 1
-  const sceneKind = match ? outcomeOf(moves, match, shown) : 'out'
-  const sceneDir = match ? ((match.seed + shown * 7) % 3) as 0 | 1 | 2 : 1
+  const sceneKind: Kind = match ? outcomeOf(moves, match, shown) : 'out'
+  const sceneShot = match ? shotFromOutcome(sceneKind, match.seed + shown) : null
 
   return (
     <div className="flex min-h-screen flex-col bg-paper">
@@ -528,24 +458,21 @@ export default function Duelo() {
               </p>
             )}
 
-            {revealing ? (
-              <div className="mt-3">
-                <Scene kind={sceneKind} dir={sceneDir} />
-              </div>
-            ) : iMoved ? (
-              <div className="mt-8 flex min-h-[140px] flex-col items-center justify-center gap-2 text-center">
-                <span className="font-display text-2xl uppercase tracking-tight text-grass-600">Você respondeu ✓</span>
-                <p className="max-w-xs font-serif text-sm italic text-ink-600">
-                  O lance só acontece quando os dois respondem. Esperando o adversário{' '}
-                  {amKicker ? 'defender' : 'bater'}…
-                </p>
-              </div>
+            {/* Campo sempre visível: goleiro parado enquanto espera, anima quando os dois respondem */}
+            <div className="mt-3 flex w-full justify-center">
+              <PenaltyScene shot={revealing ? sceneShot : null} animKey={shown} />
+            </div>
+
+            {revealing ? null : iMoved ? (
+              <p className="mt-3 text-center font-serif text-sm italic text-ink-600">
+                Você respondeu ✓ — esperando o adversário {amKicker ? 'defender' : 'bater'}…
+              </p>
             ) : question ? (
               <>
-                <div className="mx-auto mt-2 h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-paper-300">
+                <div className="mx-auto mt-3 h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-paper-300">
                   <div className={`h-full transition-[width] duration-1000 ease-linear ${timeLeft <= 3 ? 'bg-ochre-500' : 'bg-grass-600'}`} style={{ width: `${(timeLeft / (amKicker ? ATTACK_SEC : DEF_SEC)) * 100}%` }} />
                 </div>
-                <p className="mt-4 kicker text-ink-500">{amKicker ? 'Sua cobrança' : 'Sua defesa (difícil)'} · {question.cat}</p>
+                <p className="mt-3 kicker text-ink-500">{amKicker ? 'Sua cobrança' : 'Sua defesa (difícil)'} · {question.cat}</p>
                 <h2 className="mt-1 font-serif text-xl leading-snug text-ink-900 sm:text-2xl">{question.q}</h2>
                 <div className="mt-3 grid gap-2">
                   {question.options.map((opt, i) => (
