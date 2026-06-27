@@ -19,6 +19,7 @@ import {
 
 const ATTACK_SEC = 10 // tempo pra cobrar
 const DEF_SEC = 6 // tempo pra defender (menos — pressão; e perguntas mais difíceis)
+const HELP_KEY = 'encyclobol:duelo:help'
 type Phase = 'lobby' | 'waiting' | 'play' | 'done'
 type Kind = 'goal' | 'save' | 'out'
 
@@ -142,7 +143,23 @@ export default function Duelo() {
   const [msg, setMsg] = useState('')
   const [copied, setCopied] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [showHelp, setShowHelp] = useState(() => {
+    try {
+      return !localStorage.getItem(HELP_KEY)
+    } catch {
+      return false
+    }
+  })
   const cleanup = useRef<(() => void) | null>(null)
+
+  function closeHelp() {
+    setShowHelp(false)
+    try {
+      localStorage.setItem(HELP_KEY, '1')
+    } catch {
+      /* ignore */
+    }
+  }
   const revealTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const seedRef = useRef<number | null>(null)
   const matchId = match?.id
@@ -368,7 +385,16 @@ export default function Duelo() {
           <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" className="h-6 w-auto" />
           <span className="font-cond text-sm font-600 uppercase tracking-wider">← Pênaltis</span>
         </Link>
-        <span className="font-cond text-xs font-500 uppercase tracking-[0.16em] text-ink-600">Duelo online</span>
+        <div className="flex items-center gap-3">
+          <span className="font-cond text-xs font-500 uppercase tracking-[0.16em] text-ink-600">Duelo online</span>
+          <button
+            onClick={() => setShowHelp(true)}
+            aria-label="Como jogar"
+            className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink-900 font-cond text-sm font-700 text-ink-900 hover:bg-ink-900 hover:text-paper"
+          >
+            ?
+          </button>
+        </div>
       </div>
     </header>
   )
@@ -472,14 +498,25 @@ export default function Duelo() {
               {shown >= match.rounds * 2 ? 'Morte súbita' : `Cobrança ${pairNo}/${match.rounds}`} ·{' '}
               <span className={amKicker ? 'text-grass-600' : 'text-ochre-600'}>{amKicker ? 'Você bate' : 'Você defende'}</span>
             </p>
+            {!revealing && (
+              <p className="mt-1 text-center font-serif text-xs italic text-ink-600">
+                {amKicker
+                  ? 'Acerte a pergunta pra mandar no gol — errou, chuta pra fora.'
+                  : 'Acerte a pergunta pra defender — errou, é gol do adversário.'}
+              </p>
+            )}
 
             {revealing ? (
               <div className="mt-3">
                 <Scene kind={sceneKind} dir={sceneDir} />
               </div>
             ) : iMoved ? (
-              <div className="mt-8 flex min-h-[140px] flex-col items-center justify-center text-center">
-                <p className="font-cond text-sm uppercase tracking-wider text-ink-500">Respondido! Aguardando o adversário…</p>
+              <div className="mt-8 flex min-h-[140px] flex-col items-center justify-center gap-2 text-center">
+                <span className="font-display text-2xl uppercase tracking-tight text-grass-600">Você respondeu ✓</span>
+                <p className="max-w-xs font-serif text-sm italic text-ink-600">
+                  O lance só acontece quando os dois respondem. Esperando o adversário{' '}
+                  {amKicker ? 'defender' : 'bater'}…
+                </p>
               </div>
             ) : question ? (
               <>
@@ -537,6 +574,39 @@ export default function Duelo() {
           </button>
         )}
       </main>
+
+      {showHelp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/60 p-4" onClick={closeHelp}>
+          <div className="w-full max-w-sm border-2 border-ink-900 bg-paper p-6" onClick={(e) => e.stopPropagation()}>
+            <p className="kicker">Como funciona</p>
+            <h2 className="mt-1 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900">
+              Duelo 1×1
+            </h2>
+            <ul className="mt-4 space-y-3 font-serif text-[15px] leading-snug text-ink-700">
+              <li>
+                Em cada cobrança, <strong>um bate e o outro defende</strong> — e isso{' '}
+                <strong>alterna</strong> a cada rodada.
+              </li>
+              <li>
+                <span className="text-grass-700">Quem bate:</span> acertou a pergunta = <strong>vai no gol</strong>;
+                errou = chuta <strong>pra fora</strong>.
+              </li>
+              <li>
+                <span className="text-ochre-600">Quem defende:</span> acertou = <strong>defendeu</strong>; errou ={' '}
+                <strong>gol</strong> do adversário. (A defesa tem <strong>menos tempo</strong> e perguntas mais difíceis.)
+              </li>
+              <li>
+                Os dois respondem <strong>ao mesmo tempo</strong>. O lance (a animação) só acontece{' '}
+                <strong>quando os dois respondem</strong>.
+              </li>
+              <li>É melhor de 5 cobranças — empatou, vai pra <strong>morte súbita</strong>.</li>
+            </ul>
+            <button onClick={closeHelp} className="btn-stamp mt-6 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700">
+              Entendi, bora
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
