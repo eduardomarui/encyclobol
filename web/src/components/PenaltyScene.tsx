@@ -1,6 +1,36 @@
 import { useEffect, useRef } from 'react'
-import { BallMark } from './landing/Icons'
 import LottieBox from './LottieBox'
+
+// Bola de futebol "de verdade": branca com gomos pretos (pentágonos).
+function SoccerBall({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 32 32" className={className}>
+      <defs>
+        <clipPath id="ballclip">
+          <circle cx="16" cy="16" r="15" />
+        </clipPath>
+      </defs>
+      <circle cx="16" cy="16" r="15" fill="#f7f4ec" stroke="#16130d" strokeWidth="1.4" />
+      <g clipPath="url(#ballclip)">
+        <g stroke="#16130d" strokeWidth="0.9" fill="none">
+          <line x1="16" y1="10.5" x2="16" y2="1" />
+          <line x1="21.2" y1="14.3" x2="30.3" y2="11.4" />
+          <line x1="19.2" y1="20.4" x2="24.8" y2="28.1" />
+          <line x1="12.8" y1="20.4" x2="7.2" y2="28.1" />
+          <line x1="10.8" y1="14.3" x2="1.7" y2="11.4" />
+        </g>
+        <g fill="#16130d">
+          <polygon points="16,10.5 21.2,14.3 19.2,20.4 12.8,20.4 10.8,14.3" />
+          <polygon points="23.6,2.3 26.6,4.5 25.5,8.1 21.7,8.1 20.6,4.5" />
+          <polygon points="28.4,16.8 31.4,19 30.3,22.6 26.5,22.6 25.4,19" />
+          <polygon points="16,25.8 19,28 17.9,31.6 14.1,31.6 13,28" />
+          <polygon points="3.6,16.8 6.6,19 5.5,22.6 1.7,22.6 0.6,19" />
+          <polygon points="8.4,2.3 11.4,4.5 10.3,8.1 6.5,8.1 5.4,4.5" />
+        </g>
+      </g>
+    </svg>
+  )
+}
 
 const LOTTIE_KEEPER = `${import.meta.env.BASE_URL}lottie/keeper.json`
 
@@ -173,7 +203,7 @@ export function PenaltyScene({
 
       <div ref={ballRef} className="absolute z-20" style={{ left: '50%', top: '82%', transform: 'translate(-50%,-50%)' }}>
         <div className="drop-shadow-[0_3px_4px_rgba(0,0,0,0.4)]" style={{ animation: shot ? 'ballspin 0.4s linear infinite' : 'none' }}>
-          <BallMark className="h-8 w-8 text-paper" />
+          <SoccerBall className="h-8 w-8" />
         </div>
       </div>
 
