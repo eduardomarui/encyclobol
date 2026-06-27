@@ -310,7 +310,7 @@ export default function Penaltis() {
 
   return (
     <div className="flex min-h-screen flex-col bg-paper">
-      <header className="sticky top-0 z-10 border-b-2 border-ink-900 bg-paper/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-10 border-b border-white/10 bg-paper/95 backdrop-blur-sm">
         <div className="container-page flex h-14 items-center justify-between">
           <Link to="/" className="flex items-center gap-2 text-ink-900">
             <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" className="h-6 w-auto" />

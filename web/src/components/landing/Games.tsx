@@ -80,7 +80,7 @@ const games: Game[] = [
 
 function StatusTag({ status }: { status: Status }) {
   const styles: Record<Status, string> = {
-    'Edição de hoje': 'text-ochre-600',
+    'Edição de hoje': 'text-corn-500',
     'No ar': 'text-grass-600',
     'Em breve': 'text-ink-500',
   }

@@ -24,7 +24,7 @@ export default function Perfil() {
     <div className="flex min-h-screen flex-col bg-paper">
       <Nav />
       <main className="container-page flex-1 py-12 sm:py-16">
-        <header className="border-b-2 border-ink-900 pb-5">
+        <header className="border-b border-white/10 pb-5">
           <p className="kicker">A ficha do craque</p>
           <h1 className="mt-2 font-display text-4xl uppercase leading-[1.05] tracking-tight text-ink-900 sm:text-6xl">
             Meu perfil

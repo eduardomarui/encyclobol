@@ -121,7 +121,7 @@ export default function Ranking() {
     <div className="flex min-h-screen flex-col bg-paper">
       <Nav />
       <main className="container-page flex-1 py-12 sm:py-16">
-        <header className="border-b-2 border-ink-900 pb-5">
+        <header className="border-b border-white/10 pb-5">
           <p className="kicker">A tabela do campeonato</p>
           <h1 className="mt-2 font-display text-4xl uppercase leading-[1.05] tracking-tight text-ink-900 sm:text-6xl">
             Ranking
@@ -253,7 +253,7 @@ export default function Ranking() {
             </div>
 
             {/* Abas */}
-            <div className="mt-4 flex border-b-2 border-ink-900">
+            <div className="mt-4 flex border-b border-white/10">
               {(['global', 'friends'] as const).map((t) => (
                 <button
                   key={t}

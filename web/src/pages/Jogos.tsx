@@ -162,7 +162,7 @@ export default function Jogos() {
     <div className="flex min-h-screen flex-col bg-paper">
       <Nav />
       <main className="container-page flex-1 py-12 sm:py-16">
-        <header className="border-b-2 border-ink-900 pb-5">
+        <header className="border-b border-white/10 pb-5">
           <p className="kicker">As edições de hoje</p>
           <h1 className="mt-2 font-display text-4xl uppercase leading-[1.05] tracking-tight text-ink-900 sm:text-6xl">
             O caderno de jogos
@@ -234,7 +234,7 @@ export default function Jogos() {
               <div className="mt-5 flex items-center justify-between border-t border-ink-900/10 pt-3">
                 <span
                   className={`font-cond text-[11px] font-600 uppercase tracking-[0.16em] ${
-                    g.played ? 'text-grass-600' : 'text-ochre-600'
+                    g.played ? 'text-grass-400' : 'text-corn-500'
                   }`}
                 >
                   {g.played ? '✓ Jogado hoje' : '● Edição de hoje'}

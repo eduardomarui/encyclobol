@@ -31,7 +31,7 @@ export default function Nav() {
   const [open, setOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-50 border-b-2 border-ink-900 bg-paper/95 backdrop-blur-sm">
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-paper/95 backdrop-blur-sm">
       <nav className="container-page flex h-14 items-center justify-between">
         <Link to="/" className="flex items-center gap-2 text-ink-900">
           <img src={`${BASE}logo.png`} alt="" className="h-9 w-auto" />

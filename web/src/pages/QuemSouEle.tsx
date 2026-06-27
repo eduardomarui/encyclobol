@@ -62,8 +62,8 @@ function Heart({ on }: { on: boolean }) {
     <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden>
       <path
         d="M12 21C12 21 3.5 14.6 3.5 8.8 3.5 6 5.6 4 8 4c1.9 0 3.2 1.1 4 2.4C12.8 5.1 14.1 4 16 4c2.4 0 4.5 2 4.5 4.8 0 5.8-8.5 12.2-8.5 12.2Z"
-        fill={on ? '#c8472b' : 'none'}
-        stroke={on ? '#c8472b' : 'rgba(22,19,13,0.3)'}
+        fill={on ? '#d24a3a' : 'none'}
+        stroke={on ? '#d24a3a' : 'rgba(255,255,255,0.28)'}
         strokeWidth="1.6"
       />
     </svg>
@@ -293,7 +293,7 @@ export default function QuemSouEle() {
 
   return (
     <div className="flex min-h-screen flex-col bg-paper">
-      <header className="sticky top-0 z-10 border-b-2 border-ink-900 bg-paper/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-10 border-b border-white/10 bg-paper/95 backdrop-blur-sm">
         <div className="container-page flex h-14 items-center justify-between">
           <Link to="/" className="flex items-center gap-2 text-ink-900">
             <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" className="h-6 w-auto" />
