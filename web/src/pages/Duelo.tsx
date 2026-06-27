@@ -175,7 +175,8 @@ export default function Duelo() {
         if (revealTimer.current) clearTimeout(revealTimer.current)
       }
       seedRef.current = m.seed
-      setPhase((ph) => (ph === 'waiting' || ph === 'done' ? 'play' : ph))
+      // Sala em jogo: entra na partida venha de onde vier (lobby/waiting/done).
+      setPhase((ph) => (ph === 'play' ? ph : 'play'))
     }
   }
 
