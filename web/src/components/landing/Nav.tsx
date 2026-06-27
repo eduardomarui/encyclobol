@@ -49,7 +49,7 @@ export default function Nav() {
         <div className="flex items-center gap-2">
           <Link
             to="/jogos"
-            className="btn-stamp bg-ink-900 px-4 py-2 text-paper hover:bg-grass-600"
+            className="btn-stamp bg-grass-700 px-4 py-2 text-ink-900 hover:bg-grass-600"
           >
             Edição de hoje
           </Link>

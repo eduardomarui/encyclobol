@@ -23,7 +23,7 @@ const rules = [
 
 export default function HowItWorks() {
   return (
-    <section id="como-funciona" className="border-t-2 border-ink-900 bg-ink-900 text-paper">
+    <section id="como-funciona" className="border-t-2 border-ink-900 bg-grass-700 text-ink-900">
       <div className="container-page py-16 sm:py-20">
         <header className="border-b border-paper/20 pb-5">
           <p className="font-cond text-xs font-600 uppercase tracking-[0.18em] text-grass-400">
@@ -36,12 +36,12 @@ export default function HowItWorks() {
 
         <ol className="grid gap-px overflow-hidden bg-paper/20 sm:grid-cols-2 lg:grid-cols-4">
           {rules.map((r) => (
-            <li key={r.n} className="bg-ink-900 px-6 py-8">
+            <li key={r.n} className="bg-grass-700 px-6 py-8">
               <span className="font-display text-5xl text-grass-400">{r.n}</span>
               <h3 className="mt-3 font-display text-xl uppercase tracking-tight">
                 {r.title}
               </h3>
-              <p className="mt-2 font-serif text-[15px] leading-relaxed text-paper/70">
+              <p className="mt-2 font-serif text-[15px] leading-relaxed text-ink-900/70">
                 {r.desc}
               </p>
             </li>

@@ -174,7 +174,7 @@ export default function Jogos() {
           </p>
           <Link
             to="/ranking"
-            className="btn-stamp mt-4 inline-block bg-grass-600 px-5 py-2.5 text-paper hover:bg-grass-700"
+            className="btn-stamp mt-4 inline-block bg-grass-600 px-5 py-2.5 text-ink-900 hover:bg-grass-700"
           >
             Ver o ranking →
           </Link>
@@ -208,7 +208,7 @@ export default function Jogos() {
           <button
             onClick={compartilharDia}
             disabled={jogadosHoje === 0}
-            className="btn-stamp mt-5 w-full bg-ink-900 px-6 py-3 text-paper hover:bg-grass-600 disabled:cursor-not-allowed disabled:opacity-40"
+            className="btn-stamp mt-5 w-full bg-grass-700 px-6 py-3 text-ink-900 hover:bg-grass-600 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {copied ? 'Imagem pronta!' : fechou ? 'Compartilhar o dia' : 'Compartilhar meu progresso'}
           </button>

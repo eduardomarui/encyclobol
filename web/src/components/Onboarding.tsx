@@ -92,14 +92,14 @@ export default function Onboarding() {
           <Link
             to="/jogos"
             onClick={done}
-            className="btn-stamp w-full max-w-xs bg-grass-600 px-8 py-3.5 text-center text-base text-paper hover:bg-grass-700"
+            className="btn-stamp w-full max-w-xs bg-grass-600 px-8 py-3.5 text-center text-base text-ink-900 hover:bg-grass-700"
           >
             Começar a jogar
           </Link>
         ) : (
           <button
             onClick={() => setI((n) => n + 1)}
-            className="btn-stamp w-full max-w-xs bg-ink-900 px-8 py-3.5 text-base text-paper hover:bg-grass-600"
+            className="btn-stamp w-full max-w-xs bg-grass-700 px-8 py-3.5 text-base text-ink-900 hover:bg-grass-600"
           >
             Próximo
           </button>

@@ -23,7 +23,7 @@
 
   /* Rótulo/kicker editorial */
   .kicker {
-    @apply font-cond text-xs font-600 uppercase tracking-[0.18em] text-ochre-600;
+    @apply font-cond text-xs font-600 uppercase tracking-[0.18em] text-corn-500;
   }
 
   /* Réguas de jornal */
@@ -34,12 +34,12 @@
     @apply border-t-2 border-ink-900;
   }
   .rule-double {
-    border-top: 3px double rgba(22, 19, 13, 0.55);
+    border-top: 3px double rgba(238, 245, 241, 0.4);
   }
 
-  /* Trama de meio-tom (halftone) bem sutil sobre o papel */
+  /* Trama de meio-tom (halftone) bem sutil */
   .halftone {
-    background-image: radial-gradient(rgba(22, 19, 13, 0.06) 1px, transparent 1.4px);
+    background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1.4px);
     background-size: 7px 7px;
   }
 

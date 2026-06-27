@@ -342,7 +342,7 @@ export default function Duelo() {
           <button
             onClick={() => setShowHelp(true)}
             aria-label="Como jogar"
-            className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink-900 font-cond text-sm font-700 text-ink-900 hover:bg-ink-900 hover:text-paper"
+            className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink-900 font-cond text-sm font-700 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
           >
             ?
           </button>
@@ -391,7 +391,7 @@ export default function Duelo() {
                 placeholder="Apelido"
                 className="flex-1 border-2 border-ink-900 bg-paper px-4 py-2.5 font-cond uppercase tracking-wide text-ink-900 outline-none"
               />
-              <button onClick={salvarNick} className="btn-stamp bg-grass-600 px-5 py-2.5 text-paper hover:bg-grass-700">
+              <button onClick={salvarNick} className="btn-stamp bg-grass-600 px-5 py-2.5 text-ink-900 hover:bg-grass-700">
                 Salvar
               </button>
             </div>
@@ -401,7 +401,7 @@ export default function Duelo() {
 
         {nick && phase === 'lobby' && (
           <div className="mt-8 w-full max-w-sm space-y-4">
-            <button onClick={criar} disabled={busy} className="btn-stamp w-full bg-grass-600 px-6 py-3 text-paper hover:bg-grass-700 disabled:opacity-50">
+            <button onClick={criar} disabled={busy} className="btn-stamp w-full bg-grass-600 px-6 py-3 text-ink-900 hover:bg-grass-700 disabled:opacity-50">
               {busy ? 'Criando…' : 'Criar partida'}
             </button>
             <div className="border-2 border-ink-900 bg-paper-100 p-4">
@@ -413,7 +413,7 @@ export default function Duelo() {
                   placeholder="Código"
                   className="flex-1 border-2 border-ink-900 bg-paper px-4 py-2.5 font-cond uppercase tracking-[0.2em] text-ink-900 outline-none"
                 />
-                <button onClick={entrar} disabled={busy} className="btn-stamp border-2 border-ink-900 px-5 py-2.5 text-ink-900 hover:bg-ink-900 hover:text-paper disabled:opacity-50">
+                <button onClick={entrar} disabled={busy} className="btn-stamp border-2 border-ink-900 px-5 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900 disabled:opacity-50">
                   {busy ? 'Entrando…' : 'Entrar'}
                 </button>
               </div>
@@ -427,7 +427,7 @@ export default function Duelo() {
             <p className="kicker">Sala criada</p>
             <p className="mt-2 font-display text-5xl tracking-[0.1em] text-ink-900">{match.code}</p>
             <p className="mt-2 font-serif text-sm italic text-ink-600">Mande o código pro amigo. Começa quando ele entrar.</p>
-            <button onClick={convidar} className="btn-stamp mt-4 w-full bg-ink-900 px-6 py-2.5 text-paper hover:bg-grass-600">
+            <button onClick={convidar} className="btn-stamp mt-4 w-full bg-grass-700 px-6 py-2.5 text-ink-900 hover:bg-grass-600">
               {copied ? 'Copiado!' : 'Convidar amigo'}
             </button>
             <p className="mt-3 font-cond text-xs uppercase tracking-wider text-ink-500">Aguardando adversário…</p>
@@ -500,14 +500,14 @@ export default function Duelo() {
             <p className="mt-1 font-serif text-base italic text-ink-600">
               {myScore > oppScore ? 'Frieza na cobrança e mão firme na defesa!' : 'Faltou pontaria. Revanche?'}
             </p>
-            <button onClick={pedirRevanche} className="btn-stamp mt-5 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700">
+            <button onClick={pedirRevanche} className="btn-stamp mt-5 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700">
               Revanche
             </button>
             {msg && <p className="mt-2 font-cond text-xs uppercase tracking-wider text-ochre-600">{msg}</p>}
-            <button onClick={resetToLobby} className="btn-stamp mt-2 w-full border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-ink-900 hover:text-paper">
+            <button onClick={resetToLobby} className="btn-stamp mt-2 w-full border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900">
               Sair da sala
             </button>
-            <Link to="/jogos/penaltis" className="btn-stamp mt-2 block border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-ink-900 hover:text-paper">
+            <Link to="/jogos/penaltis" className="btn-stamp mt-2 block border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900">
               Voltar
             </Link>
           </div>
@@ -521,7 +521,7 @@ export default function Duelo() {
       </main>
 
       {showHelp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/60 p-4" onClick={closeHelp}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={closeHelp}>
           <div className="w-full max-w-sm border-2 border-ink-900 bg-paper p-6" onClick={(e) => e.stopPropagation()}>
             <p className="kicker">Como funciona</p>
             <h2 className="mt-1 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900">
@@ -546,7 +546,7 @@ export default function Duelo() {
               </li>
               <li>É melhor de 5 cobranças — empatou, vai pra <strong>morte súbita</strong>.</li>
             </ul>
-            <button onClick={closeHelp} className="btn-stamp mt-6 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700">
+            <button onClick={closeHelp} className="btn-stamp mt-6 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700">
               Entendi, bora
             </button>
           </div>

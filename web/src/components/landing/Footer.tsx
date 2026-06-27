@@ -38,7 +38,7 @@ const cols: { title: string; links: FLink[] }[] = [
 
 export default function Footer() {
   return (
-    <footer className="border-t-2 border-ink-900 bg-ink-900 text-paper">
+    <footer className="border-t-2 border-ink-900 bg-grass-700 text-ink-900">
       <div className="container-page py-14">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
@@ -48,7 +48,7 @@ export default function Footer() {
                 Encyclobol
               </span>
             </div>
-            <p className="mt-4 max-w-xs font-serif text-[15px] leading-relaxed text-paper/60">
+            <p className="mt-4 max-w-xs font-serif text-[15px] leading-relaxed text-ink-900/60">
               O almanaque jogável do futebol. Feito por quem cresceu trocando
               figurinha e discutindo escalação no recreio.
             </p>
@@ -61,7 +61,7 @@ export default function Footer() {
               </h4>
               <ul className="mt-4 space-y-2.5">
                 {c.links.map((l) => {
-                  const cls = 'font-serif text-[15px] text-paper/70 transition-colors hover:text-paper'
+                  const cls = 'font-serif text-[15px] text-ink-900/70 transition-colors hover:text-ink-900'
                   return (
                     <li key={l.label}>
                       {l.to ? (
@@ -82,10 +82,10 @@ export default function Footer() {
         </div>
 
         <div className="mt-12 flex flex-col items-start justify-between gap-2 rule-double border-paper/40 pt-6 sm:flex-row sm:items-center">
-          <p className="font-cond text-xs uppercase tracking-[0.14em] text-paper/50">
+          <p className="font-cond text-xs uppercase tracking-[0.14em] text-ink-900/50">
             Encyclobol · Edição independente · São Paulo, Brasil
           </p>
-          <p className="font-cond text-xs uppercase tracking-[0.14em] text-paper/50">
+          <p className="font-cond text-xs uppercase tracking-[0.14em] text-ink-900/50">
             © 2026 · Todos os direitos reservados
           </p>
         </div>

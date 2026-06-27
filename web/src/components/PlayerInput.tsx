@@ -83,7 +83,7 @@ export default function PlayerInput({
         <button
           type="button"
           onClick={() => q.trim() && choose(q)}
-          className="btn-stamp bg-grass-600 px-6 text-paper hover:bg-grass-700"
+          className="btn-stamp bg-grass-600 px-6 text-ink-900 hover:bg-grass-700"
         >
           Chutar
         </button>
@@ -101,7 +101,7 @@ export default function PlayerInput({
                 }}
                 onMouseEnter={() => setHi(i)}
                 className={`block w-full px-4 py-2.5 text-left font-serif text-base transition-colors ${
-                  i === hi ? 'bg-grass-600 text-paper' : 'text-ink-900 hover:bg-paper-200'
+                  i === hi ? 'bg-grass-600 text-ink-900' : 'text-ink-900 hover:bg-paper-200'
                 }`}
               >
                 {o.display}

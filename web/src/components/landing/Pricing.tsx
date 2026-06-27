@@ -56,7 +56,7 @@ export default function Pricing() {
             <div
               key={p.name}
               className={`relative flex flex-col p-8 ${
-                p.featured ? 'bg-grass-600 text-paper' : 'bg-paper text-ink-900'
+                p.featured ? 'bg-grass-600 text-ink-900' : 'bg-paper text-ink-900'
               }`}
             >
               {p.featured && (
@@ -67,7 +67,7 @@ export default function Pricing() {
               <h3 className="font-display text-2xl uppercase tracking-tight">{p.name}</h3>
               <p
                 className={`mt-1 font-serif text-[15px] italic ${
-                  p.featured ? 'text-paper/80' : 'text-ink-600'
+                  p.featured ? 'text-ink-900/80' : 'text-ink-600'
                 }`}
               >
                 {p.desc}
@@ -78,7 +78,7 @@ export default function Pricing() {
                 {p.period && (
                   <span
                     className={`mb-1.5 font-cond text-sm uppercase ${
-                      p.featured ? 'text-paper/80' : 'text-ink-500'
+                      p.featured ? 'text-ink-900/80' : 'text-ink-500'
                     }`}
                   >
                     {p.period}
@@ -100,7 +100,7 @@ export default function Pricing() {
                 className={`btn-stamp mt-8 px-6 py-3.5 text-base ${
                   p.featured
                     ? 'bg-paper text-ink-900 hover:bg-paper-200'
-                    : 'bg-ink-900 text-paper hover:bg-grass-600'
+                    : 'bg-grass-700 text-ink-900 hover:bg-grass-600'
                 }`}
               >
                 {p.cta}

@@ -164,10 +164,10 @@ export function PenaltyScene({
       <div className="absolute inset-0 bg-gradient-to-b from-[#9ec7d8] via-[#86b98f] to-grass-700" />
       <div className="absolute inset-0" style={{ background: 'radial-gradient(120% 55% at 50% 0%, rgba(255,255,255,0.22), transparent 60%)' }} />
       <div className="absolute inset-x-0 bottom-0 top-[52%]" style={{ backgroundImage: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.06) 0 20px, transparent 20px 40px)' }} />
-      <div className="absolute inset-x-0 top-0 h-[22%] bg-ink-800" style={{ backgroundImage: 'radial-gradient(rgba(242,238,226,0.35) 1px, transparent 1.4px)', backgroundSize: '6px 6px' }} />
-      <div className="absolute inset-x-0 top-[52%] h-px bg-paper/40" />
-      <div className="absolute left-1/2 top-[78%] h-2 w-2 -translate-x-1/2 rounded-full bg-paper/80" />
-      <div className="absolute left-1/2 top-[64%] h-10 w-28 -translate-x-1/2 rounded-[100%] border-2 border-b-0 border-paper/25" />
+      <div className="absolute inset-x-0 top-0 h-[22%] bg-[#0e1f19]" style={{ backgroundImage: 'radial-gradient(rgba(242,238,226,0.35) 1px, transparent 1.4px)', backgroundSize: '6px 6px' }} />
+      <div className="absolute inset-x-0 top-[52%] h-px bg-white/40" />
+      <div className="absolute left-1/2 top-[78%] h-2 w-2 -translate-x-1/2 rounded-full bg-white/80" />
+      <div className="absolute left-1/2 top-[64%] h-10 w-28 -translate-x-1/2 rounded-[100%] border-2 border-b-0 border-white/25" />
 
       <div className={`absolute left-[11%] top-[16%] w-[78%] ${shot?.net ? 'animate-netshake' : ''}`}>
         <svg viewBox="0 0 100 44" preserveAspectRatio="none" className="h-28 w-full">
@@ -193,13 +193,13 @@ export function PenaltyScene({
         <div key={`dust${animKey}`} className="absolute left-1/2 top-[82%] z-10 -translate-x-1/2 -translate-y-1/2">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="absolute" style={{ transform: `rotate(${i * 60}deg)` }}>
-              <span className="block h-1.5 w-1.5 rounded-full bg-paper/70" style={{ animation: 'dustfly 0.5s ease-out forwards' }} />
+              <span className="block h-1.5 w-1.5 rounded-full bg-white/70" style={{ animation: 'dustfly 0.5s ease-out forwards' }} />
             </div>
           ))}
         </div>
       )}
 
-      {shot?.net && <div key={`flash${animKey}`} className="pointer-events-none absolute inset-0 z-20 animate-crowdflash bg-paper" />}
+      {shot?.net && <div key={`flash${animKey}`} className="pointer-events-none absolute inset-0 z-20 animate-crowdflash bg-white" />}
 
       <div ref={ballRef} className="absolute z-20" style={{ left: '50%', top: '82%', transform: 'translate(-50%,-50%)' }}>
         <div className="drop-shadow-[0_3px_4px_rgba(0,0,0,0.4)]" style={{ animation: shot ? 'ballspin 0.4s linear infinite' : 'none' }}>
@@ -209,7 +209,7 @@ export function PenaltyScene({
 
       {shot && (
         <div className="absolute inset-x-0 bottom-3 z-30 flex justify-center">
-          <span className={`animate-pop rounded-sm px-4 py-1.5 font-display text-3xl uppercase tracking-tight text-paper shadow-lg ${shot.good ? 'bg-grass-600' : 'bg-ochre-500'}`}>
+          <span className={`animate-pop rounded-sm px-4 py-1.5 font-display text-3xl uppercase tracking-tight text-ink-900 shadow-lg ${shot.good ? 'bg-grass-600' : 'bg-ochre-500'}`}>
             {shot.label}
           </span>
         </div>

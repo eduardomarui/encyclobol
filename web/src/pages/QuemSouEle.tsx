@@ -46,14 +46,14 @@ function evaluate(guess: string, answer: string): Cell[] {
 }
 
 const cellClass: Record<Cell, string> = {
-  correct: 'bg-grass-600 text-paper border-grass-700',
-  present: 'bg-corn-500 text-paper border-corn-600',
-  absent: 'bg-ink-700 text-paper border-ink-800',
+  correct: 'bg-grass-600 text-ink-900 border-grass-700',
+  present: 'bg-corn-500 text-ink-900 border-corn-600',
+  absent: 'bg-[#3b4a44] text-ink-800 border-[#4a5a53]',
 }
 const keyClass: Record<Cell | 'idle', string> = {
-  correct: 'bg-grass-600 text-paper',
-  present: 'bg-corn-500 text-paper',
-  absent: 'bg-ink-700 text-paper/60',
+  correct: 'bg-grass-600 text-ink-900',
+  present: 'bg-corn-500 text-ink-900',
+  absent: 'bg-[#3b4a44] text-ink-700',
   idle: 'bg-paper-200 text-ink-900 hover:bg-paper-300',
 }
 
@@ -308,7 +308,7 @@ export default function QuemSouEle() {
             <button
               onClick={() => setShowHelp(true)}
               aria-label="Como jogar"
-              className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink-900 font-cond text-sm font-700 text-ink-900 hover:bg-ink-900 hover:text-paper"
+              className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink-900 font-cond text-sm font-700 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
             >
               ?
             </button>
@@ -394,7 +394,7 @@ export default function QuemSouEle() {
                   <span
                     key={i}
                     className={`flex aspect-square min-w-0 flex-1 items-center justify-center border font-display text-sm uppercase ${
-                      i < revealed ? 'border-grass-700 bg-grass-600 text-paper' : 'border-ink-900/20 text-ink-500'
+                      i < revealed ? 'border-grass-700 bg-grass-600 text-ink-900' : 'border-ink-900/20 text-ink-500'
                     }`}
                   >
                     {i < revealed ? ch : '·'}
@@ -442,14 +442,14 @@ export default function QuemSouEle() {
                 <button
                   onClick={revelar}
                   disabled={revealCount <= 0 || revealed >= answer.length}
-                  className="btn-stamp border-2 border-ink-900 px-4 py-2 text-ink-900 hover:bg-ink-900 hover:text-paper disabled:cursor-not-allowed disabled:opacity-40"
+                  className="btn-stamp border-2 border-ink-900 px-4 py-2 text-ink-900 hover:bg-grass-700 hover:text-ink-900 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   Revelar letra ({revealCount})
                 </button>
                 <button
                   onClick={pular}
                   disabled={skipCount <= 0}
-                  className="btn-stamp border-2 border-ink-900 px-4 py-2 text-ink-900 hover:bg-ink-900 hover:text-paper disabled:cursor-not-allowed disabled:opacity-40"
+                  className="btn-stamp border-2 border-ink-900 px-4 py-2 text-ink-900 hover:bg-grass-700 hover:text-ink-900 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   Pular ({skipCount})
                 </button>
@@ -485,13 +485,13 @@ export default function QuemSouEle() {
                 </p>
                 <button
                   onClick={compartilhar}
-                  className="btn-stamp mt-4 w-full bg-ink-900 px-6 py-2.5 text-paper hover:bg-grass-600"
+                  className="btn-stamp mt-4 w-full bg-grass-700 px-6 py-2.5 text-ink-900 hover:bg-grass-600"
                 >
                   {copied ? 'Imagem pronta!' : 'Compartilhar imagem'}
                 </button>
                 <button
                   onClick={praticar}
-                  className="btn-stamp mt-2 w-full border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-ink-900 hover:text-paper"
+                  className="btn-stamp mt-2 w-full border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
                 >
                   Treinar (sem pontos)
                 </button>
@@ -513,7 +513,7 @@ export default function QuemSouEle() {
                 </p>
                 <button
                   onClick={avancar}
-                  className="btn-stamp mt-4 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700"
+                  className="btn-stamp mt-4 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700"
                 >
                   Próximo craque →
                 </button>
@@ -529,13 +529,13 @@ export default function QuemSouEle() {
                 </p>
                 <button
                   onClick={praticar}
-                  className="btn-stamp mt-4 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700"
+                  className="btn-stamp mt-4 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700"
                 >
                   Sortear outro
                 </button>
                 <button
                   onClick={voltarCarreira}
-                  className="btn-stamp mt-2 w-full border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-ink-900 hover:text-paper"
+                  className="btn-stamp mt-2 w-full border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
                 >
                   Voltar pra carreira
                 </button>
@@ -552,7 +552,7 @@ export default function QuemSouEle() {
                 {i === 2 && (
                   <button
                     onClick={() => onKey('ENTER')}
-                    className="flex h-12 flex-[1.5] items-center justify-center rounded-sm bg-ink-900 px-2 font-cond text-xs font-600 uppercase tracking-wider text-paper hover:bg-grass-600"
+                    className="flex h-12 flex-[1.5] items-center justify-center rounded-sm bg-grass-700 px-2 font-cond text-xs font-600 uppercase tracking-wider text-ink-900 hover:bg-grass-600"
                   >
                     Enter
                   </button>
@@ -571,7 +571,7 @@ export default function QuemSouEle() {
                 {i === 2 && (
                   <button
                     onClick={() => onKey('BACK')}
-                    className="flex h-12 flex-[1.5] items-center justify-center rounded-sm bg-ink-900 px-2 font-cond text-xs font-600 uppercase tracking-wider text-paper hover:bg-ochre-600"
+                    className="flex h-12 flex-[1.5] items-center justify-center rounded-sm bg-grass-700 px-2 font-cond text-xs font-600 uppercase tracking-wider text-ink-900 hover:bg-ochre-600"
                   >
                     Apagar
                   </button>
@@ -584,7 +584,7 @@ export default function QuemSouEle() {
 
       {showHelp && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/60 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
           onClick={closeHelp}
         >
           <div
@@ -606,7 +606,7 @@ export default function QuemSouEle() {
                 certa no lugar.{' '}
                 <span className="inline-block h-3 w-3 translate-y-0.5 bg-corn-500" /> amarelo:
                 existe, lugar errado.{' '}
-                <span className="inline-block h-3 w-3 translate-y-0.5 bg-ink-700" /> escuro: não tem.
+                <span className="inline-block h-3 w-3 translate-y-0.5 bg-[#3b4a44]" /> escuro: não tem.
               </li>
               <li>Use as dicas (seleção, posição, época). São 6 tentativas por craque.</li>
               <li>
@@ -623,7 +623,7 @@ export default function QuemSouEle() {
             </ul>
             <button
               onClick={closeHelp}
-              className="btn-stamp mt-6 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700"
+              className="btn-stamp mt-6 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700"
             >
               Entendi, bora jogar
             </button>

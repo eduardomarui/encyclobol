@@ -185,7 +185,7 @@ export default function Intruso() {
             <button
               onClick={() => setShowHelp(true)}
               aria-label="Como jogar"
-              className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink-900 font-cond text-sm font-700 text-ink-900 hover:bg-ink-900 hover:text-paper"
+              className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink-900 font-cond text-sm font-700 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
             >
               ?
             </button>
@@ -213,7 +213,7 @@ export default function Intruso() {
             Caçados: <span className="text-grass-600">{caught}</span>
           </span>
           {combo >= 2 && (
-            <span className="rounded-sm bg-ochre-500 px-2 py-0.5 font-cond text-xs font-700 uppercase tracking-wider text-paper">
+            <span className="rounded-sm bg-ochre-500 px-2 py-0.5 font-cond text-xs font-700 uppercase tracking-wider text-ink-900">
               x{combo}
             </span>
           )}
@@ -230,7 +230,7 @@ export default function Intruso() {
               Recorde: <span className="text-ink-800">{prevBest}</span> pts
             </span>
             {beating && (
-              <span className="animate-pop rounded-sm bg-grass-600 px-2 py-0.5 text-paper">Novo recorde!</span>
+              <span className="animate-pop rounded-sm bg-grass-600 px-2 py-0.5 text-ink-900">Novo recorde!</span>
             )}
           </div>
         )}
@@ -244,8 +244,8 @@ export default function Intruso() {
               {current.players.map((name, i) => {
                 let cls = 'border-ink-900/25 bg-paper hover:border-ink-900 hover:bg-paper-100'
                 if (step !== 'intruder') {
-                  if (i === current.intruderIdx) cls = 'animate-pop border-grass-700 bg-grass-600 text-paper'
-                  else if (i === selIntruder) cls = 'border-ochre-600 bg-ochre-500 text-paper'
+                  if (i === current.intruderIdx) cls = 'animate-pop border-grass-700 bg-grass-600 text-ink-900'
+                  else if (i === selIntruder) cls = 'border-ochre-600 bg-ochre-500 text-ink-900'
                   else cls = 'border-ink-900/15 bg-paper opacity-60'
                 }
                 return (
@@ -271,8 +271,8 @@ export default function Intruso() {
                   {CATS.map((c) => {
                     let cls = 'border-ink-900/25 bg-paper hover:border-ink-900 hover:bg-paper-100'
                     if (step === 'revealed') {
-                      if (c === current.cat) cls = 'border-grass-700 bg-grass-600 text-paper'
-                      else if (c === selReason) cls = 'border-ochre-600 bg-ochre-500 text-paper'
+                      if (c === current.cat) cls = 'border-grass-700 bg-grass-600 text-ink-900'
+                      else if (c === selReason) cls = 'border-ochre-600 bg-ochre-500 text-ink-900'
                       else cls = 'border-ink-900/15 bg-paper opacity-60'
                     }
                     return (
@@ -307,7 +307,7 @@ export default function Intruso() {
                 </p>
                 <button
                   onClick={advance}
-                  className="btn-stamp mt-4 bg-grass-600 px-8 py-2.5 text-paper hover:bg-grass-700"
+                  className="btn-stamp mt-4 bg-grass-600 px-8 py-2.5 text-ink-900 hover:bg-grass-700"
                 >
                   {lives <= 0 ? 'Ver resultado →' : 'Continuar →'}
                 </button>
@@ -348,7 +348,7 @@ export default function Intruso() {
                 <p className="mt-3 font-serif text-sm italic text-ink-600">Volte amanhã pra somar mais ao total.</p>
                 <button
                   onClick={compartilhar}
-                  className="btn-stamp mt-4 w-full bg-ink-900 px-6 py-2.5 text-paper hover:bg-grass-600"
+                  className="btn-stamp mt-4 w-full bg-grass-700 px-6 py-2.5 text-ink-900 hover:bg-grass-600"
                 >
                   {copied ? 'Imagem pronta!' : 'Compartilhar imagem'}
                 </button>
@@ -357,13 +357,13 @@ export default function Intruso() {
 
             <button
               onClick={jogarTreino}
-              className="btn-stamp mt-2 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700"
+              className="btn-stamp mt-2 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700"
             >
               {daily ? 'Treinar (sem pontos)' : 'Outra caçada'}
             </button>
             <Link
               to="/"
-              className="btn-stamp mt-2 block border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-ink-900 hover:text-paper"
+              className="btn-stamp mt-2 block border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
             >
               Voltar pro almanaque
             </Link>
@@ -372,7 +372,7 @@ export default function Intruso() {
       </main>
 
       {showHelp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/60 p-4" onClick={closeHelp}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={closeHelp}>
           <div className="w-full max-w-sm border-2 border-ink-900 bg-paper p-6" onClick={(e) => e.stopPropagation()}>
             <p className="kicker">Como jogar</p>
             <h2 className="mt-1 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900">
@@ -396,7 +396,7 @@ export default function Intruso() {
                 pontos do dia somam num <strong>total</strong> que cresce sempre.
               </li>
             </ul>
-            <button onClick={closeHelp} className="btn-stamp mt-6 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700">
+            <button onClick={closeHelp} className="btn-stamp mt-6 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700">
               Entendi, bora caçar
             </button>
           </div>

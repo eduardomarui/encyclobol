@@ -23,7 +23,7 @@ const solvedBg: Record<GroupColor, string> = {
   corn: 'bg-corn-500',
   grass: 'bg-grass-600',
   ochre: 'bg-ochre-500',
-  ink: 'bg-ink-700',
+  ink: 'bg-[#52647a]',
 }
 const sqColor: Record<GroupColor, Sq> = { corn: 'y', grass: 'g', ochre: 'o', ink: 'k' }
 
@@ -212,7 +212,7 @@ export default function Conexoes() {
             <button
               onClick={() => setShowHelp(true)}
               aria-label="Como jogar"
-              className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink-900 font-cond text-sm font-700 text-ink-900 hover:bg-ink-900 hover:text-paper"
+              className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink-900 font-cond text-sm font-700 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
             >
               ?
             </button>
@@ -243,7 +243,7 @@ export default function Conexoes() {
               {solved.map((g) => (
                 <div
                   key={g.color}
-                  className={`animate-rise rounded-sm px-3 py-2 text-center text-paper ${solvedBg[g.color]}`}
+                  className={`animate-rise rounded-sm px-3 py-2 text-center text-ink-900 ${solvedBg[g.color]}`}
                 >
                   <div className="font-cond text-xs font-700 uppercase tracking-wider">{g.label}</div>
                   <div className="font-serif text-sm">{g.members.join(' · ')}</div>
@@ -262,7 +262,7 @@ export default function Conexoes() {
                     onClick={() => toggle(name)}
                     className={`flex min-h-[60px] items-center justify-center rounded-sm border-2 px-1 py-2 text-center font-cond text-[11px] font-600 uppercase leading-tight transition-colors sm:text-sm ${
                       on
-                        ? 'border-ink-900 bg-ink-900 text-paper'
+                        ? 'border-ink-900 bg-grass-700 text-ink-900'
                         : 'border-ink-900/25 bg-paper text-ink-900 hover:border-ink-900'
                     }`}
                   >
@@ -292,20 +292,20 @@ export default function Conexoes() {
             <div className="mt-4 flex flex-wrap justify-center gap-2">
               <button
                 onClick={() => setOrder((o) => seededShuffle(o, Math.floor(Math.random() * 1e9) + 1))}
-                className="btn-stamp border-2 border-ink-900 px-5 py-2.5 text-ink-900 hover:bg-ink-900 hover:text-paper"
+                className="btn-stamp border-2 border-ink-900 px-5 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
               >
                 Embaralhar
               </button>
               <button
                 onClick={() => setSelected([])}
-                className="btn-stamp border-2 border-ink-900 px-5 py-2.5 text-ink-900 hover:bg-ink-900 hover:text-paper"
+                className="btn-stamp border-2 border-ink-900 px-5 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
               >
                 Limpar
               </button>
               <button
                 onClick={enviar}
                 disabled={selected.length !== 4}
-                className="btn-stamp bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700 disabled:cursor-not-allowed disabled:opacity-40"
+                className="btn-stamp bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Enviar
               </button>
@@ -326,12 +326,12 @@ export default function Conexoes() {
               {(perfect || ordered) && (
                 <div className="mt-2 flex flex-wrap justify-center gap-1.5">
                   {perfect && (
-                    <span className="border border-grass-700 bg-grass-600 px-2 py-0.5 font-cond text-[10px] font-700 uppercase tracking-wide text-paper">
+                    <span className="border border-grass-700 bg-grass-600 px-2 py-0.5 font-cond text-[10px] font-700 uppercase tracking-wide text-ink-900">
                       Sem erros +{PERFECT_BONUS}
                     </span>
                   )}
                   {ordered && (
-                    <span className="border border-ink-900 bg-ink-900 px-2 py-0.5 font-cond text-[10px] font-700 uppercase tracking-wide text-paper">
+                    <span className="border border-ink-900 bg-grass-700 px-2 py-0.5 font-cond text-[10px] font-700 uppercase tracking-wide text-ink-900">
                       Na ordem +{ORDER_BONUS}
                     </span>
                   )}
@@ -356,7 +356,7 @@ export default function Conexoes() {
                   <p className="mt-3 font-serif text-sm italic text-ink-600">Volte amanhã pra somar mais.</p>
                   <button
                     onClick={compartilhar}
-                    className="btn-stamp mt-4 w-full bg-ink-900 px-6 py-2.5 text-paper hover:bg-grass-600"
+                    className="btn-stamp mt-4 w-full bg-grass-700 px-6 py-2.5 text-ink-900 hover:bg-grass-600"
                   >
                     {copied ? 'Imagem pronta!' : 'Compartilhar imagem'}
                   </button>
@@ -365,13 +365,13 @@ export default function Conexoes() {
 
               <button
                 onClick={treinar}
-                className="btn-stamp mt-2 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700"
+                className="btn-stamp mt-2 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700"
               >
                 {daily ? 'Treinar (sem pontos)' : 'Outro puzzle'}
               </button>
               <Link
                 to="/"
-                className="btn-stamp mt-2 block border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-ink-900 hover:text-paper"
+                className="btn-stamp mt-2 block border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
               >
                 Voltar pro almanaque
               </Link>
@@ -381,7 +381,7 @@ export default function Conexoes() {
       </main>
 
       {showHelp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/60 p-4" onClick={closeHelp}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={closeHelp}>
           <div className="w-full max-w-sm border-2 border-ink-900 bg-paper p-6" onClick={(e) => e.stopPropagation()}>
             <p className="kicker">Como jogar</p>
             <h2 className="mt-1 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900">
@@ -401,7 +401,7 @@ export default function Conexoes() {
                 <span className="inline-block h-3 w-3 translate-y-0.5 bg-corn-500" /> fácil →{' '}
                 <span className="inline-block h-3 w-3 translate-y-0.5 bg-grass-600" />{' '}
                 <span className="inline-block h-3 w-3 translate-y-0.5 bg-ochre-500" /> →{' '}
-                <span className="inline-block h-3 w-3 translate-y-0.5 bg-ink-700" /> traiçoeiro.
+                <span className="inline-block h-3 w-3 translate-y-0.5 bg-[#52647a]" /> traiçoeiro.
               </li>
               <li>
                 <strong>Pontos:</strong> cada grupo +{SOLVE_PTS}; terminar <strong>sem erros</strong>{' '}
@@ -409,7 +409,7 @@ export default function Conexoes() {
                 soma num <strong>total</strong> que cresce a cada dia.
               </li>
             </ul>
-            <button onClick={closeHelp} className="btn-stamp mt-6 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700">
+            <button onClick={closeHelp} className="btn-stamp mt-6 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700">
               Entendi, bora
             </button>
           </div>

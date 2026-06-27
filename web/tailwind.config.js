@@ -8,37 +8,38 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Papel jornal / almanaque
+        // "Estádio à noite": superfícies (gramado escuro → elevadas)
         paper: {
-          DEFAULT: '#f2eee2',
-          100: '#f7f4ea',
-          200: '#ece6d6',
-          300: '#ddd4bd',
+          DEFAULT: '#0b241c',
+          100: '#102d22',
+          200: '#163a2c',
+          300: '#1f4a39',
         },
-        // Tinta — preto quente de impressão
+        // Giz / texto claro (900 = mais claro → 500 = mais apagado)
         ink: {
-          900: '#16130d',
-          800: '#262219',
-          700: '#3a352b',
-          600: '#544d3f',
-          500: '#6b6456',
+          900: '#eef5f1',
+          800: '#dbe7e0',
+          700: '#bfd2c9',
+          600: '#9bb6ab',
+          500: '#84a094',
         },
-        // Verde gramado vintage
+        // Verde gramado (ações) — clareado pra brilhar no escuro
         grass: {
-          700: '#1c4d34',
-          600: '#235e40',
-          500: '#2c6e49',
-          400: '#3e8c61',
+          700: '#1f5a3b',
+          600: '#2c7d4f',
+          500: '#389a5f',
+          400: '#54b97b',
         },
-        // Vermelho de tinta / camisa — acento editorial
+        // Vermelho (erro/derrota) — menos alaranjado
         ochre: {
-          600: '#a83823',
-          500: '#c8472b',
+          600: '#b03a2a',
+          500: '#d24a3a',
         },
-        // Amarelo de marca-texto (feedback "letra existe")
+        // Dourado da taça — acento de marca
         corn: {
-          600: '#a8862a',
-          500: '#c9a227',
+          600: '#b8901f',
+          500: '#d8a72e',
+          400: '#e6b73e',
         },
       },
       fontFamily: {

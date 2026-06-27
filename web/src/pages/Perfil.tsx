@@ -51,7 +51,7 @@ export default function Perfil() {
         {/* Ranking CTA */}
         <Link
           to="/ranking"
-          className="btn-stamp mt-4 inline-block bg-grass-600 px-5 py-2.5 text-paper hover:bg-grass-700"
+          className="btn-stamp mt-4 inline-block bg-grass-600 px-5 py-2.5 text-ink-900 hover:bg-grass-700"
         >
           Ver o ranking →
         </Link>

@@ -168,7 +168,7 @@ export default function Ranking() {
               <button
                 onClick={salvarApelido}
                 disabled={saving}
-                className="btn-stamp bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700 disabled:opacity-50"
+                className="btn-stamp bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700 disabled:opacity-50"
               >
                 {saving ? '…' : 'Entrar'}
               </button>
@@ -191,7 +191,7 @@ export default function Ranking() {
               </div>
               <button
                 onClick={copiarCodigo}
-                className="btn-stamp bg-ink-900 px-5 py-2.5 text-paper hover:bg-grass-600"
+                className="btn-stamp bg-grass-700 px-5 py-2.5 text-ink-900 hover:bg-grass-600"
               >
                 {copied ? 'Copiado!' : 'Convidar amigo'}
               </button>
@@ -207,7 +207,7 @@ export default function Ranking() {
               />
               <button
                 onClick={adicionarAmigo}
-                className="btn-stamp border-2 border-ink-900 px-5 py-2.5 text-ink-900 hover:bg-ink-900 hover:text-paper"
+                className="btn-stamp border-2 border-ink-900 px-5 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
               >
                 Adicionar
               </button>
@@ -221,7 +221,7 @@ export default function Ranking() {
                   key={p}
                   onClick={() => changePeriod(p)}
                   className={`border-2 px-3 py-1.5 font-cond text-xs font-700 uppercase tracking-wide transition-colors ${
-                    period === p ? 'border-ink-900 bg-ink-900 text-paper' : 'border-ink-900/30 text-ink-700 hover:border-ink-900'
+                    period === p ? 'border-ink-900 bg-grass-700 text-ink-900' : 'border-ink-900/30 text-ink-700 hover:border-ink-900'
                   }`}
                 >
                   {label}
@@ -234,7 +234,7 @@ export default function Ranking() {
               <button
                 onClick={() => changeGame(null)}
                 className={`border-2 px-3 py-1.5 font-cond text-xs font-600 uppercase tracking-wide transition-colors ${
-                  gameFilter === null ? 'border-grass-700 bg-grass-600 text-paper' : 'border-ink-900/30 text-ink-700 hover:border-ink-900'
+                  gameFilter === null ? 'border-grass-700 bg-grass-600 text-ink-900' : 'border-ink-900/30 text-ink-700 hover:border-ink-900'
                 }`}
               >
                 Geral
@@ -244,7 +244,7 @@ export default function Ranking() {
                   key={g}
                   onClick={() => changeGame(g)}
                   className={`border-2 px-3 py-1.5 font-cond text-xs font-600 uppercase tracking-wide transition-colors ${
-                    gameFilter === g ? 'border-grass-700 bg-grass-600 text-paper' : 'border-ink-900/30 text-ink-700 hover:border-ink-900'
+                    gameFilter === g ? 'border-grass-700 bg-grass-600 text-ink-900' : 'border-ink-900/30 text-ink-700 hover:border-ink-900'
                   }`}
                 >
                   {g}

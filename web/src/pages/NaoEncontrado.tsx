@@ -14,12 +14,12 @@ export default function NaoEncontrado() {
         Essa página chutou pra fora. Nada por aqui — bora voltar pro jogo?
       </p>
       <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-        <Link to="/jogos" className="btn-stamp bg-grass-600 px-7 py-3 text-paper hover:bg-grass-700">
+        <Link to="/jogos" className="btn-stamp bg-grass-600 px-7 py-3 text-ink-900 hover:bg-grass-700">
           Ver os jogos
         </Link>
         <Link
           to="/"
-          className="btn-stamp border-2 border-ink-900 px-7 py-3 text-ink-900 hover:bg-ink-900 hover:text-paper"
+          className="btn-stamp border-2 border-ink-900 px-7 py-3 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
         >
           Voltar ao início
         </Link>

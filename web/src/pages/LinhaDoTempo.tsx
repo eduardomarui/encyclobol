@@ -174,7 +174,7 @@ export default function LinhaDoTempo() {
             <button
               onClick={() => setShowHelp(true)}
               aria-label="Como jogar"
-              className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink-900 font-cond text-sm font-700 text-ink-900 hover:bg-ink-900 hover:text-paper"
+              className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink-900 font-cond text-sm font-700 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
             >
               ?
             </button>
@@ -202,7 +202,7 @@ export default function LinhaDoTempo() {
             Cartas: <span className="text-grass-600">{score}</span>
           </span>
           {combo >= 2 && (
-            <span className="rounded-sm bg-ochre-500 px-2 py-0.5 font-cond text-xs font-700 uppercase tracking-wider text-paper">
+            <span className="rounded-sm bg-ochre-500 px-2 py-0.5 font-cond text-xs font-700 uppercase tracking-wider text-ink-900">
               x{combo}
             </span>
           )}
@@ -219,7 +219,7 @@ export default function LinhaDoTempo() {
               Recorde: <span className="text-ink-800">{prevBest}</span> pts
             </span>
             {beating && (
-              <span className="animate-pop rounded-sm bg-grass-600 px-2 py-0.5 text-paper">Novo recorde!</span>
+              <span className="animate-pop rounded-sm bg-grass-600 px-2 py-0.5 text-ink-900">Novo recorde!</span>
             )}
           </div>
         )}
@@ -305,7 +305,7 @@ export default function LinhaDoTempo() {
                 <p className="mt-3 font-serif text-sm italic text-ink-600">Volte amanhã pra somar mais ao total.</p>
                 <button
                   onClick={compartilhar}
-                  className="btn-stamp mt-4 w-full bg-ink-900 px-6 py-2.5 text-paper hover:bg-grass-600"
+                  className="btn-stamp mt-4 w-full bg-grass-700 px-6 py-2.5 text-ink-900 hover:bg-grass-600"
                 >
                   {copied ? 'Imagem pronta!' : 'Compartilhar imagem'}
                 </button>
@@ -315,20 +315,20 @@ export default function LinhaDoTempo() {
             <div className="mt-2 flex gap-2">
               <button
                 onClick={() => restart(false)}
-                className="btn-stamp flex-1 bg-grass-600 px-4 py-2.5 text-paper hover:bg-grass-700"
+                className="btn-stamp flex-1 bg-grass-600 px-4 py-2.5 text-ink-900 hover:bg-grass-700"
               >
                 {daily ? 'Treinar' : 'De novo'}
               </button>
               <button
                 onClick={() => restart(true)}
-                className="btn-stamp flex-1 border-2 border-ink-900 px-4 py-2.5 text-ink-900 hover:bg-ink-900 hover:text-paper"
+                className="btn-stamp flex-1 border-2 border-ink-900 px-4 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
               >
                 Difícil
               </button>
             </div>
             <Link
               to="/"
-              className="btn-stamp mt-2 block border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-ink-900 hover:text-paper"
+              className="btn-stamp mt-2 block border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
             >
               Voltar pro almanaque
             </Link>
@@ -337,7 +337,7 @@ export default function LinhaDoTempo() {
       </main>
 
       {showHelp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/60 p-4" onClick={closeHelp}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={closeHelp}>
           <div className="w-full max-w-sm border-2 border-ink-900 bg-paper p-6" onClick={(e) => e.stopPropagation()}>
             <p className="kicker">Como jogar</p>
             <h2 className="mt-1 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900">
@@ -361,7 +361,7 @@ export default function LinhaDoTempo() {
                 pontos do dia somam num <strong>total</strong> que cresce a cada dia.
               </li>
             </ul>
-            <button onClick={closeHelp} className="btn-stamp mt-6 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700">
+            <button onClick={closeHelp} className="btn-stamp mt-6 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700">
               Entendi, bora
             </button>
           </div>

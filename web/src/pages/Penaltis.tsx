@@ -74,7 +74,7 @@ function Pip({ mark, team }: { mark?: Mark; team: 'me' | 'op' }) {
   if (mark === 'goal')
     return <span className={`h-3.5 w-3.5 rounded-full ${team === 'me' ? 'bg-grass-400' : 'bg-ochre-500'}`} />
   return (
-    <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full border border-paper/40 text-[9px] text-paper/50">
+    <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full border border-paper/40 text-[9px] text-ink-900/50">
       ✕
     </span>
   )
@@ -329,7 +329,7 @@ export default function Penaltis() {
             <button
               onClick={() => setShowHelp(true)}
               aria-label="Como jogar"
-              className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink-900 font-cond text-sm font-700 text-ink-900 hover:bg-ink-900 hover:text-paper"
+              className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink-900 font-cond text-sm font-700 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
             >
               ?
             </button>
@@ -367,7 +367,7 @@ export default function Penaltis() {
 
         {/* PLACAR */}
         {!copaDone && (
-          <div className="w-full max-w-sm border-2 border-ink-900 bg-ink-900 text-paper">
+          <div className="w-full max-w-sm border-2 border-ink-900 bg-grass-700 text-ink-900">
             <div className="flex items-center gap-3 border-b border-paper/15 px-3 py-2">
               <span className="w-12 font-cond text-xs font-700 uppercase tracking-wider text-grass-400">Você</span>
               <div className="flex flex-1 flex-wrap gap-1">
@@ -422,8 +422,8 @@ export default function Penaltis() {
               {current.options.map((opt, i) => {
                 let cls = 'border-ink-900/25 bg-paper hover:border-ink-900 hover:bg-paper-100'
                 if (phase === 'shoot') {
-                  if (i === current.correct) cls = 'border-grass-700 bg-grass-600 text-paper'
-                  else if (i === selected) cls = 'border-ochre-600 bg-ochre-500 text-paper'
+                  if (i === current.correct) cls = 'border-grass-700 bg-grass-600 text-ink-900'
+                  else if (i === selected) cls = 'border-ochre-600 bg-ochre-500 text-ink-900'
                   else cls = 'border-ink-900/15 bg-paper opacity-60'
                 }
                 return (
@@ -455,7 +455,7 @@ export default function Penaltis() {
             </p>
             <button
               onClick={() => startShootout(round + 1, copaMode)}
-              className="btn-stamp mt-5 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700"
+              className="btn-stamp mt-5 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700"
             >
               Avançar pra {ROUND_NAMES[round]} →
             </button>
@@ -470,12 +470,12 @@ export default function Penaltis() {
               {my} <span className="text-ink-500">×</span> {opp}
             </p>
             <p className="mt-1 font-serif text-base italic text-ink-600">Treino não conta pontos.</p>
-            <button onClick={treinar} className="btn-stamp mt-5 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700">
+            <button onClick={treinar} className="btn-stamp mt-5 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700">
               Outra disputa
             </button>
             <Link
               to="/"
-              className="btn-stamp mt-2 block border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-ink-900 hover:text-paper"
+              className="btn-stamp mt-2 block border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
             >
               Voltar pro almanaque
             </Link>
@@ -515,13 +515,13 @@ export default function Penaltis() {
 
             <button
               onClick={compartilhar}
-              className="btn-stamp mt-4 w-full bg-ink-900 px-6 py-2.5 text-paper hover:bg-grass-600"
+              className="btn-stamp mt-4 w-full bg-grass-700 px-6 py-2.5 text-ink-900 hover:bg-grass-600"
             >
               {copied ? 'Imagem pronta!' : 'Compartilhar imagem'}
             </button>
             <button
               onClick={treinar}
-              className="btn-stamp mt-2 w-full border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-ink-900 hover:text-paper"
+              className="btn-stamp mt-2 w-full border-2 border-ink-900 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
             >
               Treinar (sem pontos)
             </button>
@@ -530,7 +530,7 @@ export default function Penaltis() {
       </main>
 
       {showHelp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/60 p-4" onClick={closeHelp}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={closeHelp}>
           <div className="w-full max-w-sm border-2 border-ink-900 bg-paper p-6" onClick={(e) => e.stopPropagation()}>
             <p className="kicker">Como jogar</p>
             <h2 className="mt-1 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900">
@@ -556,7 +556,7 @@ export default function Penaltis() {
                 .
               </li>
             </ul>
-            <button onClick={closeHelp} className="btn-stamp mt-6 w-full bg-grass-600 px-6 py-2.5 text-paper hover:bg-grass-700">
+            <button onClick={closeHelp} className="btn-stamp mt-6 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700">
               Entendi, bora
             </button>
           </div>
