@@ -89,7 +89,15 @@ export function shotFromOutcome(kind: Kind, seed: number): Shot {
   return { bx: z.x, by: 6, kx: clampKx(k.x), pose: poseFor(k), label: 'PRA FORA!', good: false, net: false }
 }
 
-export function PenaltyScene({ shot, animKey = 0 }: { shot: Shot; animKey?: number }) {
+export function PenaltyScene({
+  shot,
+  animKey = 0,
+  compact = false,
+}: {
+  shot: Shot
+  animKey?: number
+  compact?: boolean
+}) {
   const ballRef = useRef<HTMLDivElement>(null)
   const sceneRef = useRef<HTMLDivElement>(null)
 
@@ -121,7 +129,7 @@ export function PenaltyScene({ shot, animKey = 0 }: { shot: Shot; animKey?: numb
   return (
     <div
       ref={sceneRef}
-      className={`relative h-64 w-full max-w-sm overflow-hidden rounded-sm border-2 border-ink-900 ${shot?.net ? 'animate-shake' : ''}`}
+      className={`relative ${compact ? 'h-44 sm:h-56' : 'h-64'} w-full max-w-sm overflow-hidden rounded-sm border-2 border-ink-900 ${shot?.net ? 'animate-shake' : ''}`}
     >
       <div className="absolute inset-0 bg-gradient-to-b from-[#9ec7d8] via-[#86b98f] to-grass-700" />
       <div className="absolute inset-0" style={{ background: 'radial-gradient(120% 55% at 50% 0%, rgba(255,255,255,0.22), transparent 60%)' }} />

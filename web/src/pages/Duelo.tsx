@@ -370,11 +370,15 @@ export default function Duelo() {
   return (
     <div className="flex min-h-screen flex-col bg-paper">
       {header}
-      <main className="container-page flex flex-1 flex-col items-center py-8">
-        <p className="kicker">Multiplayer · jogo 02</p>
-        <h1 className="mt-3 font-display text-4xl uppercase leading-[1.05] tracking-tight text-ink-900 sm:text-5xl">
-          Duelo de Pênaltis
-        </h1>
+      <main className="container-page flex flex-1 flex-col items-center py-5">
+        {phase !== 'play' && (
+          <>
+            <p className="kicker">Multiplayer · jogo 02</p>
+            <h1 className="mt-3 font-display text-4xl uppercase leading-[1.05] tracking-tight text-ink-900 sm:text-5xl">
+              Duelo de Pênaltis
+            </h1>
+          </>
+        )}
 
         {!nick && (
           <div className="mt-8 w-full max-w-sm border-2 border-ink-900 bg-paper-100 p-6">
@@ -431,55 +435,47 @@ export default function Duelo() {
         )}
 
         {phase === 'play' && match && match.guest_id && (
-          <div className="mt-6 w-full max-w-md">
+          <div className="w-full max-w-md">
             <div className="grid grid-cols-2 gap-2">
               {[
                 { nm: myNick, sc: myScore, mine: true },
                 { nm: oppNick, sc: oppScore, mine: false },
               ].map((p, idx) => (
-                <div key={idx} className={`border-2 px-3 py-2 text-center ${p.mine ? 'border-grass-700 bg-grass-600/10' : 'border-ink-900 bg-paper-100'}`}>
-                  <div className="truncate font-cond text-xs font-700 uppercase tracking-wide text-ink-800">
+                <div key={idx} className={`border-2 px-3 py-1.5 text-center ${p.mine ? 'border-grass-700 bg-grass-600/10' : 'border-ink-900 bg-paper-100'}`}>
+                  <div className="truncate font-cond text-[11px] font-700 uppercase tracking-wide text-ink-800">
                     {p.nm ?? '—'} {p.mine && <span className="text-grass-600">(você)</span>}
                   </div>
-                  <div className="font-display text-4xl text-ink-900">{p.sc}</div>
+                  <div className="font-display text-3xl text-ink-900">{p.sc}</div>
                 </div>
               ))}
             </div>
 
-            <p className="mt-3 text-center font-cond text-xs font-600 uppercase tracking-[0.16em] text-ink-500">
+            <p className="mt-2 text-center font-cond text-xs font-600 uppercase tracking-[0.16em] text-ink-500">
               {shown >= match.rounds * 2 ? 'Morte súbita' : `Cobrança ${pairNo}/${match.rounds}`} ·{' '}
               <span className={amKicker ? 'text-grass-600' : 'text-ochre-600'}>{amKicker ? 'Você bate' : 'Você defende'}</span>
             </p>
-            {!revealing && (
-              <p className="mt-1 text-center font-serif text-xs italic text-ink-600">
-                {amKicker
-                  ? 'Acerte a pergunta pra mandar no gol — errou, chuta pra fora.'
-                  : 'Acerte a pergunta pra defender — errou, é gol do adversário.'}
-              </p>
-            )}
 
             {/* Campo sempre visível: goleiro parado enquanto espera, anima quando os dois respondem */}
-            <div className="mt-3 flex w-full justify-center">
-              <PenaltyScene shot={revealing ? sceneShot : null} animKey={shown} />
+            <div className="mt-2 flex w-full justify-center">
+              <PenaltyScene shot={revealing ? sceneShot : null} animKey={shown} compact />
             </div>
 
             {revealing ? null : iMoved ? (
-              <p className="mt-3 text-center font-serif text-sm italic text-ink-600">
+              <p className="mt-2 text-center font-serif text-sm italic text-ink-600">
                 Você respondeu ✓ — esperando o adversário {amKicker ? 'defender' : 'bater'}…
               </p>
             ) : question ? (
               <>
-                <div className="mx-auto mt-3 h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-paper-300">
+                <div className="mx-auto mt-2 h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-paper-300">
                   <div className={`h-full transition-[width] duration-1000 ease-linear ${timeLeft <= 3 ? 'bg-ochre-500' : 'bg-grass-600'}`} style={{ width: `${(timeLeft / (amKicker ? ATTACK_SEC : DEF_SEC)) * 100}%` }} />
                 </div>
-                <p className="mt-3 kicker text-ink-500">{amKicker ? 'Sua cobrança' : 'Sua defesa (difícil)'} · {question.cat}</p>
-                <h2 className="mt-1 font-serif text-xl leading-snug text-ink-900 sm:text-2xl">{question.q}</h2>
-                <div className="mt-3 grid gap-2">
+                <h2 className="mt-2 text-center font-serif text-base leading-snug text-ink-900 sm:text-lg">{question.q}</h2>
+                <div className="mt-2 grid gap-1.5">
                   {question.options.map((opt, i) => (
                     <button
                       key={i}
                       onClick={() => responder(i)}
-                      className="flex items-center gap-3 border-2 border-ink-900/25 bg-paper px-4 py-2.5 text-left font-serif text-base transition-colors hover:border-ink-900 hover:bg-paper-100"
+                      className="flex items-center gap-3 border-2 border-ink-900/25 bg-paper px-3 py-2 text-left font-serif text-[15px] transition-colors hover:border-ink-900 hover:bg-paper-100"
                     >
                       <span className="font-cond text-xs font-700">{String.fromCharCode(65 + i)}</span>
                       {opt}
