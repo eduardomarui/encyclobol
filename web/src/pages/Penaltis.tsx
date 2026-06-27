@@ -401,7 +401,7 @@ export default function Penaltis() {
         {/* CENA */}
         {showGame && (
           <div className="mt-3 flex w-full justify-center">
-            <PenaltyScene shot={shot} animKey={index} />
+            <PenaltyScene shot={shot} animKey={index} compact />
           </div>
         )}
 

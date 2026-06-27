@@ -193,12 +193,12 @@ export default function Intruso() {
         </div>
       </header>
 
-      <main className="container-page flex flex-1 flex-col items-center py-8">
+      <main className="container-page flex flex-1 flex-col items-center py-5">
         <p className="kicker">Dedução · jogo 05</p>
-        <h1 className="mt-3 font-display text-4xl uppercase leading-[1.05] tracking-tight text-ink-900 sm:text-5xl">
+        <h1 className="mt-2 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900 sm:text-5xl">
           O Intruso
         </h1>
-        <p className="mt-3 max-w-md text-center font-serif text-base italic text-ink-600">
+        <p className="mt-2 hidden max-w-md text-center font-serif text-sm italic text-ink-600 sm:block">
           Três craques têm algo em comum, um não. Ache o infiltrado — e depois crave o
           porquê. Erre o intruso e perde vida; vá o mais longe que conseguir.
         </p>

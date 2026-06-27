@@ -182,12 +182,12 @@ export default function LinhaDoTempo() {
         </div>
       </header>
 
-      <main className="container-page flex flex-1 flex-col items-center py-8">
+      <main className="container-page flex flex-1 flex-col items-center py-5">
         <p className="kicker">Cronologia · jogo 04</p>
-        <h1 className="mt-3 font-display text-4xl uppercase leading-[1.05] tracking-tight text-ink-900 sm:text-5xl">
+        <h1 className="mt-2 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900 sm:text-5xl">
           Linha do Tempo
         </h1>
-        <p className="mt-3 max-w-md text-center font-serif text-base italic text-ink-600">
+        <p className="mt-2 hidden max-w-md text-center font-serif text-sm italic text-ink-600 sm:block">
           Empilhe os craques na ordem da história, pelo início de carreira. Acertos
           seguidos valem mais; errou a época, perde vida. Vá o mais longe que conseguir.
         </p>

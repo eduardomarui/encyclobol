@@ -220,12 +220,12 @@ export default function Conexoes() {
         </div>
       </header>
 
-      <main className="container-page flex flex-1 flex-col items-center py-8">
+      <main className="container-page flex flex-1 flex-col items-center py-5">
         <p className="kicker">Lógica · jogo 03</p>
-        <h1 className="mt-3 font-display text-4xl uppercase leading-[1.05] tracking-tight text-ink-900 sm:text-5xl">
+        <h1 className="mt-2 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900 sm:text-5xl">
           Quarteto
         </h1>
-        <p className="mt-3 max-w-md text-center font-serif text-base italic text-ink-600">
+        <p className="mt-2 hidden max-w-md text-center font-serif text-sm italic text-ink-600 sm:block">
           Ache os quatro grupos de quatro craques. Sempre tem uma isca: alguém que
           parece caber em dois lugares — mas só fecha de um jeito.
         </p>
