@@ -141,7 +141,12 @@ export default function Duelo() {
   const [copied, setCopied] = useState(false)
   const [busy, setBusy] = useState(false)
   const cleanup = useRef<(() => void) | null>(null)
+  const revealTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const matchId = match?.id
+
+  useEffect(() => () => {
+    if (revealTimer.current) clearTimeout(revealTimer.current)
+  }, [])
 
   // Rede de segurança: revalida jogadas/estado periodicamente e ao voltar pra aba
   // (cobre Realtime perdido quando o navegador suspende a aba em segundo plano).
@@ -273,16 +278,16 @@ export default function Duelo() {
   const question = match && phase === 'play' ? (amKicker ? duelShot(match.seed, shown) : duelDefense(match.seed, shown)) : null
 
   // Revela a rodada concluída (com animação) e depois avança.
+  // O timer fica numa ref pra a re-execução do efeito NÃO cancelá-lo.
   useEffect(() => {
     if (phase !== 'play' || !match || revealing) return
     if (resolved > shown) {
       setRevealing(true)
-      const t = setTimeout(() => {
+      revealTimer.current = setTimeout(() => {
         setRevealing(false)
         setTimeLeft(DUEL_SEC)
         setShown((s) => s + 1)
       }, 2100)
-      return () => clearTimeout(t)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resolved, shown, revealing, phase, match])
