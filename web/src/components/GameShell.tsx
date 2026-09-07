@@ -8,17 +8,21 @@ export function GameHeader({
   label,
   onHelp,
   extra,
+  backTo = '/jogos',
+  backLabel = 'Encyclobol',
 }: {
   label: string
   onHelp: () => void
   extra?: ReactNode
+  backTo?: string
+  backLabel?: string
 }) {
   return (
     <header className="sticky top-0 z-10 border-b border-white/10 bg-paper/95 backdrop-blur-sm">
       <div className="container-page flex h-14 items-center justify-between">
-        <Link to="/jogos" className="flex items-center gap-2 text-ink-900">
+        <Link to={backTo} className="flex items-center gap-2 text-ink-900">
           <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" className="h-6 w-auto" />
-          <span className="font-cond text-sm font-600 uppercase tracking-wider">← Encyclobol</span>
+          <span className="font-cond text-sm font-600 uppercase tracking-wider">← {backLabel}</span>
         </Link>
         <div className="flex items-center gap-3">
           {extra}

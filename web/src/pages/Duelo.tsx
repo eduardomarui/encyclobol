@@ -17,6 +17,7 @@ import {
   type Move,
 } from '../lib/duel'
 import { PenaltyScene, shotFromOutcome, type Kind } from '../components/PenaltyScene'
+import { GameHeader, HelpModal } from '../components/GameShell'
 
 const ATTACK_SEC = 10 // tempo pra cobrar
 const DEF_SEC = 6 // tempo pra defender (menos — pressão; e perguntas mais difíceis)
@@ -331,24 +332,7 @@ export default function Duelo() {
   }
 
   const header = (
-    <header className="sticky top-0 z-10 border-b border-white/10 bg-paper/95 backdrop-blur-sm">
-      <div className="container-page flex h-14 items-center justify-between">
-        <Link to="/jogos/penaltis" className="flex items-center gap-2 text-ink-900">
-          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" className="h-6 w-auto" />
-          <span className="font-cond text-sm font-600 uppercase tracking-wider">← Pênaltis</span>
-        </Link>
-        <div className="flex items-center gap-3">
-          <span className="font-cond text-xs font-500 uppercase tracking-[0.16em] text-ink-600">Duelo online</span>
-          <button
-            onClick={() => setShowHelp(true)}
-            aria-label="Como jogar"
-            className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white/20 font-cond text-sm font-700 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
-          >
-            ?
-          </button>
-        </div>
-      </div>
-    </header>
+    <GameHeader label="Duelo online" onHelp={() => setShowHelp(true)} backTo="/jogos/penaltis" backLabel="Pênaltis" />
   )
 
   if (!rankingEnabled) {
@@ -521,13 +505,7 @@ export default function Duelo() {
       </main>
 
       {showHelp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={closeHelp}>
-          <div className="w-full max-w-sm border-2 border-white/20 bg-paper p-6" onClick={(e) => e.stopPropagation()}>
-            <p className="kicker">Como funciona</p>
-            <h2 className="mt-1 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900">
-              Duelo 1×1
-            </h2>
-            <ul className="mt-4 space-y-3 font-serif text-[15px] leading-snug text-ink-700">
+        <HelpModal title="Duelo 1×1" onClose={closeHelp}>
               <li>
                 Em cada cobrança, <strong>um bate e o outro defende</strong> — e isso{' '}
                 <strong>alterna</strong> a cada rodada.
@@ -545,12 +523,7 @@ export default function Duelo() {
                 <strong>quando os dois respondem</strong>.
               </li>
               <li>É melhor de 5 cobranças — empatou, vai pra <strong>morte súbita</strong>.</li>
-            </ul>
-            <button onClick={closeHelp} className="btn-stamp mt-6 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700">
-              Entendi, bora
-            </button>
-          </div>
-        </div>
+        </HelpModal>
       )}
     </div>
   )

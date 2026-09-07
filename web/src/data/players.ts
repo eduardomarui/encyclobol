@@ -522,7 +522,6 @@ export const players: Player[] = [
   // Alemanha
   { answer: 'EFFENBERG', display: 'Stefan Effenberg', nat: 'Alemanha', pos: 'Meia', era: '1987–2004' },
   { answer: 'KHEDIRA', display: 'Sami Khedira', nat: 'Alemanha', pos: 'Meia', era: '2006–2021' },
-  { answer: 'THOMASMULLER', display: 'Thomas Müller', nat: 'Alemanha', pos: 'Atacante', era: '2008–presente' },
   { answer: 'TERSTEGEN', display: 'Marc-André ter Stegen', nat: 'Alemanha', pos: 'Goleiro', era: '2010–presente' },
   // Espanha
   { answer: 'THIAGOALCANTARA', display: 'Thiago Alcântara', nat: 'Espanha', pos: 'Meia', era: '2009–2024' },
@@ -553,7 +552,6 @@ export const players: Player[] = [
   { answer: 'GOYCOCHEA', display: 'Sergio Goycochea', nat: 'Argentina', pos: 'Goleiro', era: '1983–1999' },
   // Paraguai / México
   { answer: 'SANTACRUZ', display: 'Roque Santa Cruz', nat: 'Paraguai', pos: 'Atacante', era: '1997–2021' },
-  { answer: 'HUGOSANCHEZ', display: 'Hugo Sánchez', nat: 'México', pos: 'Atacante', era: '1976–1997' },
   // Inglaterra
   { answer: 'BARNES', display: 'John Barnes', nat: 'Inglaterra', pos: 'Ponta', era: '1981–1999' },
   { answer: 'ADAMS', display: 'Tony Adams', nat: 'Inglaterra', pos: 'Zagueiro', era: '1983–2002' },
