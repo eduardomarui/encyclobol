@@ -11,6 +11,7 @@ import {
 import { PenaltyScene, ZONES, poseFor, type Zone, type Shot } from '../components/PenaltyScene'
 import { confetti } from '../lib/juice'
 import { shareScoreImage } from '../lib/shareCard'
+import { GameHeader, HelpModal, StatGrid, TimeBar } from '../components/GameShell'
 
 const HELP_KEY = 'encyclobol:copa:help'
 
@@ -92,6 +93,34 @@ function Trophy({ on }: { on: boolean }) {
         strokeLinecap="round"
       />
     </svg>
+  )
+}
+
+// Chaveamento do dia: cada fase vencida, a que parou e as que não vieram.
+function Bracket({ reached, champion }: { reached: number; champion: boolean }) {
+  return (
+    <ol className="mt-4 grid grid-cols-4 gap-1">
+      {ROUND_NAMES.map((name, i) => {
+        const r = i + 1
+        const won = r < reached || (r === reached && champion)
+        const lost = r === reached && !champion
+        return (
+          <li
+            key={name}
+            className={`border-2 px-1 py-2 text-center font-cond text-[10px] font-700 uppercase tracking-wide ${
+              won
+                ? 'border-grass-600 bg-grass-700/50 text-ink-900'
+                : lost
+                  ? 'border-ochre-600 bg-ochre-500/20 text-ochre-500'
+                  : 'border-white/10 text-ink-500'
+            }`}
+          >
+            <span className="block font-display text-base leading-none">{won ? '✓' : lost ? '✕' : '·'}</span>
+            <span className="mt-1 block truncate">{name}</span>
+          </li>
+        )
+      })}
+    </ol>
   )
 }
 
@@ -310,32 +339,18 @@ export default function Penaltis() {
 
   return (
     <div className="flex min-h-screen flex-col bg-paper">
-      <header className="sticky top-0 z-10 border-b border-white/10 bg-paper/95 backdrop-blur-sm">
-        <div className="container-page flex h-14 items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-ink-900">
-            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" className="h-6 w-auto" />
-            <span className="font-cond text-sm font-600 uppercase tracking-wider">← Encyclobol</span>
+      <GameHeader
+        label={copaMode ? 'Copa de Pênaltis' : 'Modo treino'}
+        onHelp={() => setShowHelp(true)}
+        extra={
+          <Link
+            to="/jogos/penaltis/online"
+            className="border border-corn-500/60 px-2 py-1 font-cond text-[11px] font-700 uppercase tracking-wider text-corn-500 hover:bg-corn-500 hover:text-paper"
+          >
+            1×1 online
           </Link>
-          <div className="flex items-center gap-3">
-            <Link
-              to="/jogos/penaltis/online"
-              className="font-cond text-xs font-700 uppercase tracking-wider text-grass-600 hover:text-grass-700"
-            >
-              1×1 online
-            </Link>
-            <span className="font-cond text-xs font-500 uppercase tracking-[0.16em] text-ink-600">
-              {copaMode ? 'Copa de Pênaltis' : 'Modo treino'}
-            </span>
-            <button
-              onClick={() => setShowHelp(true)}
-              aria-label="Como jogar"
-              className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white/20 font-cond text-sm font-700 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
-            >
-              ?
-            </button>
-          </div>
-        </div>
-      </header>
+        }
+      />
 
       <main className="container-page flex flex-1 flex-col items-center py-5">
         {/* Cabeçalho da fase */}
@@ -408,13 +423,11 @@ export default function Penaltis() {
         {/* PERGUNTA */}
         {showGame && current && (
           <div className="mt-4 w-full max-w-sm">
-            <div className="mb-1.5 h-1.5 w-full bg-paper-300">
-              <div
-                className={`h-1.5 transition-[width] duration-1000 ease-linear ${
-                  timeLeft <= 3 ? 'bg-ochre-500' : 'bg-grass-600'
-                }`}
-                style={{ width: `${(timeLeft / secsFor(round, index)) * 100}%` }}
-              />
+            <div className="mb-1.5 flex items-center gap-2">
+              <TimeBar left={timeLeft} total={secsFor(round, index)} danger={3} />
+              <span className={`w-5 text-right font-display text-base leading-none tabular-nums ${timeLeft <= 3 ? 'animate-pulse text-ochre-500' : 'text-ink-700'}`}>
+                {timeLeft}
+              </span>
             </div>
             <p className="kicker text-ink-500">{current.cat}</p>
             <h2 className="mt-1 font-serif text-xl leading-snug text-ink-900 sm:text-2xl">{current.q}</h2>
@@ -497,19 +510,16 @@ export default function Penaltis() {
                 : 'Bom caminho. Amanhã tem outra chance de erguer o caneco.'}
             </p>
 
-            <div className="mt-5 grid grid-cols-4 gap-px overflow-hidden border-2 border-white/20 bg-ink-900/15">
-              {[
+            <Bracket reached={round} champion={champion} />
+
+            <StatGrid
+              items={[
                 ['Total', copa.total],
                 ['Recorde', copa.best],
                 ['Copas', copa.cups],
                 ['Dias', copa.days],
-              ].map(([k, v]) => (
-                <div key={k} className="bg-paper-100 px-1 py-2">
-                  <div className="font-display text-2xl text-ink-900">{v}</div>
-                  <div className="font-cond text-[9px] font-500 uppercase tracking-wide text-ink-600">{k}</div>
-                </div>
-              ))}
-            </div>
+              ]}
+            />
 
             <p className="mt-3 font-serif text-sm italic text-ink-600">Volte amanhã pra nova Copa.</p>
 
@@ -530,13 +540,7 @@ export default function Penaltis() {
       </main>
 
       {showHelp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={closeHelp}>
-          <div className="w-full max-w-sm border-2 border-white/20 bg-paper p-6" onClick={(e) => e.stopPropagation()}>
-            <p className="kicker">Como jogar</p>
-            <h2 className="mt-1 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900">
-              Copa de Pênaltis
-            </h2>
-            <ul className="mt-4 space-y-3 font-serif text-[15px] leading-snug text-ink-700">
+        <HelpModal title="Copa de Pênaltis" onClose={closeHelp}>
               <li>
                 Cada pergunta é uma cobrança. <strong>Quando você cobra:</strong> acertou, é gol;
                 errou, o goleiro defende.
@@ -555,12 +559,7 @@ export default function Penaltis() {
                 </span>
                 .
               </li>
-            </ul>
-            <button onClick={closeHelp} className="btn-stamp mt-6 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700">
-              Entendi, bora
-            </button>
-          </div>
-        </div>
+        </HelpModal>
       )}
     </div>
   )

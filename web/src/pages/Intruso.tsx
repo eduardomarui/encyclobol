@@ -10,6 +10,8 @@ import {
 } from '../lib/intrusoStats'
 import { confetti } from '../lib/juice'
 import { shareScoreImage } from '../lib/shareCard'
+import { players } from '../data/players'
+import { GameHeader, GameTitle, HelpModal, Lives, StatGrid } from '../components/GameShell'
 
 const LIVES = 3
 const REASON_BONUS = 50
@@ -17,6 +19,18 @@ const CATS: IntrusoCat[] = ['Posição', 'Nacionalidade', 'Clube', 'Era']
 const HELP_KEY = 'encyclobol:intruso:help'
 
 type Round = { players: string[]; intruderIdx: number; rule: string; cat: IntrusoCat }
+
+// Ficha curta (seleção · posição · época) mostrada na revelação, pra ficar
+// claro o que cada um é — e por que o intruso não pertence ao grupo.
+const norm = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toUpperCase().replace(/[^A-Z]/g, '')
+function metaFor(name: string): string | null {
+  const n = norm(name)
+  const p =
+    players.find((x) => norm(x.display) === n) ??
+    players.find((x) => x.answer === n) ??
+    players.find((x) => norm(x.display).endsWith(n))
+  return p ? `${p.nat} · ${p.pos} · ${p.era}` : null
+}
 
 function makeRounds(picks: number[], seedBase: number): Round[] {
   return picks.map((bi, qi) => {
@@ -172,56 +186,30 @@ export default function Intruso() {
 
   return (
     <div className="flex min-h-screen flex-col bg-paper">
-      <header className="sticky top-0 z-10 border-b border-white/10 bg-paper/95 backdrop-blur-sm">
-        <div className="container-page flex h-14 items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-ink-900">
-            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" className="h-6 w-auto" />
-            <span className="font-cond text-sm font-600 uppercase tracking-wider">← Encyclobol</span>
-          </Link>
-          <div className="flex items-center gap-3">
-            <span className="font-cond text-xs font-500 uppercase tracking-[0.16em] text-ink-600">
-              {daily ? 'Caçada do dia' : 'Modo treino'}
-            </span>
-            <button
-              onClick={() => setShowHelp(true)}
-              aria-label="Como jogar"
-              className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white/20 font-cond text-sm font-700 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
-            >
-              ?
-            </button>
-          </div>
-        </div>
-      </header>
+      <GameHeader label={daily ? 'Caçada do dia' : 'Modo treino'} onHelp={() => setShowHelp(true)} />
 
       <main className="container-page flex flex-1 flex-col items-center py-5">
-        <p className="kicker">Dedução · jogo 05</p>
-        <h1 className="mt-2 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900 sm:text-5xl">
-          O Intruso
-        </h1>
-        <p className="mt-2 hidden max-w-md text-center font-serif text-sm italic text-ink-600 sm:block">
-          Três craques têm algo em comum, um não. Ache o infiltrado — e depois crave o
-          porquê. Erre o intruso e perde vida; vá o mais longe que conseguir.
-        </p>
+        <GameTitle
+          kicker="Dedução · jogo 05"
+          title="O Intruso"
+          blurb="Três craques têm algo em comum, um não. Ache o infiltrado — e depois crave o porquê. Erre o intruso e perde vida; vá o mais longe que conseguir."
+        />
 
         {/* HUD */}
         <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
-          <span className="font-display text-2xl text-ink-900">
+          <span className="font-display text-2xl text-corn-500">
             {points}
             <span className="ml-1 font-cond text-xs font-500 uppercase tracking-wide text-ink-500">pts</span>
           </span>
           <span className="font-cond text-sm font-600 uppercase tracking-wider text-ink-700">
-            Caçados: <span className="text-grass-600">{caught}</span>
+            Caçados: <span className="text-grass-500">{caught}</span>
           </span>
           {combo >= 2 && (
-            <span className="rounded-sm bg-ochre-500 px-2 py-0.5 font-cond text-xs font-700 uppercase tracking-wider text-ink-900">
-              x{combo}
+            <span className="animate-pop rounded-sm bg-corn-500 px-2 py-0.5 font-cond text-xs font-700 uppercase tracking-wider text-paper">
+              combo x{combo}
             </span>
           )}
-          <span className="flex items-center gap-1">
-            {Array.from({ length: LIVES }).map((_, i) => (
-              <span key={i} className={`h-2.5 w-2.5 rotate-45 ${i < lives ? 'bg-ochre-500' : 'bg-ink-900/20'}`} />
-            ))}
-          </span>
+          <Lives total={LIVES} left={lives} />
         </div>
 
         {daily && !over && (
@@ -237,25 +225,36 @@ export default function Intruso() {
 
         {/* Rodada */}
         {!over && current && (
-          <div className="mt-7 w-full max-w-xl">
-            <p className="text-center font-serif text-lg italic text-ink-700">Quem não pertence ao grupo?</p>
+          <div className="mt-6 w-full max-w-xl">
+            <div className="flex items-baseline justify-between">
+              <span className="font-cond text-[11px] font-600 uppercase tracking-[0.16em] text-ink-500">
+                Rodada {String(index + 1).padStart(2, '0')}
+              </span>
+              <p className="font-serif text-lg italic text-ink-700">Quem não pertence ao grupo?</p>
+            </div>
 
-            <div className="mt-4 grid grid-cols-2 gap-2.5">
+            <div className="mt-3 grid grid-cols-2 gap-2.5">
               {current.players.map((name, i) => {
-                let cls = 'border-ink-900/25 bg-paper hover:border-white/20 hover:bg-paper-100'
-                if (step !== 'intruder') {
-                  if (i === current.intruderIdx) cls = 'animate-pop border-grass-700 bg-grass-600 text-ink-900'
+                const revealedRound = step !== 'intruder'
+                let cls = 'border-ink-900/25 bg-paper hover:-translate-y-0.5 hover:border-white/30 hover:bg-paper-100'
+                if (revealedRound) {
+                  if (i === current.intruderIdx) cls = 'animate-pop border-corn-500 bg-corn-500 text-paper'
                   else if (i === selIntruder) cls = 'border-ochre-600 bg-ochre-500 text-ink-900'
-                  else cls = 'border-ink-900/15 bg-paper opacity-60'
+                  else cls = 'border-grass-600/60 bg-grass-700/40 text-ink-900'
                 }
+                const meta = revealedRound ? metaFor(name) : null
                 return (
                   <button
                     key={name}
                     onClick={() => pickIntruder(i)}
-                    disabled={step !== 'intruder'}
-                    className={`min-h-[64px] border-2 px-3 py-3 text-center font-cond text-sm font-600 uppercase leading-tight transition-colors ${cls}`}
+                    disabled={revealedRound}
+                    className={`flex min-h-[68px] flex-col items-center justify-center border-2 px-3 py-3 text-center transition-all ${cls}`}
                   >
-                    {name}
+                    <span className="font-cond text-sm font-600 uppercase leading-tight">{name}</span>
+                    {meta && <span className="mt-1 font-cond text-[10px] font-500 uppercase tracking-wide opacity-80">{meta}</span>}
+                    {revealedRound && i === current.intruderIdx && (
+                      <span className="mt-1 font-cond text-[9px] font-700 uppercase tracking-[0.16em]">intruso</span>
+                    )}
                   </button>
                 )
               })}
@@ -294,7 +293,7 @@ export default function Intruso() {
               <div className="mt-4 text-center">
                 <p className="font-serif text-base italic text-ink-700">
                   {selIntruder === current.intruderIdx ? (
-                    <span className="text-grass-700">
+                    <span className="text-grass-400">
                       Acertou! +{lastGain}
                       {reasonGot ? ' +50 (elo certo)' : ' (elo errado)'} ·{' '}
                     </span>
@@ -332,19 +331,14 @@ export default function Intruso() {
 
             {daily && (
               <>
-                <div className="mt-5 grid grid-cols-4 gap-px overflow-hidden border-2 border-white/20 bg-ink-900/15">
-                  {[
+                <StatGrid
+                  items={[
                     ['Total', career.total],
                     ['Recorde', career.best],
                     ['Ofensiva', career.streak],
                     ['Dias', career.days],
-                  ].map(([k, v]) => (
-                    <div key={k} className="bg-paper-100 px-1 py-2">
-                      <div className="font-display text-2xl text-ink-900">{v}</div>
-                      <div className="font-cond text-[9px] font-500 uppercase tracking-wide text-ink-600">{k}</div>
-                    </div>
-                  ))}
-                </div>
+                  ]}
+                />
                 <p className="mt-3 font-serif text-sm italic text-ink-600">Volte amanhã pra somar mais ao total.</p>
                 <button
                   onClick={compartilhar}
@@ -372,13 +366,7 @@ export default function Intruso() {
       </main>
 
       {showHelp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={closeHelp}>
-          <div className="w-full max-w-sm border-2 border-white/20 bg-paper p-6" onClick={(e) => e.stopPropagation()}>
-            <p className="kicker">Como jogar</p>
-            <h2 className="mt-1 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900">
-              O Intruso
-            </h2>
-            <ul className="mt-4 space-y-3 font-serif text-[15px] leading-snug text-ink-700">
+        <HelpModal title="O Intruso" cta="Entendi, bora caçar" onClose={closeHelp}>
               <li>
                 São 4 craques: <strong>3 compartilham um traço</strong> (posição, nacionalidade,
                 clube ou era) e <strong>1 é o infiltrado</strong>. Ache o intruso.
@@ -395,12 +383,7 @@ export default function Intruso() {
                 É <strong>sobrevivência</strong>: cace o máximo de intrusos até acabarem as vidas. Os
                 pontos do dia somam num <strong>total</strong> que cresce sempre.
               </li>
-            </ul>
-            <button onClick={closeHelp} className="btn-stamp mt-6 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700">
-              Entendi, bora caçar
-            </button>
-          </div>
-        </div>
+        </HelpModal>
       )}
     </div>
   )

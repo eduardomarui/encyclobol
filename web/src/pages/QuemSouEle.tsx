@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { players } from '../data/players'
 import { dayNumber } from '../lib/daily'
 import {
@@ -10,6 +9,7 @@ import {
 } from '../lib/stats'
 import { confetti } from '../lib/juice'
 import { shareScoreImage } from '../lib/shareCard'
+import { GameHeader, GameTitle, HelpModal, StatGrid, TimeBar } from '../components/GameShell'
 
 const MAX_ATTEMPTS = 6
 const ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM']
@@ -112,6 +112,8 @@ export default function QuemSouEle() {
   const [copied, setCopied] = useState(false)
   const [timeLeft, setTimeLeft] = useState(() => timeForStage(today?.stage ?? 1))
   const [timedOut, setTimedOut] = useState(false)
+  // Craques enfrentados na corrida de hoje (pra ficha do fim).
+  const [history, setHistory] = useState<{ name: string; ok: boolean; tries: number }[]>([])
   const [showHelp, setShowHelp] = useState(() => {
     try {
       return !localStorage.getItem(HELP_KEY)
@@ -154,6 +156,7 @@ export default function QuemSouEle() {
   useEffect(() => {
     if (!careerMode || careerDoneToday || !over || roundDone) return
     setRoundDone(true)
+    setHistory((h) => [...h, { name: player.display, ok: won, tries: guesses.length }])
     if (won) {
       const gain = 100 + (MAX_ATTEMPTS - guesses.length) * 25 + stage * 10
       setLastGain(gain)
@@ -293,68 +296,46 @@ export default function QuemSouEle() {
 
   return (
     <div className="flex min-h-screen flex-col bg-paper">
-      <header className="sticky top-0 z-10 border-b border-white/10 bg-paper/95 backdrop-blur-sm">
-        <div className="container-page flex h-14 items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-ink-900">
-            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" className="h-6 w-auto" />
-            <span className="font-cond text-sm font-600 uppercase tracking-wider">
-              ← Encyclobol
-            </span>
-          </Link>
-          <div className="flex items-center gap-3">
-            <span className="font-cond text-xs font-500 uppercase tracking-[0.16em] text-ink-600">
-              {careerMode ? 'Carreira do dia' : 'Modo treino'}
-            </span>
-            <button
-              onClick={() => setShowHelp(true)}
-              aria-label="Como jogar"
-              className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white/20 font-cond text-sm font-700 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
-            >
-              ?
-            </button>
-          </div>
-        </div>
-      </header>
+      <GameHeader label={careerMode ? 'Carreira do dia' : 'Modo treino'} onHelp={() => setShowHelp(true)} />
 
       <main className="container-page flex flex-1 flex-col items-center py-5">
-        <p className="kicker">Carreira · jogo 01</p>
-        <h1 className="mt-2 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900 sm:text-5xl">
-          Tira-Teima
-        </h1>
+        <GameTitle kicker="Carreira · jogo 01" title="Tira-Teima" />
 
-        {/* HUD da carreira */}
+        {/* HUD da carreira: estágio · pontos · vidas · relógio, num painel só */}
         {careerMode && !careerDoneToday && (
-          <div className="mt-4 flex items-center gap-5">
-            <span className="font-cond text-sm font-600 uppercase tracking-wider text-ink-700">
-              Estágio <span className="text-grass-600">{stage}</span>
-            </span>
-            <span className="font-display text-2xl text-ink-900">
-              {careerScore}
-              <span className="ml-1 font-cond text-xs font-500 uppercase tracking-wide text-ink-500">pts hoje</span>
-            </span>
-            <span className="flex items-center gap-0.5">
-              {Array.from({ length: CAREER_LIVES }).map((_, i) => (
-                <Heart key={i} on={i < lives} />
-              ))}
-            </span>
-          </div>
-        )}
-
-        {/* Cronômetro do craque */}
-        {careerMode && !careerDoneToday && !over && (
-          <div className="mx-auto mt-3 w-full max-w-xs">
-            <div className="flex justify-between font-cond text-[11px] font-600 uppercase tracking-wider">
-              <span className="text-ink-500">Tempo</span>
-              <span className={timeLeft <= 10 ? 'text-ochre-600' : 'text-ink-700'}>{timeLeft}s</span>
+          <div className="mt-4 w-full max-w-md border-2 border-white/20 bg-paper-100">
+            <div className="grid grid-cols-3 divide-x divide-white/10">
+              <div className="px-3 py-2 text-center">
+                <div className="font-display text-2xl leading-none text-ink-900">{stage}</div>
+                <div className="mt-1 font-cond text-[10px] font-500 uppercase tracking-wide text-ink-500">estágio</div>
+              </div>
+              <div className="px-3 py-2 text-center">
+                <div className="font-display text-2xl leading-none text-corn-500">{careerScore}</div>
+                <div className="mt-1 font-cond text-[10px] font-500 uppercase tracking-wide text-ink-500">pts hoje</div>
+              </div>
+              <div className="flex flex-col items-center justify-center px-3 py-2">
+                <div className="flex items-center gap-0.5">
+                  {Array.from({ length: CAREER_LIVES }).map((_, i) => (
+                    <Heart key={i} on={i < lives} />
+                  ))}
+                </div>
+                <div className="mt-1 font-cond text-[10px] font-500 uppercase tracking-wide text-ink-500">vidas</div>
+              </div>
             </div>
-            <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-ink-900/10">
-              <div
-                className={`h-full transition-[width] duration-1000 ease-linear ${
-                  timeLeft <= 10 ? 'bg-ochre-500' : 'bg-grass-600'
-                }`}
-                style={{ width: `${(timeLeft / timeForStage(stage)) * 100}%` }}
-              />
-            </div>
+            {!over && (
+              <div className="border-t border-white/10 px-3 py-2">
+                <div className="flex items-center gap-3">
+                  <TimeBar left={timeLeft} total={timeForStage(stage)} />
+                  <span
+                    className={`w-9 text-right font-display text-lg leading-none tabular-nums ${
+                      timeLeft <= 10 ? 'animate-pulse text-ochre-500' : 'text-ink-800'
+                    }`}
+                  >
+                    {timeLeft}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -468,18 +449,25 @@ export default function QuemSouEle() {
                 <p className="font-cond text-xs font-500 uppercase tracking-wider text-ink-600">
                   pontos hoje · chegou ao estágio {stage}
                 </p>
-                <div className="mt-5 grid grid-cols-3 gap-px overflow-hidden border-2 border-white/20 bg-ink-900/15">
-                  {[
+                {history.length > 0 && (
+                  <ul className="mt-4 max-h-40 space-y-1 overflow-y-auto border-y border-white/10 py-2 text-left">
+                    {history.map((h, i) => (
+                      <li key={i} className="flex items-center gap-2 font-cond text-xs uppercase tracking-wide">
+                        <span className={`h-2 w-2 flex-none rounded-full ${h.ok ? 'bg-grass-500' : 'bg-ochre-500'}`} />
+                        <span className="text-ink-500">{String(i + 1).padStart(2, '0')}</span>
+                        <span className="flex-1 truncate text-ink-900">{h.name}</span>
+                        <span className="text-ink-500">{h.ok ? `${h.tries}ª tent.` : 'errou'}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <StatGrid
+                  items={[
                     ['Total', career.total],
                     ['Recorde/dia', career.best],
                     ['Dias', career.days],
-                  ].map(([k, v]) => (
-                    <div key={k} className="bg-paper-100 px-1 py-2">
-                      <div className="font-display text-2xl text-ink-900">{v}</div>
-                      <div className="font-cond text-[9px] font-500 uppercase tracking-wide text-ink-600">{k}</div>
-                    </div>
-                  ))}
-                </div>
+                  ]}
+                />
                 <p className="mt-3 font-serif text-sm italic text-ink-600">
                   Volte amanhã pra somar mais à sua carreira.
                 </p>
@@ -583,19 +571,7 @@ export default function QuemSouEle() {
       </main>
 
       {showHelp && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
-          onClick={closeHelp}
-        >
-          <div
-            className="w-full max-w-sm border-2 border-white/20 bg-paper p-6"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <p className="kicker">Como jogar</p>
-            <h2 className="mt-1 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900">
-              Tira-Teima
-            </h2>
-            <ul className="mt-4 space-y-3 font-serif text-[15px] leading-snug text-ink-700">
+        <HelpModal title="Tira-Teima" cta="Entendi, bora jogar" onClose={closeHelp}>
               <li>
                 Adivinhe o craque digitando o <strong>nome pelo qual ele é conhecido</strong> —
                 tudo junto, <strong>sem espaço e sem acento</strong>. Ex: <em>Thiago Silva</em> →{' '}
@@ -620,15 +596,7 @@ export default function QuemSouEle() {
                 </span>
                 , craques cada vez mais difíceis. Os pontos somam num total que cresce a cada dia.
               </li>
-            </ul>
-            <button
-              onClick={closeHelp}
-              className="btn-stamp mt-6 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700"
-            >
-              Entendi, bora jogar
-            </button>
-          </div>
-        </div>
+        </HelpModal>
       )}
     </div>
   )

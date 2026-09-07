@@ -12,6 +12,7 @@ import {
 } from '../lib/misteriosoStats'
 import { confetti } from '../lib/juice'
 import { shareScoreImage, type Sq } from '../lib/shareCard'
+import { GameHeader, GameTitle, HelpModal, StatGrid } from '../components/GameShell'
 
 const MAX_GUESSES = 8
 const HINT_COST = 75
@@ -256,6 +257,41 @@ export default function Misterioso() {
     }
   }
 
+  // O que já dá pra afirmar com os chutes feitos (caderno do detetive).
+  const clues = useMemo(() => {
+    const yes: string[] = []
+    const no: string[] = []
+    const seen = new Set<string>()
+    const push = (arr: string[], v: string) => {
+      if (!seen.has(v)) {
+        seen.add(v)
+        arr.push(v)
+      }
+    }
+    let after = -Infinity
+    let before = Infinity
+    for (const r of rows) {
+      const gy = startYear(r.player.era)
+      if (r.natOk) push(yes, r.player.nat)
+      else push(no, r.player.nat)
+      if (r.contOk) push(yes, continentOf(r.player.nat))
+      else push(no, continentOf(r.player.nat))
+      if (r.posOk) push(yes, r.player.pos)
+      else push(no, r.player.pos)
+      if (r.dir === 'up') after = Math.max(after, gy)
+      else if (r.dir === 'down') before = Math.min(before, gy)
+    }
+    // Se a seleção bateu, o continente é redundante; se o continente falhou, as seleções dele também.
+    const isCont = (v: string) => Object.values(CONTINENT).includes(v)
+    const yesF = yes.filter((v) => !isCont(v) || !yes.some((n) => CONTINENT[n] === v))
+    const noF = no.filter((v) => !(CONTINENT[v] && no.includes(CONTINENT[v])))
+    let epoch = ''
+    if (after > -Infinity && before < Infinity) epoch = `estreou entre ${after + 1} e ${before - 1}`
+    else if (after > -Infinity) epoch = `estreou depois de ${after}`
+    else if (before < Infinity) epoch = `estreou antes de ${before}`
+    return { yes: yesF, no: noF, epoch }
+  }, [rows])
+
   const cellOk = 'bg-grass-600 text-ink-900 border-grass-700'
   const cellClose = 'bg-paper text-ochre-700 border-ochre-500'
   const cellNo = 'bg-paper text-ink-700 border-ink-900/20'
@@ -263,41 +299,51 @@ export default function Misterioso() {
 
   return (
     <div className="flex min-h-screen flex-col bg-paper">
-      <header className="sticky top-0 z-10 border-b border-white/10 bg-paper/95 backdrop-blur-sm">
-        <div className="container-page flex h-14 items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-ink-900">
-            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" className="h-6 w-auto" />
-            <span className="font-cond text-sm font-600 uppercase tracking-wider">← Encyclobol</span>
-          </Link>
-          <div className="flex items-center gap-3">
-            <span className="font-cond text-xs font-500 uppercase tracking-[0.16em] text-ink-600">
-              {daily ? 'Mistério do dia' : 'Modo treino'}
-            </span>
-            <button
-              onClick={() => setShowHelp(true)}
-              aria-label="Como jogar"
-              className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white/20 font-cond text-sm font-700 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
-            >
-              ?
-            </button>
-          </div>
-        </div>
-      </header>
+      <GameHeader label={daily ? 'Mistério do dia' : 'Modo treino'} onHelp={() => setShowHelp(true)} />
 
       <main className="container-page flex flex-1 flex-col items-center py-5">
-        <p className="kicker">Detetive · jogo 06</p>
-        <h1 className="mt-2 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900 sm:text-5xl">
-          Craque Misterioso
-        </h1>
-        <p className="mt-2 hidden max-w-md text-center font-serif text-sm italic text-ink-600 sm:block">
-          Chute craques e leia as pistas: seleção, continente, posição e época. Verde
-          acertou; amarelo na época é quente. Menos chutes valem mais pontos.
-        </p>
+        <GameTitle
+          kicker="Detetive · jogo 06"
+          title="Craque Misterioso"
+          blurb="Chute craques e leia as pistas: seleção, continente, posição e época. Verde acertou; amarelo na época é quente. Menos chutes valem mais pontos."
+        />
 
-        {daily && !over && (
-          <p className="mt-2 font-cond text-xs font-600 uppercase tracking-wider text-ink-500">
-            Recorde: <span className="text-ink-800">{prevBest}</span> pts · total {career.total}
-          </p>
+        {!over && (
+          <div className="mt-3 flex items-center gap-3">
+            <span className="flex items-center gap-1" aria-label={`${guessesLeft} chutes restantes`}>
+              {Array.from({ length: MAX_GUESSES }).map((_, i) => (
+                <span
+                  key={i}
+                  className={`h-2 w-2 rounded-full ${i < rows.length ? 'bg-ink-900/25' : 'bg-corn-500'}`}
+                />
+              ))}
+            </span>
+            <span className="font-cond text-xs font-600 uppercase tracking-wider text-ink-500">
+              {guessesLeft} {guessesLeft === 1 ? 'chute' : 'chutes'}
+              {daily && <> · recorde {prevBest}</>}
+            </span>
+          </div>
+        )}
+
+        {/* Caderno do detetive: o que já está confirmado e o que já caiu */}
+        {!over && rows.length > 0 && (clues.yes.length > 0 || clues.no.length > 0 || clues.epoch) && (
+          <div className="mt-3 flex w-full max-w-xl flex-wrap items-center justify-center gap-1.5">
+            {clues.yes.map((v) => (
+              <span key={`y${v}`} className="border border-grass-600 bg-grass-700/50 px-2 py-0.5 font-cond text-[10px] font-700 uppercase tracking-wide text-ink-900">
+                {v}
+              </span>
+            ))}
+            {clues.epoch && (
+              <span className="border border-corn-500/60 bg-corn-500/10 px-2 py-0.5 font-cond text-[10px] font-700 uppercase tracking-wide text-corn-400">
+                {clues.epoch}
+              </span>
+            )}
+            {clues.no.map((v) => (
+              <span key={`n${v}`} className="border border-white/10 px-2 py-0.5 font-cond text-[10px] font-500 uppercase tracking-wide text-ink-500 line-through decoration-ochre-500/70">
+                {v}
+              </span>
+            ))}
+          </div>
         )}
 
         {/* Dicas reveladas */}
@@ -355,10 +401,13 @@ export default function Misterioso() {
             <div className="mt-4">
               <PlayerInput options={players} onGuess={tryGuess} placeholder="Digite o nome de um craque…" />
               <div className="mt-2 flex items-center justify-between gap-2">
-                <span className="font-cond text-xs font-500 uppercase tracking-wider text-ink-600">
-                  {guessesLeft} {guessesLeft === 1 ? 'tentativa' : 'tentativas'}
-                </span>
-                {note && <span className="font-cond text-xs font-600 uppercase tracking-wider text-ochre-600">{note}</span>}
+                {note ? (
+                  <span className="font-cond text-xs font-600 uppercase tracking-wider text-ochre-500">{note}</span>
+                ) : (
+                  <span className="font-cond text-xs font-500 uppercase tracking-wider text-ink-600">
+                    {rows.length === 0 ? 'Comece por um craque famoso' : 'Leia as pistas e afine o chute'}
+                  </span>
+                )}
                 <button
                   onClick={pedirDica}
                   disabled={hints.length >= hintPool.length}
@@ -391,19 +440,14 @@ export default function Misterioso() {
 
               {daily && (
                 <>
-                  <div className="mt-5 grid grid-cols-4 gap-px overflow-hidden border-2 border-white/20 bg-ink-900/15">
-                    {[
+                  <StatGrid
+                    items={[
                       ['Total', career.total],
                       ['Recorde', career.best],
                       ['Ofensiva', career.streak],
                       ['Dias', career.days],
-                    ].map(([k, v]) => (
-                      <div key={k} className="bg-paper-100 px-1 py-2">
-                        <div className="font-display text-2xl text-ink-900">{v}</div>
-                        <div className="font-cond text-[9px] font-500 uppercase tracking-wide text-ink-600">{k}</div>
-                      </div>
-                    ))}
-                  </div>
+                    ]}
+                  />
                   <p className="mt-3 font-serif text-sm italic text-ink-600">Volte amanhã pra somar mais ao total.</p>
                   <button
                     onClick={compartilhar}
@@ -432,13 +476,7 @@ export default function Misterioso() {
       </main>
 
       {showHelp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={closeHelp}>
-          <div className="w-full max-w-sm border-2 border-white/20 bg-paper p-6" onClick={(e) => e.stopPropagation()}>
-            <p className="kicker">Como jogar</p>
-            <h2 className="mt-1 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900">
-              Craque Misterioso
-            </h2>
-            <ul className="mt-4 space-y-3 font-serif text-[15px] leading-snug text-ink-700">
+        <HelpModal title="Craque Misterioso" onClose={closeHelp}>
               <li>
                 Há um craque secreto. Chute nomes; cada chute compara{' '}
                 <strong>seleção, continente, posição e época</strong>.
@@ -457,12 +495,11 @@ export default function Misterioso() {
                 Os pontos do dia somam num <strong>total</strong> que cresce a cada dia. Acerte dias
                 seguidos pra manter a ofensiva.
               </li>
-            </ul>
-            <button onClick={closeHelp} className="btn-stamp mt-6 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700">
-              Entendi, bora
-            </button>
-          </div>
-        </div>
+              <li>
+                O <strong>caderno</strong> acima da tabela resume o que você já sabe: em verde o que
+                está confirmado, riscado o que já caiu, em dourado a janela de época.
+              </li>
+        </HelpModal>
       )}
     </div>
   )

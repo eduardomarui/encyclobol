@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { players, type Player } from '../data/players'
+import { GameHeader, GameTitle, HelpModal, Lives, StatGrid } from '../components/GameShell'
 import { dayNumber, seededShuffle } from '../lib/daily'
 import {
   loadTLCareer,
@@ -56,6 +57,9 @@ export default function LinhaDoTempo() {
   const [status, setStatus] = useState<'playing' | 'over'>(today ? 'over' : 'playing')
   const [flash, setFlash] = useState('')
   const [flashOk, setFlashOk] = useState(true)
+  // Última carta encaixada: recebe destaque e a linha rola até ela.
+  const [lastPlaced, setLastPlaced] = useState<string | null>(null)
+  const [lastOk, setLastOk] = useState(true)
   const [recorded, setRecorded] = useState(!!today)
   const [career, setCareer] = useState<TLCareer>(() => loadTLCareer())
   const [prevBest] = useState(() => loadTLCareer().best)
@@ -75,6 +79,12 @@ export default function LinhaDoTempo() {
   const beating = daily && points > prevBest && points > 0
   const newRecord = over && daily && points > prevBest && points > 0
 
+  useEffect(() => {
+    if (!lastPlaced) return
+    const el = document.getElementById(`tl-${lastPlaced}`)
+    el?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
+  }, [lastPlaced])
+
   function finish(finalScore: number, finalPoints: number) {
     setStatus('over')
     if (daily && finalPoints > prevBest && finalPoints > 0) confetti()
@@ -90,6 +100,8 @@ export default function LinhaDoTempo() {
     const ok = validSlot(placed, slot, current.year)
     const at = lowerBound(placed, current.year)
     setPlaced([...placed.slice(0, at), current, ...placed.slice(at)])
+    setLastPlaced(current.player.answer)
+    setLastOk(ok)
 
     let newScore = score
     let newPoints = points
@@ -133,6 +145,7 @@ export default function LinhaDoTempo() {
     setBestCombo(0)
     setStatus('playing')
     setFlash('')
+    setLastPlaced(null)
   }
 
   function closeHelp() {
@@ -161,56 +174,33 @@ export default function LinhaDoTempo() {
 
   return (
     <div className="flex min-h-screen flex-col bg-paper">
-      <header className="sticky top-0 z-10 border-b border-white/10 bg-paper/95 backdrop-blur-sm">
-        <div className="container-page flex h-14 items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-ink-900">
-            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" className="h-6 w-auto" />
-            <span className="font-cond text-sm font-600 uppercase tracking-wider">← Encyclobol</span>
-          </Link>
-          <div className="flex items-center gap-3">
-            <span className="font-cond text-xs font-500 uppercase tracking-[0.16em] text-ink-600">
-              {daily ? 'Linha do dia' : hard ? 'Treino · difícil' : 'Modo treino'}
-            </span>
-            <button
-              onClick={() => setShowHelp(true)}
-              aria-label="Como jogar"
-              className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white/20 font-cond text-sm font-700 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
-            >
-              ?
-            </button>
-          </div>
-        </div>
-      </header>
+      <GameHeader
+        label={daily ? 'Linha do dia' : hard ? 'Treino · difícil' : 'Modo treino'}
+        onHelp={() => setShowHelp(true)}
+      />
 
       <main className="container-page flex flex-1 flex-col items-center py-5">
-        <p className="kicker">Cronologia · jogo 04</p>
-        <h1 className="mt-2 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900 sm:text-5xl">
-          Linha do Tempo
-        </h1>
-        <p className="mt-2 hidden max-w-md text-center font-serif text-sm italic text-ink-600 sm:block">
-          Empilhe os craques na ordem da história, pelo início de carreira. Acertos
-          seguidos valem mais; errou a época, perde vida. Vá o mais longe que conseguir.
-        </p>
+        <GameTitle
+          kicker="Cronologia · jogo 04"
+          title="Linha do Tempo"
+          blurb="Empilhe os craques na ordem da história, pelo início de carreira. Acertos seguidos valem mais; errou a época, perde vida. Vá o mais longe que conseguir."
+        />
 
         {/* Placar / combo / vidas */}
         <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
-          <span className="font-display text-2xl text-ink-900">
+          <span className="font-display text-2xl text-corn-500">
             {points}
             <span className="ml-1 font-cond text-xs font-500 uppercase tracking-wide text-ink-500">pts</span>
           </span>
           <span className="font-cond text-sm font-600 uppercase tracking-wider text-ink-700">
-            Cartas: <span className="text-grass-600">{score}</span>
+            Cartas: <span className="text-grass-500">{score}</span>
           </span>
           {combo >= 2 && (
-            <span className="rounded-sm bg-ochre-500 px-2 py-0.5 font-cond text-xs font-700 uppercase tracking-wider text-ink-900">
-              x{combo}
+            <span className="animate-pop rounded-sm bg-corn-500 px-2 py-0.5 font-cond text-xs font-700 uppercase tracking-wider text-paper">
+              combo x{combo}
             </span>
           )}
-          <span className="flex items-center gap-1">
-            {Array.from({ length: maxLives }).map((_, i) => (
-              <span key={i} className={`h-2.5 w-2.5 rotate-45 ${i < lives ? 'bg-ochre-500' : 'bg-ink-900/20'}`} />
-            ))}
-          </span>
+          <Lives total={maxLives} left={lives} />
         </div>
 
         {daily && (
@@ -245,31 +235,47 @@ export default function LinhaDoTempo() {
         )}
 
         {/* Linha do tempo */}
-        <div className="mt-6 w-full max-w-3xl overflow-x-auto pb-3">
-          <div className="flex items-stretch justify-start gap-0">
-            {Array.from({ length: placed.length + 1 }).map((_, slot) => (
-              <div key={slot} className="flex items-stretch">
-                {!over && current ? (
-                  <button
-                    onClick={() => place(slot)}
-                    className="group mx-0.5 flex w-7 flex-none items-center justify-center self-stretch rounded-sm border-2 border-dashed border-grass-600/50 bg-grass-600/5 text-grass-600 transition-colors hover:border-grass-600 hover:bg-grass-600/15"
-                    title="Encaixar aqui"
-                  >
-                    <span className="font-cond text-lg font-700">+</span>
-                  </button>
-                ) : (
-                  <span className="w-1.5 flex-none" />
-                )}
-                {slot < placed.length && (
-                  <div className="flex w-[84px] flex-none flex-col items-center justify-between border-2 border-white/20 bg-paper p-2 text-center">
-                    <span className="font-cond text-[11px] font-600 uppercase leading-tight text-ink-900">
-                      {placed[slot].player.display}
-                    </span>
-                    <span className="mt-1 font-display text-lg text-grass-600">{placed[slot].year}</span>
-                  </div>
-                )}
-              </div>
-            ))}
+        <div className="mt-6 w-full max-w-3xl">
+          <div className="flex items-center justify-between font-cond text-[10px] font-600 uppercase tracking-[0.16em] text-ink-500">
+            <span>← mais antigo</span>
+            <span>{placed.length} na linha</span>
+            <span>mais recente →</span>
+          </div>
+          <div className="mt-1 overflow-x-auto pb-3">
+            <div className="flex items-stretch justify-start gap-0 px-1">
+              {Array.from({ length: placed.length + 1 }).map((_, slot) => (
+                <div key={slot} className="flex items-stretch">
+                  {!over && current ? (
+                    <button
+                      onClick={() => place(slot)}
+                      className="group mx-0.5 flex w-8 flex-none items-center justify-center self-stretch rounded-sm border-2 border-dashed border-grass-500/50 bg-grass-600/5 text-grass-400 transition-colors hover:border-grass-400 hover:bg-grass-600/20 active:bg-grass-600/40"
+                      title="Encaixar aqui"
+                    >
+                      <span className="font-cond text-lg font-700">+</span>
+                    </button>
+                  ) : (
+                    <span className="w-1.5 flex-none" />
+                  )}
+                  {slot < placed.length && (
+                    <div
+                      id={`tl-${placed[slot].player.answer}`}
+                      className={`flex w-[84px] flex-none flex-col items-center justify-between border-2 p-2 text-center transition-colors ${
+                        placed[slot].player.answer === lastPlaced
+                          ? lastOk
+                            ? 'animate-pop border-corn-500 bg-corn-500/10'
+                            : 'animate-shake border-ochre-500 bg-ochre-500/10'
+                          : 'border-white/20 bg-paper'
+                      }`}
+                    >
+                      <span className="font-cond text-[11px] font-600 uppercase leading-tight text-ink-900">
+                        {placed[slot].player.display}
+                      </span>
+                      <span className="mt-1 font-display text-lg text-grass-500">{placed[slot].year}</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -289,19 +295,14 @@ export default function LinhaDoTempo() {
 
             {daily && (
               <>
-                <div className="mt-5 grid grid-cols-4 gap-px overflow-hidden border-2 border-white/20 bg-ink-900/15">
-                  {[
+                <StatGrid
+                  items={[
                     ['Total', career.total],
                     ['Recorde', career.best],
                     ['Ofensiva', career.streak],
                     ['Dias', career.days],
-                  ].map(([k, v]) => (
-                    <div key={k} className="bg-paper-100 px-1 py-2">
-                      <div className="font-display text-2xl text-ink-900">{v}</div>
-                      <div className="font-cond text-[9px] font-500 uppercase tracking-wide text-ink-600">{k}</div>
-                    </div>
-                  ))}
-                </div>
+                  ]}
+                />
                 <p className="mt-3 font-serif text-sm italic text-ink-600">Volte amanhã pra somar mais ao total.</p>
                 <button
                   onClick={compartilhar}
@@ -337,13 +338,7 @@ export default function LinhaDoTempo() {
       </main>
 
       {showHelp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={closeHelp}>
-          <div className="w-full max-w-sm border-2 border-white/20 bg-paper p-6" onClick={(e) => e.stopPropagation()}>
-            <p className="kicker">Como jogar</p>
-            <h2 className="mt-1 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900">
-              Linha do Tempo
-            </h2>
-            <ul className="mt-4 space-y-3 font-serif text-[15px] leading-snug text-ink-700">
+        <HelpModal title="Linha do Tempo" onClose={closeHelp}>
               <li>
                 Cada craque tem um <strong>início de carreira</strong>. Encaixe a carta no lugar
                 certo da linha, da mais antiga pra mais recente.
@@ -360,12 +355,7 @@ export default function LinhaDoTempo() {
                 Empate é justo: craques do <strong>mesmo ano</strong> encaixam de qualquer lado. Os
                 pontos do dia somam num <strong>total</strong> que cresce a cada dia.
               </li>
-            </ul>
-            <button onClick={closeHelp} className="btn-stamp mt-6 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700">
-              Entendi, bora
-            </button>
-          </div>
-        </div>
+        </HelpModal>
       )}
     </div>
   )
