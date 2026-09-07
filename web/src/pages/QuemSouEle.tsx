@@ -9,7 +9,7 @@ import {
 } from '../lib/stats'
 import { confetti } from '../lib/juice'
 import { shareScoreImage } from '../lib/shareCard'
-import { GameHeader, GameTitle, HelpModal, StatGrid, TimeBar } from '../components/GameShell'
+import { GameHeader, HelpModal, StatGrid, TimeBar } from '../components/GameShell'
 
 const MAX_ATTEMPTS = 6
 const ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM']
@@ -298,49 +298,44 @@ export default function QuemSouEle() {
     <div className="flex min-h-screen flex-col bg-paper">
       <GameHeader label={careerMode ? 'Carreira do dia' : 'Modo treino'} onHelp={() => setShowHelp(true)} />
 
-      <main className="container-page flex flex-1 flex-col items-center py-5">
-        <GameTitle kicker="Carreira · jogo 01" title="Tira-Teima" />
+      <main className="container-page flex flex-1 flex-col items-center py-4">
+        {/* Título compacto: a página inteira (tabuleiro + teclado) tem que caber sem rolar */}
+        <p className="kicker">Carreira · jogo 01</p>
+        <h1 className="mt-1 font-display text-3xl uppercase leading-none tracking-tight text-ink-900">Tira-Teima</h1>
 
-        {/* HUD da carreira: estágio · pontos · vidas · relógio, num painel só */}
+        {/* HUD da carreira numa linha: estágio · pontos · vidas · relógio */}
         {careerMode && !careerDoneToday && (
-          <div className="mt-4 w-full max-w-md border-2 border-white/20 bg-paper-100">
-            <div className="grid grid-cols-3 divide-x divide-white/10">
-              <div className="px-3 py-2 text-center">
-                <div className="font-display text-2xl leading-none text-ink-900">{stage}</div>
-                <div className="mt-1 font-cond text-[10px] font-500 uppercase tracking-wide text-ink-500">estágio</div>
-              </div>
-              <div className="px-3 py-2 text-center">
-                <div className="font-display text-2xl leading-none text-corn-500">{careerScore}</div>
-                <div className="mt-1 font-cond text-[10px] font-500 uppercase tracking-wide text-ink-500">pts hoje</div>
-              </div>
-              <div className="flex flex-col items-center justify-center px-3 py-2">
-                <div className="flex items-center gap-0.5">
-                  {Array.from({ length: CAREER_LIVES }).map((_, i) => (
-                    <Heart key={i} on={i < lives} />
-                  ))}
-                </div>
-                <div className="mt-1 font-cond text-[10px] font-500 uppercase tracking-wide text-ink-500">vidas</div>
-              </div>
+          <div className="mt-3 flex w-full max-w-md items-stretch divide-x divide-white/10 border-2 border-white/20 bg-paper-100">
+            <div className="flex items-baseline gap-1.5 px-3 py-1.5">
+              <span className="font-display text-xl leading-none text-ink-900">{stage}</span>
+              <span className="font-cond text-[10px] font-500 uppercase tracking-wide text-ink-500">estágio</span>
+            </div>
+            <div className="flex items-baseline gap-1.5 px-3 py-1.5">
+              <span className="font-display text-xl leading-none text-corn-500">{careerScore}</span>
+              <span className="font-cond text-[10px] font-500 uppercase tracking-wide text-ink-500">pts</span>
+            </div>
+            <div className="flex items-center gap-0.5 px-3 py-1.5">
+              {Array.from({ length: CAREER_LIVES }).map((_, i) => (
+                <Heart key={i} on={i < lives} />
+              ))}
             </div>
             {!over && (
-              <div className="border-t border-white/10 px-3 py-2">
-                <div className="flex items-center gap-3">
-                  <TimeBar left={timeLeft} total={timeForStage(stage)} />
-                  <span
-                    className={`w-9 text-right font-display text-lg leading-none tabular-nums ${
-                      timeLeft <= 10 ? 'animate-pulse text-ochre-500' : 'text-ink-800'
-                    }`}
-                  >
-                    {timeLeft}
-                  </span>
-                </div>
+              <div className="flex flex-1 items-center gap-2 px-3 py-1.5">
+                <TimeBar left={timeLeft} total={timeForStage(stage)} />
+                <span
+                  className={`w-7 text-right font-display text-lg leading-none tabular-nums ${
+                    timeLeft <= 10 ? 'animate-pulse text-ochre-500' : 'text-ink-800'
+                  }`}
+                >
+                  {timeLeft}
+                </span>
               </div>
             )}
           </div>
         )}
 
         {mode === 'practice' && (
-          <p className="mt-3 font-cond text-xs font-500 uppercase tracking-wider text-ink-500">
+          <p className="mt-2 font-cond text-xs font-500 uppercase tracking-wider text-ink-500">
             Treino · não conta pontos
           </p>
         )}
@@ -348,7 +343,7 @@ export default function QuemSouEle() {
         {/* Conteúdo do jogo (escondido no resumo) */}
         {!(careerMode && careerDoneToday) && (
           <>
-            <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5">
               {[
                 ['Seleção', player.nat],
                 ['Posição', player.pos],
@@ -356,15 +351,15 @@ export default function QuemSouEle() {
               ].map(([k, v]) => (
                 <span
                   key={k}
-                  className="border border-ink-900/20 bg-paper-100 px-3 py-1 font-cond text-[11px] font-500 uppercase tracking-wider text-ink-700"
+                  className="border border-ink-900/20 bg-paper-100 px-2.5 py-0.5 font-cond text-[11px] font-500 uppercase tracking-wider text-ink-700"
                 >
                   <span className="text-ink-500">{k}:</span> {v}
                 </span>
               ))}
+              <span className="px-1 font-serif text-[13px] italic text-ink-500">
+                {answer.length} letras · {MAX_ATTEMPTS} tentativas
+              </span>
             </div>
-            <p className="mt-3 font-serif text-sm italic text-ink-500">
-              {answer.length} letras, sem espaço · {MAX_ATTEMPTS} tentativas
-            </p>
 
             {careerMode && revealed > 0 && (
               <div
@@ -385,8 +380,8 @@ export default function QuemSouEle() {
             )}
 
             <div
-              className="mx-auto mt-6 flex w-full flex-col gap-1.5"
-              style={{ maxWidth: `${answer.length * 48}px` }}
+              className="mx-auto mt-3 flex w-full flex-col gap-1"
+              style={{ maxWidth: `${answer.length * 46}px` }}
             >
               {Array.from({ length: MAX_ATTEMPTS }).map((_, r) => {
                 const guessed = guesses[r]
@@ -419,18 +414,18 @@ export default function QuemSouEle() {
             </div>
 
             {careerMode && !over && (
-              <div className="mt-4 flex gap-2">
+              <div className="mt-3 flex gap-2">
                 <button
                   onClick={revelar}
                   disabled={revealCount <= 0 || revealed >= answer.length}
-                  className="btn-stamp border-2 border-white/20 px-4 py-2 text-ink-900 hover:bg-grass-700 hover:text-ink-900 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="btn-stamp border-2 border-white/20 px-4 py-1.5 text-xs text-ink-900 hover:bg-grass-700 hover:text-ink-900 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   Revelar letra ({revealCount})
                 </button>
                 <button
                   onClick={pular}
                   disabled={skipCount <= 0}
-                  className="btn-stamp border-2 border-white/20 px-4 py-2 text-ink-900 hover:bg-grass-700 hover:text-ink-900 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="btn-stamp border-2 border-white/20 px-4 py-1.5 text-xs text-ink-900 hover:bg-grass-700 hover:text-ink-900 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   Pular ({skipCount})
                 </button>
@@ -534,13 +529,13 @@ export default function QuemSouEle() {
 
         {/* Teclado */}
         {!ended && (
-          <div className="mt-8 flex w-full max-w-lg flex-col gap-1.5">
+          <div className="mt-4 flex w-full max-w-lg flex-col gap-1">
             {ROWS.map((row, i) => (
-              <div key={i} className="flex justify-center gap-1.5">
+              <div key={i} className="flex justify-center gap-1">
                 {i === 2 && (
                   <button
                     onClick={() => onKey('ENTER')}
-                    className="flex h-12 flex-[1.5] items-center justify-center rounded-sm bg-grass-700 px-2 font-cond text-xs font-600 uppercase tracking-wider text-ink-900 hover:bg-grass-600"
+                    className="flex h-10 flex-[1.5] items-center justify-center rounded-sm bg-grass-700 px-2 font-cond text-xs font-600 uppercase tracking-wider text-ink-900 hover:bg-grass-600"
                   >
                     Enter
                   </button>
@@ -549,7 +544,7 @@ export default function QuemSouEle() {
                   <button
                     key={k}
                     onClick={() => onKey(k)}
-                    className={`flex h-12 flex-1 items-center justify-center rounded-sm font-cond text-base font-600 uppercase transition-colors ${
+                    className={`flex h-10 flex-1 items-center justify-center rounded-sm font-cond text-sm font-600 uppercase transition-colors ${
                       keyClass[keyStates[k] ?? 'idle']
                     }`}
                   >
@@ -559,7 +554,7 @@ export default function QuemSouEle() {
                 {i === 2 && (
                   <button
                     onClick={() => onKey('BACK')}
-                    className="flex h-12 flex-[1.5] items-center justify-center rounded-sm bg-grass-700 px-2 font-cond text-xs font-600 uppercase tracking-wider text-ink-900 hover:bg-ochre-600"
+                    className="flex h-10 flex-[1.5] items-center justify-center rounded-sm bg-grass-700 px-2 font-cond text-xs font-600 uppercase tracking-wider text-ink-900 hover:bg-ochre-600"
                   >
                     Apagar
                   </button>

@@ -83,7 +83,7 @@ for k in club_keys:
         warn(f'clubs: dica para answer inexistente {k}')
 
 # ---------- quiz ----------
-quiz_src = strip_comments(read('quiz.ts') + '\n' + read('quiz.extra.ts'))
+quiz_src = strip_comments(read('quiz.ts') + '\n' + read('quiz.extra.ts') + '\n' + read('quiz.extra2.ts'))
 qs = re.findall(
     r"\{\s*q:\s*'((?:[^'\\]|\\.)*)',\s*options:\s*\[([^\]]*)\],\s*correct:\s*(\d+),\s*cat:\s*'([^']*)',\s*dif:\s*'([^']*)'\s*\}",
     quiz_src,
