@@ -1,7 +1,7 @@
 /* Encyclobol — service worker: app shell offline + cache de assets.
    Navegações: rede primeiro, cai pro cache (e pro index) se estiver offline.
    Assets do mesmo domínio: cache primeiro. Nada de terceiros (Supabase, fontes). */
-const CACHE = 'encyclobol-v1'
+const CACHE = 'encyclobol-v2'
 
 self.addEventListener('install', () => {
   self.skipWaiting()
@@ -23,8 +23,11 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return
 
   if (req.mode === 'navigate') {
+    // `cache: 'no-cache'` revalida o index no servidor em vez de aceitar a
+    // cópia do cache HTTP (o Pages manda max-age=600): sem isso, logo após um
+    // deploy o index velho apontava pro bundle velho por até 10 minutos.
     event.respondWith(
-      fetch(req)
+      fetch(req.url, { cache: 'no-cache', credentials: 'same-origin' })
         .then((res) => {
           const copy = res.clone()
           caches.open(CACHE).then((c) => c.put(req, copy))
