@@ -233,8 +233,13 @@ do $$ begin
   alter publication supabase_realtime add table public.match_moves;
 exception when others then null; end $$;
 
--- Cria uma sala (host = quem chama); gera código e seed
-create or replace function public.create_match(p_rounds int default 5)
+-- Tema (campeonato) das perguntas da sala: 'geral', 'copas', 'champions', 'brasileirao'...
+alter table public.matches add column if not exists theme text not null default 'geral';
+
+-- Cria uma sala (host = quem chama); gera código e seed. A versão antiga
+-- (só p_rounds) sai pra não haver ambiguidade de assinatura.
+drop function if exists public.create_match(int);
+create or replace function public.create_match(p_rounds int default 5, p_theme text default 'geral')
 returns public.matches
 language plpgsql security definer set search_path = public as $$
 declare uid uuid := auth.uid(); n text; v_code text; m public.matches;
@@ -246,8 +251,8 @@ begin
     v_code := public.gen_friend_code();
     exit when not exists (select 1 from public.matches where code = v_code and status <> 'done');
   end loop;
-  insert into public.matches(code, host_id, host_nick, seed, rounds)
-  values (v_code, uid, n, (floor(random() * 1000000000))::int, p_rounds)
+  insert into public.matches(code, host_id, host_nick, seed, rounds, theme)
+  values (v_code, uid, n, (floor(random() * 1000000000))::int, p_rounds, coalesce(nullif(trim(p_theme), ''), 'geral'))
   returning * into m;
   return m;
 end; $$;

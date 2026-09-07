@@ -11,7 +11,8 @@ import {
 import { PenaltyScene, ZONES, poseFor, type Zone, type Shot } from '../components/PenaltyScene'
 import { confetti } from '../lib/juice'
 import { shareScoreImage } from '../lib/shareCard'
-import { GameHeader, HelpModal, StatGrid, TimeBar } from '../components/GameShell'
+import { GameHeader, HelpModal, StatGrid, ThemePicker, TimeBar } from '../components/GameShell'
+import { loadTheme, poolsFor, saveTheme, themeLabel, themeSeed } from '../lib/themes'
 
 const HELP_KEY = 'encyclobol:copa:help'
 
@@ -38,9 +39,6 @@ function prepQ(bi: number, seed: number): PQ {
     correct: order.indexOf(base.correct),
   }
 }
-const EASY = quiz.flatMap((q, i) => (q.dif === 'facil' ? [i] : []))
-const HARD = quiz.flatMap((q, i) => (q.dif === 'dificil' ? [i] : []))
-
 // Intercala cobrança (fácil) e defesa (difícil): A, D, A, D...
 function interleave(eIdx: number[], hIdx: number[], seed: number): PQ[] {
   const out: PQ[] = []
@@ -50,23 +48,31 @@ function interleave(eIdx: number[], hIdx: number[], seed: number): PQ[] {
   }
   return out
 }
-// Confronto da fase: determinístico no dia (mesmo pra todos), por fase.
-function dailyShootout(round: number): PQ[] {
-  const seed = dayNumber() * 100 + round * 7
-  const e = seededShuffle(EASY, seed + 1).slice(0, 5)
-  const h = seededShuffle(HARD, seed + 2).slice(0, 5)
-  return interleave(e, h, seed)
+// n índices a partir de `offset` num pool embaralhado (dá a volta se o pool for curto).
+function take(pool: number[], seed: number, offset: number, n: number): number[] {
+  const sh = seededShuffle(pool, seed)
+  return Array.from({ length: n }, (_, i) => sh[(offset + i) % sh.length])
 }
-function randomShootout(): PQ[] {
+// Confronto da fase: determinístico no dia (mesmo pra todos), por tema.
+// O pool do dia é embaralhado uma vez e cada fase pega o seu pedaço — sem
+// repetir pergunta entre as fases da mesma Copa.
+function dailyShootout(round: number, theme: string): PQ[] {
+  const day = dayNumber() * 100 + themeSeed(theme)
+  const p = poolsFor(theme)
+  const e = take(p.easy, day + 1, (round - 1) * 5, 5)
+  const h = take(p.hard, day + 2, (round - 1) * 5, 5)
+  return interleave(e, h, day + round * 7)
+}
+function randomShootout(theme: string): PQ[] {
   const s = Math.floor(Math.random() * 1e9) + 1
-  const e = seededShuffle(EASY, s).slice(0, 5)
-  const h = seededShuffle(HARD, s + 1).slice(0, 5)
-  return interleave(e, h, s)
+  const p = poolsFor(theme)
+  return interleave(take(p.easy, s, 0, 5), take(p.hard, s + 1, 0, 5), s)
 }
-function extraPair(): PQ[] {
+function extraPair(theme: string): PQ[] {
+  const p = poolsFor(theme)
   return [
-    prepQ(EASY[Math.floor(Math.random() * EASY.length)], Math.floor(Math.random() * 1e9) + 1),
-    prepQ(HARD[Math.floor(Math.random() * HARD.length)], Math.floor(Math.random() * 1e9) + 1),
+    prepQ(p.easy[Math.floor(Math.random() * p.easy.length)], Math.floor(Math.random() * 1e9) + 1),
+    prepQ(p.hard[Math.floor(Math.random() * p.hard.length)], Math.floor(Math.random() * 1e9) + 1),
   ]
 }
 
@@ -129,7 +135,9 @@ const copaToday = loadCopaToday()
 export default function Penaltis() {
   const [mode, setMode] = useState<'copa' | 'practice'>('copa')
   const [round, setRound] = useState(copaToday?.round ?? 1)
-  const [prepared, setPrepared] = useState<PQ[]>(() => dailyShootout(1))
+  const [theme, setTheme] = useState(loadTheme)
+  const [started, setStarted] = useState(false)
+  const [prepared, setPrepared] = useState<PQ[]>([])
   const [index, setIndex] = useState(0)
   const [meus, setMeus] = useState<Mark[]>([])
   const [rival, setRival] = useState<Mark[]>([])
@@ -163,11 +171,11 @@ export default function Penaltis() {
   const slots = Math.max(5, meus.length, rival.length)
   const copaMode = mode === 'copa'
   const wonShootout = my > opp
-  const showGame = !copaDone && !interRound && !shootoutOver
+  const showGame = started && !copaDone && !interRound && !shootoutOver
 
   // Timer da pergunta.
   useEffect(() => {
-    if (shootoutOver || copaDone || interRound || phase !== 'ask') return
+    if (!started || shootoutOver || copaDone || interRound || phase !== 'ask') return
     if (timeLeft <= 0) {
       resolve(-1)
       return
@@ -175,7 +183,7 @@ export default function Penaltis() {
     const t = setTimeout(() => setTimeLeft((s) => s - 1), 1000)
     return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeLeft, phase, shootoutOver, copaDone, interRound])
+  }, [timeLeft, phase, shootoutOver, copaDone, interRound, started])
 
 
   // Resolve o chaveamento quando uma disputa termina (só na Copa).
@@ -206,7 +214,7 @@ export default function Penaltis() {
 
   function startShootout(r: number, daily: boolean) {
     setRound(r)
-    setPrepared(daily ? dailyShootout(r) : randomShootout())
+    setPrepared(daily ? dailyShootout(r, theme) : randomShootout(theme))
     setIndex(0)
     setMeus([])
     setRival([])
@@ -296,18 +304,28 @@ export default function Penaltis() {
       else if (i < prepared.length) goAsk(i)
       else if (myG !== oppG) finishShootout(myG, oppG)
       else {
-        setPrepared((pp) => [...pp, ...extraPair()])
+        setPrepared((pp) => [...pp, ...extraPair(theme)])
         goAsk(i)
       }
     }, 1800)
   }
 
+  // Escolheu o campeonato: começa a Copa do dia (ou o treino).
+  function comecar() {
+    saveTheme(theme)
+    setStarted(true)
+    startShootout(1, copaMode)
+  }
+
+  // Volta pra escolha de campeonato em modo treino.
   function treinar() {
     setMode('practice')
     setRound(1)
     setCopaDone(false)
     setChampion(false)
-    startShootout(1, false)
+    setShootoutOver(false)
+    setInterRound(false)
+    setStarted(false)
   }
 
   function closeHelp() {
@@ -325,7 +343,7 @@ export default function Penaltis() {
       headline: champion ? 'CAMPEÃO' : String(copaScore),
       sub: champion ? 'campeão da copa' : 'pontos hoje',
       lines: [
-        champion ? `${copaScore} pts` : `Parou nas ${ROUND_NAMES[round - 1]}`,
+        `${themeLabel(theme)} · ${champion ? `${copaScore} pts` : `parou nas ${ROUND_NAMES[round - 1]}`}`,
         `Total ${copa.total} pts · ${copa.cups} copa${copa.cups === 1 ? '' : 's'}`,
       ],
       edition: `Edição #${dayNumber()}`,
@@ -353,12 +371,34 @@ export default function Penaltis() {
       />
 
       <main className="container-page flex flex-1 flex-col items-center py-5">
+        {/* Escolha do campeonato (antes de começar) */}
+        {!started && !copaDone && (
+          <div className="mt-2 w-full max-w-sm border-2 border-white/20 bg-paper-100 p-5">
+            <p className="kicker">{copaMode ? 'Copa de Pênaltis · jogo 02' : 'Treino livre'}</p>
+            <h2 className="mt-1 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900">
+              Escolha o campeonato
+            </h2>
+            <div className="mt-4">
+              <ThemePicker value={theme} onChange={setTheme} />
+            </div>
+            <p className="mt-3 font-serif text-sm italic text-ink-600">
+              {copaMode
+                ? 'Cada campeonato tem sua Copa do dia. A pontuação de hoje vale uma vez, no tema que você escolher.'
+                : 'Treino não conta pontos. Troque de campeonato à vontade.'}
+            </p>
+            <button onClick={comecar} className="btn-stamp mt-4 w-full bg-grass-600 px-6 py-3 text-ink-900 hover:bg-grass-700">
+              {copaMode ? 'Começar a Copa →' : 'Começar o treino →'}
+            </button>
+          </div>
+        )}
+
         {/* Cabeçalho da fase */}
-        {!copaDone && (
+        {started && !copaDone && (
           <div className="mb-3 flex w-full max-w-sm items-center justify-between">
             <div>
               <p className="kicker text-ink-500">
                 {copaMode ? `${ROUND_NAMES[round - 1]} · vs ${RIVALS[round - 1]}` : 'Treino livre'}
+                <span className="text-corn-500"> · {themeLabel(theme)}</span>
               </p>
               <div className="mt-0.5 flex gap-1">
                 {ROUND_NAMES.map((_, i) => (
@@ -381,7 +421,7 @@ export default function Penaltis() {
         )}
 
         {/* PLACAR */}
-        {!copaDone && (
+        {started && !copaDone && (
           <div className="w-full max-w-sm border-2 border-white/20 bg-grass-700 text-ink-900">
             <div className="flex items-center gap-3 border-b border-paper/15 px-3 py-2">
               <span className="w-12 font-cond text-xs font-700 uppercase tracking-wider text-grass-400">Você</span>
@@ -501,6 +541,7 @@ export default function Penaltis() {
             <Trophy on={champion} />
             <p className="kicker mt-1">
               {champion ? 'Campeão da Copa!' : `Eliminado nas ${ROUND_NAMES[round - 1]}`}
+              {started && <span className="text-ink-500"> · {themeLabel(theme)}</span>}
             </p>
             <p className="mt-1 font-display text-6xl text-ink-900">{copaScore}</p>
             <p className="font-cond text-xs font-500 uppercase tracking-wider text-ink-600">pontos hoje</p>

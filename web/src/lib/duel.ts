@@ -2,6 +2,7 @@
 import { supabase } from './supabase'
 import { quiz } from '../data/quiz'
 import { seededShuffle } from './daily'
+import { poolsFor } from './themes'
 
 export type Match = {
   id: string
@@ -13,6 +14,7 @@ export type Match = {
   seed: number
   rounds: number
   status: 'waiting' | 'playing' | 'done'
+  theme?: string | null // campeonato das perguntas ('geral' quando a coluna não existe)
 }
 
 export type Move = {
@@ -25,9 +27,6 @@ export type Move = {
 
 export type PQ = { q: string; cat: string; options: string[]; correct: number }
 
-const EASY = quiz.flatMap((q, i) => (q.dif === 'facil' ? [i] : []))
-const HARD = quiz.flatMap((q, i) => (q.dif === 'dificil' ? [i] : []))
-
 function prep(bi: number, seed: number): PQ {
   const base = quiz[bi]
   const order = seededShuffle(base.options.map((_, i) => i), seed)
@@ -39,15 +38,15 @@ function prep(bi: number, seed: number): PQ {
   }
 }
 
-// Pergunta do CHUTE (fácil) — determinística por (seed, round), igual pros dois.
-export function duelShot(seed: number, round: number): PQ {
-  const pool = seededShuffle(EASY, seed)
+// Pergunta do CHUTE (fácil) — determinística por (seed, round, tema), igual pros dois.
+export function duelShot(seed: number, round: number, theme = 'geral'): PQ {
+  const pool = seededShuffle(poolsFor(theme).easy, seed)
   return prep(pool[round % pool.length], seed + round * 13 + 1)
 }
 
-// Pergunta da DEFESA (difícil) — determinística por (seed, round).
-export function duelDefense(seed: number, round: number): PQ {
-  const pool = seededShuffle(HARD, seed + 999)
+// Pergunta da DEFESA (difícil) — determinística por (seed, round, tema).
+export function duelDefense(seed: number, round: number, theme = 'geral'): PQ {
+  const pool = seededShuffle(poolsFor(theme).hard, seed + 999)
   return prep(pool[round % pool.length], seed + round * 17 + 5)
 }
 
@@ -57,12 +56,16 @@ export async function myId(): Promise<string | null> {
   return data.user?.id ?? null
 }
 
-export async function createMatch(rounds = 5): Promise<Match> {
+export async function createMatch(rounds = 5, theme = 'geral'): Promise<Match> {
   if (!supabase) throw new Error('online indisponível')
-  const { data, error } = await supabase.rpc('create_match', { p_rounds: rounds })
-  if (error) throw new Error(error.message || 'falha ao criar a partida')
-  if (!data) throw new Error('falha ao criar a partida')
-  return data as Match
+  // Com tema; se o banco ainda não tem a coluna/parâmetro, cai pro formato antigo (tema geral).
+  let res = await supabase.rpc('create_match', { p_rounds: rounds, p_theme: theme })
+  if (res.error && /p_theme|function|argument/i.test(res.error.message)) {
+    res = await supabase.rpc('create_match', { p_rounds: rounds })
+  }
+  if (res.error) throw new Error(res.error.message || 'falha ao criar a partida')
+  if (!res.data) throw new Error('falha ao criar a partida')
+  return res.data as Match
 }
 
 export async function joinMatch(code: string): Promise<Match> {

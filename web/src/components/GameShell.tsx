@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { availableThemes, themeSize } from '../lib/themes'
 
 // Peças compartilhadas pelas seis páginas de jogo: cabeçalho fixo, modal
 // "Como jogar" e a grade de números do fim de rodada.
@@ -112,6 +113,31 @@ export function Lives({ total, left }: { total: number; left: number }) {
         />
       ))}
     </span>
+  )
+}
+
+// Escolha de campeonato (tema das perguntas) — Copa de Pênaltis e Duelo.
+export function ThemePicker({ value, onChange }: { value: string; onChange: (id: string) => void }) {
+  return (
+    <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label="Campeonato">
+      {availableThemes().map((t) => {
+        const on = t.id === value
+        return (
+          <button
+            key={t.id}
+            role="radio"
+            aria-checked={on}
+            onClick={() => onChange(t.id)}
+            className={`border-2 px-2.5 py-1.5 text-left font-cond text-[11px] font-700 uppercase tracking-wide transition-colors ${
+              on ? 'border-corn-500 bg-corn-500 text-paper' : 'border-white/20 text-ink-900 hover:border-corn-500/60'
+            }`}
+          >
+            {t.label}
+            <span className={`ml-1.5 font-500 ${on ? 'text-paper/70' : 'text-ink-500'}`}>{themeSize(t.id)}</span>
+          </button>
+        )
+      })}
+    </div>
   )
 }
 

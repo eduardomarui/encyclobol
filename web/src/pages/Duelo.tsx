@@ -17,7 +17,8 @@ import {
   type Move,
 } from '../lib/duel'
 import { PenaltyScene, shotFromOutcome, type Kind } from '../components/PenaltyScene'
-import { GameHeader, HelpModal } from '../components/GameShell'
+import { GameHeader, HelpModal, ThemePicker } from '../components/GameShell'
+import { loadTheme, saveTheme, themeLabel } from '../lib/themes'
 
 const ATTACK_SEC = 10 // tempo pra cobrar
 const DEF_SEC = 6 // tempo pra defender (menos — pressão; e perguntas mais difíceis)
@@ -71,6 +72,7 @@ export default function Duelo() {
   const [revealing, setRevealing] = useState(false)
   const [timeLeft, setTimeLeft] = useState(ATTACK_SEC)
   const [code, setCode] = useState('')
+  const [theme, setTheme] = useState(loadTheme)
   const [msg, setMsg] = useState('')
   const [copied, setCopied] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -183,7 +185,8 @@ export default function Duelo() {
     try {
       await ensureSession()
       setMe(await myId())
-      const m = await createMatch(5)
+      saveTheme(theme)
+      const m = await createMatch(5, theme)
       setMatch(m)
       setMoves([])
       setShown(0)
@@ -269,7 +272,13 @@ export default function Duelo() {
   const amKicker = !!(match && me && me === kickerOf(match, shown))
   const myMove = match ? findMove(moves, shown, me) : null
   const iMoved = !!myMove
-  const question = match && phase === 'play' ? (amKicker ? duelShot(match.seed, shown) : duelDefense(match.seed, shown)) : null
+  const matchTheme = match?.theme ?? 'geral'
+  const question =
+    match && phase === 'play'
+      ? amKicker
+        ? duelShot(match.seed, shown, matchTheme)
+        : duelDefense(match.seed, shown, matchTheme)
+      : null
 
   // Revela a rodada concluída (com animação) e depois avança.
   // O timer fica numa ref pra a re-execução do efeito NÃO cancelá-lo.
@@ -385,9 +394,15 @@ export default function Duelo() {
 
         {nick && phase === 'lobby' && (
           <div className="mt-8 w-full max-w-sm space-y-4">
-            <button onClick={criar} disabled={busy} className="btn-stamp w-full bg-grass-600 px-6 py-3 text-ink-900 hover:bg-grass-700 disabled:opacity-50">
-              {busy ? 'Criando…' : 'Criar partida'}
-            </button>
+            <div className="border-2 border-white/20 bg-paper-100 p-4">
+              <p className="kicker">Campeonato das perguntas</p>
+              <div className="mt-2">
+                <ThemePicker value={theme} onChange={setTheme} />
+              </div>
+              <button onClick={criar} disabled={busy} className="btn-stamp mt-4 w-full bg-grass-600 px-6 py-3 text-ink-900 hover:bg-grass-700 disabled:opacity-50">
+                {busy ? 'Criando…' : 'Criar partida'}
+              </button>
+            </div>
             <div className="border-2 border-white/20 bg-paper-100 p-4">
               <p className="kicker">Entrar numa sala</p>
               <div className="mt-2 flex gap-2">
@@ -410,6 +425,7 @@ export default function Duelo() {
           <div className="mt-8 w-full max-w-sm border-2 border-white/20 bg-paper-100 p-6 text-center">
             <p className="kicker">Sala criada</p>
             <p className="mt-2 font-display text-5xl tracking-[0.1em] text-ink-900">{match.code}</p>
+            <p className="mt-1 font-cond text-xs font-600 uppercase tracking-wider text-corn-500">{themeLabel(matchTheme)}</p>
             <p className="mt-2 font-serif text-sm italic text-ink-600">Mande o código pro amigo. Começa quando ele entrar.</p>
             <button onClick={convidar} className="btn-stamp mt-4 w-full bg-grass-700 px-6 py-2.5 text-ink-900 hover:bg-grass-600">
               {copied ? 'Copiado!' : 'Convidar amigo'}
