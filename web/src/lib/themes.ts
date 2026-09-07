@@ -9,7 +9,6 @@ export type Theme = { id: string; label: string; cats: string[] | null }
 export const THEMES: Theme[] = [
   { id: 'geral', label: 'Geral', cats: null },
   { id: 'copas', label: 'Copas do Mundo', cats: ['Copas', 'Copa 2026'] },
-  { id: 'brasil', label: 'Seleção Brasileira', cats: ['Brasil'] },
   { id: 'brasileirao', label: 'Brasileirão', cats: ['Brasileirão', 'Copa do Brasil'] },
   { id: 'libertadores', label: 'Libertadores', cats: ['Libertadores'] },
   { id: 'champions', label: 'Champions League', cats: ['Champions'] },
@@ -17,7 +16,7 @@ export const THEMES: Theme[] = [
   { id: 'laliga', label: 'Campeonato Espanhol', cats: ['La Liga'] },
   { id: 'seriea', label: 'Campeonato Italiano', cats: ['Serie A'] },
   { id: 'bundesliga', label: 'Campeonato Alemão', cats: ['Bundesliga'] },
-  { id: 'selecoes', label: 'Seleções, Euro e Copa América', cats: ['Seleções', 'Euro', 'Copa América'] },
+  { id: 'selecoes', label: 'Seleções, Euro e Copa América', cats: ['Brasil', 'Seleções', 'Euro', 'Copa América'] },
   {
     id: 'lendas',
     label: 'Lendas, clubes e recordes',
@@ -25,8 +24,10 @@ export const THEMES: Theme[] = [
   },
 ]
 
-// Mínimo por dificuldade pra uma Copa inteira (4 fases × 5 cobranças) sem repetir.
-const MIN_PER_DIF = 20
+// Mínimo por dificuldade pra um tema entrar na lista. Uma Copa inteira usa 20
+// por dificuldade; abaixo disso o pool dá a volta e pode repetir uma ou outra
+// pergunta nas fases finais — aceitável enquanto o tema engorda.
+const MIN_PER_DIF = 12
 
 export type Pools = { easy: number[]; hard: number[] }
 
