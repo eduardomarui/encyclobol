@@ -175,7 +175,7 @@ export default function Penaltis() {
 
   // Timer da pergunta.
   useEffect(() => {
-    if (!started || shootoutOver || copaDone || interRound || phase !== 'ask') return
+    if (!started || showHelp || shootoutOver || copaDone || interRound || phase !== 'ask') return
     if (timeLeft <= 0) {
       resolve(-1)
       return
@@ -183,7 +183,7 @@ export default function Penaltis() {
     const t = setTimeout(() => setTimeLeft((s) => s - 1), 1000)
     return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeLeft, phase, shootoutOver, copaDone, interRound, started])
+  }, [timeLeft, phase, shootoutOver, copaDone, interRound, started, showHelp])
 
 
   // Resolve o chaveamento quando uma disputa termina (só na Copa).
@@ -398,8 +398,8 @@ export default function Penaltis() {
             <div>
               <p className="kicker text-ink-500">
                 {copaMode ? `${ROUND_NAMES[round - 1]} · vs ${RIVALS[round - 1]}` : 'Treino livre'}
-                <span className="text-corn-500"> · {themeLabel(theme)}</span>
               </p>
+              <p className="font-cond text-[10px] font-700 uppercase tracking-[0.16em] text-corn-500">{themeLabel(theme)}</p>
               <div className="mt-0.5 flex gap-1">
                 {ROUND_NAMES.map((_, i) => (
                   <span
