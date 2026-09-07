@@ -9,13 +9,12 @@ const links: NavLink[] = [
   { label: 'Os jogos', to: '/jogos' },
   { label: 'Ranking', to: '/ranking' },
   { label: 'Perfil', to: '/perfil' },
-  { label: 'Como se joga', href: `${BASE}#como-funciona` },
-  { label: 'Assine', href: `${BASE}#planos` },
+  { label: 'Sobre', href: `${BASE}#sobre` },
 ]
 
 function NavItem({ link, onClick }: { link: NavLink; onClick?: () => void }) {
   const cls =
-    'font-cond text-sm font-500 uppercase tracking-wider text-ink-700 transition-colors hover:text-ochre-600'
+    'font-cond text-sm font-500 uppercase tracking-wider text-ink-700 transition-colors hover:text-corn-500'
   return link.to ? (
     <Link to={link.to} className={cls} onClick={onClick}>
       {link.label}

@@ -23,7 +23,7 @@ const cols: { title: string; links: FLink[] }[] = [
       { label: 'Os jogos', to: '/jogos' },
       { label: 'Ranking', to: '/ranking' },
       { label: 'Meu perfil', to: '/perfil' },
-      { label: 'Como se joga', href: `${BASE}#como-funciona` },
+      { label: 'Sobre', href: `${BASE}#sobre` },
     ],
   },
   {

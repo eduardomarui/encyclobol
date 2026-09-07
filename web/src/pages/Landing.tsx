@@ -1,8 +1,7 @@
 import Nav from '../components/landing/Nav'
 import Hero from '../components/landing/Hero'
 import Games from '../components/landing/Games'
-import HowItWorks from '../components/landing/HowItWorks'
-import Pricing from '../components/landing/Pricing'
+import Sobre from '../components/landing/Sobre'
 import Footer from '../components/landing/Footer'
 
 export default function Landing() {
@@ -12,8 +11,7 @@ export default function Landing() {
       <main>
         <Hero />
         <Games />
-        <HowItWorks />
-        <Pricing />
+        <Sobre />
       </main>
       <Footer />
     </div>
