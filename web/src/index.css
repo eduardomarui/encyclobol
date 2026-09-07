@@ -8,6 +8,12 @@
   }
   body {
     @apply bg-paper text-ink-900 font-serif antialiased;
+    /* Instalado como app (iPhone com notch): respeita a área segura embaixo */
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  /* Cabeçalhos fixos descem abaixo da barra de status quando em tela cheia */
+  header.sticky {
+    padding-top: env(safe-area-inset-top);
   }
   /* Seleção de texto com cara de marca-texto */
   ::selection {

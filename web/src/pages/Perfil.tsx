@@ -2,12 +2,13 @@ import { Link } from 'react-router-dom'
 import Nav from '../components/landing/Nav'
 import Footer from '../components/landing/Footer'
 import { gatherGames, gatherAchievements, grandTotal } from '../lib/profile'
+import { StreakPanel } from '../components/Streak'
 
 function Medal({ on }: { on: boolean }) {
   return (
     <svg viewBox="0 0 24 24" className="h-7 w-7" aria-hidden>
-      <circle cx="12" cy="14" r="6.5" fill={on ? '#d8a51f' : 'none'} stroke={on ? '#a87f10' : 'rgba(22,19,13,0.3)'} strokeWidth="1.5" />
-      <path d="M8 2.5l2 5M16 2.5l-2 5" stroke={on ? '#c1452a' : 'rgba(22,19,13,0.3)'} strokeWidth="1.6" strokeLinecap="round" />
+      <circle cx="12" cy="14" r="6.5" fill={on ? '#d8a51f' : 'none'} stroke={on ? '#a87f10' : 'rgba(238,245,241,0.3)'} strokeWidth="1.5" />
+      <path d="M8 2.5l2 5M16 2.5l-2 5" stroke={on ? '#c1452a' : 'rgba(238,245,241,0.3)'} strokeWidth="1.6" strokeLinecap="round" />
       {on && <path d="M12 11l1 2h2l-1.5 1.5.5 2-2-1-2 1 .5-2L9 13h2z" fill="#16130d" opacity="0.6" />}
     </svg>
   )
@@ -55,6 +56,12 @@ export default function Perfil() {
         >
           Ver o ranking →
         </Link>
+
+        {/* Ofensiva */}
+        <h2 className="mt-10 font-display text-2xl uppercase tracking-tight text-ink-900">Ofensiva</h2>
+        <div className="mt-3">
+          <StreakPanel />
+        </div>
 
         {/* Conquistas */}
         <h2 className="mt-10 font-display text-2xl uppercase tracking-tight text-ink-900">Conquistas</h2>

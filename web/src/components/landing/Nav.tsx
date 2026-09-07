@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { StreakBadge } from '../Streak'
 
 type NavLink = { label: string; to?: string; href?: string }
 
@@ -45,7 +46,8 @@ export default function Nav() {
           ))}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          <StreakBadge />
           <Link
             to="/jogos"
             className="btn-stamp bg-grass-700 px-4 py-2 text-ink-900 hover:bg-grass-600"

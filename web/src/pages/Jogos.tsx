@@ -12,6 +12,7 @@ import {
 } from '../components/landing/Icons'
 import { dayNumber } from '../lib/daily'
 import { shareScoreImage, type Sq } from '../lib/shareCard'
+import { StreakPanel } from '../components/Streak'
 import { loadCareer, loadCareerToday } from '../lib/stats'
 import { loadCopaStats, loadCopaToday } from '../lib/penaltisStats'
 import { loadConCareer, loadConToday } from '../lib/conexoesStats'
@@ -180,8 +181,13 @@ export default function Jogos() {
           </Link>
         </header>
 
+        {/* Ofensiva */}
+        <div className="mt-6">
+          <StreakPanel compact />
+        </div>
+
         {/* Resumo do dia */}
-        <section className="mt-6 border-2 border-white/20 bg-paper-100 p-5 sm:p-6">
+        <section className="mt-3 border-2 border-white/20 bg-paper-100 p-5 sm:p-6">
           <div className="flex items-center justify-between">
             <p className="kicker">{fechou ? 'Fechei o dia' : 'Meu dia'}</p>
             <span className="font-cond text-xs font-600 uppercase tracking-wider text-ink-600">
