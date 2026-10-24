@@ -21,18 +21,18 @@
       name="keywords"
       content="futebol, quiz de futebol, jogo diário, craques, copa do mundo, almanaque, trivia, pênaltis, ranking"
     />
-    <link rel="canonical" href="https://eduardomarui.github.io/encyclobol/" />
+    <link rel="canonical" href="https://encyclobol.com.br/" />
     <meta property="og:title" content="Encyclobol — o almanaque jogável do futebol" />
     <meta property="og:description" content="Seis desafios diários de futebol. Sem chute, sem Google. Dispute com os amigos no ranking." />
-    <meta property="og:image" content="https://eduardomarui.github.io/encyclobol/icon.png" />
+    <meta property="og:image" content="https://encyclobol.com.br/icon.png" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://eduardomarui.github.io/encyclobol/" />
+    <meta property="og:url" content="https://encyclobol.com.br/" />
     <meta property="og:site_name" content="Encyclobol" />
     <meta property="og:locale" content="pt_BR" />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="Encyclobol — o almanaque jogável do futebol" />
     <meta name="twitter:description" content="Seis desafios diários de futebol. Sem chute, sem Google." />
-    <meta name="twitter:image" content="https://eduardomarui.github.io/encyclobol/icon.png" />
+    <meta name="twitter:image" content="https://encyclobol.com.br/icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -42,25 +42,6 @@
   </head>
   <body>
     <div id="root"></div>
-    <!-- Restaura a rota redirecionada pelo 404.html (SPA no GitHub Pages) -->
-    <script>
-      (function (l) {
-        if (l.search[1] === '/') {
-          var decoded = l.search
-            .slice(1)
-            .split('&')
-            .map(function (s) {
-              return s.replace(/~and~/g, '&')
-            })
-            .join('?')
-          window.history.replaceState(
-            null,
-            null,
-            l.pathname.slice(0, -1) + decoded + l.hash,
-          )
-        }
-      })(window.location)
-    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

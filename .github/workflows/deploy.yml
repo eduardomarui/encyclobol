@@ -1,4 +1,7 @@
-name: Deploy para GitHub Pages
+name: Redirecionamento do GitHub Pages
+
+# O jogo agora sai pelo Cloudflare Pages (integração Git, ver DEPLOY-CLOUDFLARE.md).
+# O endereço antigo só manda cada link pro mesmo caminho em encyclobol.com.br.
 
 on:
   push:
@@ -19,22 +22,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Instalar dependências
-        run: npm install
-        working-directory: web
-      - name: Build
-        run: npm run build
-        working-directory: web
-        env:
-          VITE_BASE: /encyclobol/
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: web/dist
+          path: redirect
 
   deploy:
     needs: build

@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Encyclobol mudou para encyclobol.com.br</title>
+  <link rel="canonical" href="https://encyclobol.com.br/" />
+  <meta name="robots" content="noindex" />
+  <script>
+    // O Encyclobol saiu do GitHub Pages: leva o mesmo caminho, busca e âncora
+    // (links de desafio ?vs=, sala ?sala=) pro domínio novo.
+    var p = location.pathname.replace(/^\/encyclobol/, '') || '/'
+    location.replace('https://encyclobol.com.br' + p + location.search + location.hash)
+  </script>
+</head>
+<body style="background:#0f2a1c;color:#eee;font-family:sans-serif;text-align:center;padding:40px">
+  <p>O Encyclobol agora mora em <a style="color:#e6b93b" href="https://encyclobol.com.br/">encyclobol.com.br</a>.</p>
+</body>
+</html>

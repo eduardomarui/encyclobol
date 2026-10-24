@@ -5,10 +5,9 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 
 const DIST = new URL('../dist/', import.meta.url).pathname
-const BASE = (process.env.VITE_BASE ?? '/').replace(/\/$/, '')
-// Endereço público: VITE_SITE_URL (Cloudflare/domínio) ou GitHub Pages + base.
-const SITE = (process.env.VITE_SITE_URL || `https://eduardomarui.github.io${BASE}`).replace(/\/$/, '')
-const OLD = 'https://eduardomarui.github.io/encyclobol'
+// Endereço público: o domínio, ou VITE_SITE_URL num build pra outro endereço.
+const DOMAIN = 'https://encyclobol.com.br'
+const SITE = (process.env.VITE_SITE_URL || DOMAIN).replace(/\/$/, '')
 
 const PAGES = [
   ['', 'default', 'Encyclobol — o almanaque jogável do futebol', 'Seis desafios diários de futebol. Sem chute, sem Google. Dispute com os amigos e com a sua torcida.'],
@@ -28,7 +27,8 @@ const esc = (s) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g
 const html = readFileSync(join(DIST, 'index.html'), 'utf8')
 
 function withMeta(src, route, slug, title, desc) {
-  const url = `${SITE}/${route}`.replace(/\/$/, '/')
+  // Barra no fim: é o endereço final (sem ela o Cloudflare responde 308).
+  const url = `${SITE}/${route}${route ? '/' : ''}`
   const img = `${SITE}/og/${slug}.png`
   const set = (re, tag) => (re.test(src) ? (src = src.replace(re, tag)) : (src = src.replace('</head>', `    ${tag}\n  </head>`)))
   set(/<title>.*?<\/title>/s, `<title>${esc(title)}</title>`)
@@ -56,7 +56,7 @@ for (const [route, slug, title, desc] of PAGES) {
 for (const f of ['robots.txt', 'sitemap.xml']) {
   try {
     const path = join(DIST, f)
-    writeFileSync(path, readFileSync(path, 'utf8').split(OLD).join(SITE))
+    writeFileSync(path, readFileSync(path, 'utf8').split(DOMAIN).join(SITE))
   } catch {
     /* arquivo ausente: segue */
   }

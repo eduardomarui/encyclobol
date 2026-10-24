@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://eduardomarui.github.io/encyclobol/sitemap.xml
+Sitemap: https://encyclobol.com.br/sitemap.xml
