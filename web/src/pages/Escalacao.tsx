@@ -20,6 +20,35 @@ const DAILY_IDX = dailyPick(ESCALACOES.length, 7711, -1)
 const pontosDe = (found: number, total: number, dicas: number, left: number) =>
   Math.max(0, found * 100 - dicas * 30 + (found === total ? left : 0))
 
+// Treino: elenco sorteado (sem escolher), no máximo 3 por dia, e nunca o do
+// dia nem os das próximas duas semanas — senão o treino gastava as edições.
+const TREINOS_DIA = 3
+const TREINO_KEY = 'encyclobol:escalacao:treinos'
+const RESERVADOS = new Set(
+  Array.from({ length: 15 }, (_, k) => dailyPick(ESCALACOES.length, 7711, -1, new Date(Date.now() + k * 864e5))),
+)
+function treinosHoje(): string[] {
+  try {
+    const t = JSON.parse(localStorage.getItem(TREINO_KEY) ?? 'null') as { day: number; ids: string[] } | null
+    return t && t.day === dayNumber() ? t.ids : []
+  } catch {
+    return []
+  }
+}
+function marcarTreino(id: string) {
+  try {
+    localStorage.setItem(TREINO_KEY, JSON.stringify({ day: dayNumber(), ids: [...treinosHoje(), id] }))
+  } catch {
+    /* ignore */
+  }
+}
+function sortearTreino(): number | null {
+  const usados = treinosHoje()
+  if (usados.length >= TREINOS_DIA) return null
+  const pool = ESCALACOES.map((_, i) => i).filter((i) => !RESERVADOS.has(i) && !usados.includes(ESCALACOES[i].id))
+  return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null
+}
+
 type EscRun = { id: string; achados: number[]; dicas: number[]; left: number }
 
 const norm = (s: string) =>
@@ -120,7 +149,9 @@ export default function Escalacao() {
   const [run] = useState(() => (today ? null : loadRun<EscRun>('escalacao')))
   const [modo, setModo] = useState<'dia' | 'treino'>(() => {
     const id = new URLSearchParams(window.location.search).get('e')
-    return id && id !== ESCALACOES[DAILY_IDX].id && ESCALACOES.some((x) => x.id === id) ? 'treino' : 'dia'
+    const i = ESCALACOES.findIndex((x) => x.id === id)
+    // Desafio de treino abre no elenco; edições futuras ficam guardadas.
+    return i >= 0 && i !== DAILY_IDX && !RESERVADOS.has(i) ? 'treino' : 'dia'
   })
   const [idx, setIdx] = useState(() => {
     if (modo === 'treino') {
@@ -177,6 +208,13 @@ export default function Escalacao() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [left, fase, showHelp])
 
+  const [restam, setRestam] = useState(() => TREINOS_DIA - treinosHoje().length)
+  function treinar() {
+    const i = sortearTreino()
+    if (i === null) return
+    escolher(i)
+  }
+
   function escolher(i: number) {
     setModo('treino')
     setIdx(i)
@@ -188,6 +226,10 @@ export default function Escalacao() {
   }
 
   function comecar() {
+    if (!dia) {
+      marcarTreino(esc.id)
+      setRestam(TREINOS_DIA - treinosHoje().length)
+    }
     sfx.whistle()
     setAchados([])
     setDicas([])
@@ -291,24 +333,6 @@ export default function Escalacao() {
       <main className="container-page flex flex-1 flex-col items-center py-3 sm:py-5">
         <GameTitle kicker={dia ? `Memória · jogo 07 · #${dayNumber()}` : 'Escalação · treino'} title="Quem sabe todos é mago" />
 
-        {!dia && fase === 'pronto' && (
-          <div className="mt-3 flex flex-wrap justify-center gap-1.5" role="radiogroup" aria-label="Elenco">
-            {ESCALACOES.map((e, i) => (
-              <button
-                key={e.id}
-                role="radio"
-                aria-checked={i === idx}
-                onClick={() => escolher(i)}
-                className={`border-2 px-2.5 py-1.5 font-cond text-[11px] font-700 uppercase tracking-wide ${
-                  i === idx ? 'border-corn-500 bg-corn-500 text-paper' : 'border-white/20 text-ink-900 hover:border-corn-500/60'
-                }`}
-              >
-                {e.time} {e.quando.match(/\d{4}/)?.[0]}
-                <span className={`ml-1.5 font-500 ${i === idx ? 'text-paper/70' : 'text-ink-500'}`}>{e.nivel}</span>
-              </button>
-            ))}
-          </div>
-        )}
 
         {/* A "foto oficial" */}
         <div className="mt-4 w-full max-w-md">
@@ -347,8 +371,12 @@ export default function Escalacao() {
               11 titulares, 3 minutos. Número, posição e seleção de cada um já estão na foto.
               {best[esc.id] !== undefined && <> Seu recorde aqui: {best[esc.id]}/{total}.</>}
             </p>
-            <button onClick={comecar} className="btn-stamp mt-3 w-full bg-grass-600 px-6 py-3 text-ink-900 hover:bg-grass-700">
-              Começar →
+            <button
+              onClick={comecar}
+              disabled={!dia && restam <= 0}
+              className="btn-stamp mt-3 w-full bg-grass-600 px-6 py-3 text-ink-900 hover:bg-grass-700 disabled:opacity-40"
+            >
+              {!dia && restam <= 0 ? 'Treinos de hoje esgotados' : 'Começar →'}
             </button>
           </div>
         )}
@@ -408,19 +436,12 @@ export default function Escalacao() {
             <button onClick={compartilhar} className="btn-stamp mt-4 w-full bg-corn-500 px-6 py-3 text-paper hover:bg-corn-400">
               {copied ? 'Copiado!' : 'Desafiar no grupo'}
             </button>
-            {dia ? (
-              <button onClick={() => escolher((idx + 1) % ESCALACOES.length)} className="btn-stamp mt-2 w-full border-2 border-white/20 px-6 py-2.5 text-ink-900 hover:bg-grass-700">
-                Treinar outros elencos
+            {restam > 0 ? (
+              <button onClick={treinar} className="btn-stamp mt-2 w-full border-2 border-white/20 px-6 py-2.5 text-ink-900 hover:bg-grass-700">
+                Treino surpresa · {restam} {restam === 1 ? 'restante' : 'restantes'} hoje
               </button>
             ) : (
-              <>
-                <button onClick={comecar} className="btn-stamp mt-2 w-full border-2 border-white/20 px-6 py-2.5 text-ink-900 hover:bg-grass-700">
-                  Tentar de novo
-                </button>
-                <button onClick={() => escolher((idx + 1) % ESCALACOES.length)} className="mt-2 w-full font-cond text-xs font-600 uppercase tracking-wider text-ink-500 hover:text-corn-500">
-                  Outro elenco →
-                </button>
-              </>
+              <p className="mt-2 font-cond text-xs font-600 uppercase tracking-wider text-ink-500">Treinos de hoje esgotados · amanhã tem mais</p>
             )}
             <NextUp current="escalacao" />
           </div>
