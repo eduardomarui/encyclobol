@@ -327,9 +327,9 @@ export const intruso: IntrusoPuzzle[] = [
   // ===== Era =====
 
   // check: Pelé ATA BRA (Santos; 1956) | Garrincha PONTA BRA (Botafogo; 1953) |
-  // Zagallo PONTA BRA (Flamengo, Botafogo; 1950) | Tostão ATA BRA (Cruzeiro, Vasco; 1963).
+  // Zagallo PONTA BRA (Flamengo, Botafogo; 1951) | Tostão ATA BRA (Cruzeiro, Vasco; 1962).
   // Todos brasileiros campeões mundiais; posições 2-2; Botafogo 2-2; Copa 1970: Pelé e Tostão (2-2); bicampeões 1958/62: os 3 x Tostão (reforça).
-  { players: ['Pelé', 'Garrincha', 'Zagallo', 'Tostão'], intruder: 'Tostão', cat: 'Era', rule: 'Os outros estrearam nos anos 1950; Tostão estreou em 1963.' },
+  { players: ['Pelé', 'Garrincha', 'Zagallo', 'Tostão'], intruder: 'Tostão', cat: 'Era', rule: 'Os outros estrearam nos anos 1950; Tostão estreou em 1962.' },
 
   // check: Rivelino MEI BRA (Corinthians, Fluminense; 1965) | Tostão ATA BRA (Cruzeiro, Vasco; 1963) |
   // Carlos Alberto LAT BRA (Fluminense, Santos, Flamengo; 1963) | Zico MEI BRA (Flamengo, Udinese; 1971).
@@ -372,7 +372,7 @@ export const intruso: IntrusoPuzzle[] = [
   { players: ['Cristiano Ronaldo', 'Messi', 'Kaká', 'Ronaldinho'], intruder: 'Ronaldinho', cat: 'Era', rule: 'Os outros estrearam nos anos 2000; Ronaldinho estreou em 1998.' },
 
   // check: Buffon GK ITA (Parma, Juve, PSG; 1995) | Casillas GK ESP (Real, Porto; 1999) |
-  // Čech GK TCH (Rennes, Chelsea, Arsenal; 1999) | Courtois GK BEL (Chelsea, Atlético, Real; 2011).
+  // Čech GK TCH (Rennes, Chelsea, Arsenal; 1999) | Courtois GK BEL (Chelsea, Atlético, Real; 2009).
   // Todos goleiros; nacionalidades distintas; Chelsea 2-2; Real 2-2; Copa: Buffon e Casillas (2-2).
-  { players: ['Buffon', 'Casillas', 'Čech', 'Courtois'], intruder: 'Courtois', cat: 'Era', rule: 'Os outros estrearam nos anos 1990; Courtois estreou em 2011.' },
+  { players: ['Buffon', 'Casillas', 'Čech', 'Courtois'], intruder: 'Courtois', cat: 'Era', rule: 'Os outros estrearam nos anos 1990; Courtois estreou em 2009.' },
 ]
