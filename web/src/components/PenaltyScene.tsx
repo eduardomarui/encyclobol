@@ -33,41 +33,192 @@ function SoccerBall({ className }: { className?: string }) {
 }
 
 
+
+// ===================== Mundo em metros + câmera =====================
+// O lance é calculado em 3D (metros) e projetado na tela. Gol oficial
+// 7,32 × 2,44 m, marca do pênalti a 11 m, câmera 8 m atrás da marca a 1,54 m
+// de altura. A câmera foi calibrada pra trave cair exatamente na caixa GOAL
+// da tela. Como a bola segue uma parábola real (gravidade) até um alvo dentro
+// do gol, ela nunca "passa por cima do travessão e cai" — antes o arco era
+// desenhado direto na tela e subia além da trave.
+export const GOAL = { left: 22, right: 78, top: 30, bottom: 60 } // % da cena
+const HALF_W = 3.66
+const BAR = 2.44
+const LINE = 11
+const CAM_BACK = 8
+const CAM_H = 1.54
+const D_GOAL = LINE + CAM_BACK
+const KX = ((GOAL.right - 50) * D_GOAL) / HALF_W
+const KY = ((GOAL.bottom - GOAL.top) * D_GOAL) / BAR
+const HORIZON = GOAL.bottom - (KY * CAM_H) / D_GOAL
+const R = 0.11 // raio da bola
+const G = 9.81
+
+export type P3 = { x: number; y: number; z: number }
+// Mundo → tela (% da cena) e escala relativa à bola na marca do pênalti.
+export function project(p: P3) {
+  const d = Math.max(0.5, p.z + CAM_BACK)
+  return { x: 50 + (KX * p.x) / d, y: HORIZON + (KY * (CAM_H - p.y)) / d, s: CAM_BACK / d }
+}
+
 export type Pose = 'idle' | 'center' | 'tl' | 'tr' | 'dl' | 'dr'
-export type Zone = { x: number; y: number }
 // Como o lance termina. 'goal' entra; os outros não.
 export type Outcome = 'goal' | 'save' | 'post' | 'wide' | 'over' | 'weak'
 export type Shot = {
-  bx: number // ponto de impacto (% da cena)
-  by: number
-  ex?: number // pra onde a bola sai depois do impacto (trave, espalmada)
-  ey?: number
-  kx: number
+  outcome: Outcome
+  tx: number // onde a bola cruza (ou é tocada), em metros: x lateral, y altura
+  ty: number
+  xk: number // pra onde o goleiro mergulha (m)
+  kx: number // mesma coisa em % da tela
   pose: Pose
   label: string
   good: boolean // bom pra quem está vendo
   net: boolean
-  outcome?: Outcome
+  fast?: boolean
   slow?: boolean
 } | null
 
-// O gol, em % da cena. Bola, goleiro e desenho usam a MESMA régua — antes o
-// gol tinha altura fixa em pixels e o destino da bola era em %, então no
-// celular o "ângulo" passava por cima do travessão e contava gol.
-// Câmera atrás do batedor: o gol fica no fundo, menor, centrado.
-export const GOAL = { left: 22, right: 78, top: 30, bottom: 60 }
-const gx = (u: number) => GOAL.left + u * (GOAL.right - GOAL.left)
-const gy = (v: number) => GOAL.top + v * (GOAL.bottom - GOAL.top)
+const pick = <T,>(arr: T[], seed: number) => arr[((seed % arr.length) + arr.length) % arr.length]
+const sgn = (v: number) => (v < 0 ? -1 : v > 0 ? 1 : 0)
 
-// 0-2: alto (esq, meio, dir) · 3-5: rasteiro
-export const ZONES: Zone[] = [
-  { x: gx(0.12), y: gy(0.18) },
-  { x: gx(0.5), y: gy(0.16) },
-  { x: gx(0.88), y: gy(0.18) },
-  { x: gx(0.12), y: gy(0.8) },
-  { x: gx(0.5), y: gy(0.78) },
-  { x: gx(0.88), y: gy(0.8) },
-]
+function poseOf(side: number, high: boolean): Pose {
+  if (side === 0) return high ? 'center' : 'idle'
+  if (side < 0) return high ? 'tl' : 'dl'
+  return high ? 'tr' : 'dr'
+}
+
+const LABEL: Record<Outcome, string> = {
+  goal: 'GOOOL!',
+  save: 'DEFENDEU!',
+  post: 'NA TRAVE!',
+  wide: 'PRA FORA!',
+  over: 'POR CIMA!',
+  weak: 'PERDEU A HORA!',
+}
+
+// Alvos dentro do gol (bola inteira dentro: |x| ≤ 3,66 − 0,25; y ≤ 2,44 − 0,25).
+const IN = {
+  gaveta: [{ x: -3.3, y: 2.1 }, { x: 3.3, y: 2.1 }],
+  alto: [{ x: -2.9, y: 1.85 }, { x: 2.9, y: 1.85 }, { x: 0, y: 1.9 }],
+  baixo: [{ x: -3.0, y: 0.25 }, { x: 3.0, y: 0.25 }, { x: -2.4, y: 0.6 }, { x: 2.4, y: 0.6 }],
+}
+
+// Monta o lance a partir do resultado. Determinístico pelo `seed` (os dois
+// lados do Duelo veem o mesmo lance). `fast` = respondeu rápido: gaveta.
+export function makeShot(o: Outcome, opts: { seed: number; fast?: boolean; good: boolean; label?: string }): Shot {
+  const { seed, fast = false, good } = opts
+  const label = opts.label ?? (o === 'goal' && fast ? 'NA GAVETA!' : LABEL[o])
+  const mk = (tx: number, ty: number, xk: number, high: boolean, extra: Partial<NonNullable<Shot>> = {}): Shot => ({
+    outcome: o,
+    tx,
+    ty,
+    xk,
+    kx: project({ x: xk, y: 0, z: LINE }).x,
+    pose: poseOf(sgn(xk), high),
+    label,
+    good,
+    net: o === 'goal',
+    fast,
+    ...extra,
+  })
+  if (o === 'goal') {
+    const t = fast ? pick(IN.gaveta, seed) : pick([...IN.alto, ...IN.baixo], seed)
+    // O goleiro cai pro lado errado (no meio, escolhe um lado).
+    const side = t.x === 0 ? (seed % 2 ? 1 : -1) : -sgn(t.x)
+    return mk(t.x, t.y, side * 1.7, (seed >> 1) % 2 === 0)
+  }
+  if (o === 'save') {
+    const t = pick([...IN.alto, ...IN.baixo], seed)
+    // Corpo do goleiro a ~1 m do ponto: as mãos chegam na bola.
+    const xk = t.x === 0 ? 0 : t.x - sgn(t.x) * 0.75
+    const high = t.y > 1.1
+    // Espalmar é coisa de bola alta; rasteira o goleiro segura.
+    const lbl = label === 'ESPALMOU!' && !high ? 'VOCÊ PEGOU!' : label
+    return { ...mk(t.x, t.y, xk, high)!, label: lbl }
+  }
+  if (o === 'post') {
+    const side = seed % 2 ? 1 : -1
+    // Centro da bola encostado na face interna do poste (raio do poste 0,06 + bola 0,11).
+    return mk(side * (HALF_W - 0.17), pick([0.7, 1.2, 1.7], seed), -side * 1.6, false)
+  }
+  if (o === 'wide') {
+    const side = seed % 2 ? 1 : -1
+    return mk(side * 4.5, pick([0.4, 0.9, 1.4], seed), side * 1.6, false)
+  }
+  if (o === 'over') {
+    return mk(pick([-2.2, -0.8, 0.9, 2.3], seed), 3.0, pick([-1.5, 1.5], seed + 1), true)
+  }
+  // Bola fraca: rasteira, devagar, o goleiro só agacha e segura.
+  return mk(pick([-0.4, 0.3], seed), R, 0, false, { slow: true })
+}
+
+// Compatível com o Duelo: 'out' vira trave, pra fora ou por cima.
+export type Kind = 'goal' | 'save' | 'out'
+export function shotFromOutcome(kind: Kind, seed: number): Shot {
+  if (kind === 'goal') return makeShot('goal', { seed, good: true })
+  if (kind === 'save') return makeShot('save', { seed, good: false })
+  return makeShot(pick<Outcome>(['post', 'wide', 'over'], seed), { seed, good: false })
+}
+
+// ===================== Trajetória =====================
+type Seg = { ms: number; at: (u: number) => P3 }
+type Plan = { segs: Seg[]; impactMs: number; fadeOut?: boolean }
+
+// Parábola de A até B em `tf` segundos (gravidade real) com leve efeito lateral.
+function flight(A: P3, B: P3, tf: number, curl: number): (u: number) => P3 {
+  const lift = (G * tf * tf) / 2
+  return (u) => ({
+    x: A.x + (B.x - A.x) * (u + curl * u * (1 - u)),
+    y: Math.max(R, A.y + (B.y - A.y) * u + lift * u * (1 - u)),
+    z: A.z + (B.z - A.z) * (1.06 * u - 0.06 * u * u),
+  })
+}
+const lerp = (A: P3, B: P3) => (u: number): P3 => ({ x: A.x + (B.x - A.x) * u, y: A.y + (B.y - A.y) * u, z: A.z + (B.z - A.z) * u })
+// Quique: sobe um pouco e cai (bola rebatida ou caindo na rede).
+function hop(A: P3, B: P3, h: number) {
+  return (u: number): P3 => ({ x: A.x + (B.x - A.x) * u, y: Math.max(R, A.y + (B.y - A.y) * u + 4 * h * u * (1 - u)), z: A.z + (B.z - A.z) * u })
+}
+
+function planFor(shot: NonNullable<Shot>): Plan {
+  const S: P3 = { x: 0, y: R, z: 0 }
+  const o = shot.outcome
+  const side = sgn(shot.tx)
+  // Tempo de voo real (s) e tempo de tela (ms, ~15% mais lento pra dar pra ver).
+  const tf = shot.slow ? 1.0 : shot.fast ? 0.42 : shot.ty < 0.8 ? 0.48 : 0.52
+  const ms = Math.round(tf * 1000 * 1.15)
+  const zHit = o === 'save' ? LINE - 0.35 : o === 'weak' ? LINE - 0.6 : LINE
+  const E: P3 = { x: shot.tx, y: shot.ty, z: zHit }
+  const curl = shot.slow ? 0 : -0.3
+  const segs: Seg[] = [{ ms, at: shot.slow ? lerp(S, E) : flight(S, E, tf, curl) }]
+  // Pausa no impacto (hit-stop): a bola "segura" 70 ms na rede, na luva ou na trave.
+  if (o === 'goal' || o === 'save' || o === 'post') segs.push({ ms: 70, at: () => E })
+  if (o === 'goal') {
+    const N: P3 = { x: shot.tx * 1.03, y: Math.max(R, shot.ty * 0.75), z: LINE + 1.3 }
+    segs.push({ ms: 170, at: lerp(E, N) })
+    segs.push({ ms: 320, at: hop(N, { x: N.x, y: R, z: LINE + 1.0 }, 0.05) })
+  } else if (o === 'save') {
+    if (shot.ty > 1.1) segs.push({ ms: 320, at: hop(E, { x: side * 4.8 || 4.8, y: shot.ty + 0.6, z: LINE + 0.5 }, 0.4) })
+    else segs.push({ ms: 300, at: hop(E, { x: shot.tx * 0.85, y: R, z: LINE - 1.4 }, 0.15) })
+  } else if (o === 'post') {
+    segs.push({ ms: 460, at: hop(E, { x: shot.tx - side * 1.8, y: R, z: LINE - 3.5 }, 0.5) })
+  } else if (o === 'wide' || o === 'over') {
+    const F: P3 = { x: shot.tx * 1.2, y: shot.ty * 1.1, z: LINE + 4 }
+    segs.push({ ms: 300, at: lerp(E, F) })
+    return { segs, impactMs: ms, fadeOut: true }
+  }
+  return { segs, impactMs: ms }
+}
+
+function posAt(plan: Plan, t: number): { p: P3; i: number } {
+  let acc = 0
+  for (let i = 0; i < plan.segs.length; i++) {
+    const g = plan.segs[i]
+    if (t <= acc + g.ms) return { p: g.at(Math.max(0, (t - acc) / g.ms)), i }
+    acc += g.ms
+  }
+  const last = plan.segs[plan.segs.length - 1]
+  return { p: last.at(1), i: plan.segs.length - 1 }
+}
 
 type PoseDef = {
   tilt: number
@@ -109,74 +260,6 @@ function Keeper({ pose, className = 'h-24 w-24' }: { pose: Pose; className?: str
       </g>
     </svg>
   )
-}
-
-export function poseFor(z: Zone): Pose {
-  if (Math.abs(z.x - 50) < 8) return 'center'
-  const high = z.y < (GOAL.top + GOAL.bottom) / 2
-  if (z.x < 50) return high ? 'tl' : 'dl'
-  return high ? 'tr' : 'dr'
-}
-
-const clampKx = (x: number) => Math.min(68, Math.max(32, x))
-const pick = <T,>(arr: T[], seed: number) => arr[((seed % arr.length) + arr.length) % arr.length]
-
-const LABEL: Record<Outcome, string> = {
-  goal: 'GOOOL!',
-  save: 'DEFENDEU!',
-  post: 'NA TRAVE!',
-  wide: 'PRA FORA!',
-  over: 'POR CIMA!',
-  weak: 'PERDEU A HORA!',
-}
-
-// Monta o lance a partir do resultado. Determinístico pelo `seed` (os dois
-// lados do Duelo veem o mesmo lance). `fast` = respondeu rápido: gol na gaveta.
-export function makeShot(o: Outcome, opts: { seed: number; fast?: boolean; good: boolean; label?: string }): Shot {
-  const { seed, fast = false, good } = opts
-  const label = opts.label ?? (o === 'goal' && fast ? 'NA GAVETA!' : LABEL[o])
-  if (o === 'goal') {
-    // Rápido: ângulo alto. Normal: qualquer canto. O goleiro cai pro lado errado.
-    const z = fast ? pick([ZONES[0], ZONES[2]], seed) : pick([ZONES[0], ZONES[2], ZONES[3], ZONES[5], ZONES[4]], seed)
-    const k = z.x < 50 ? ZONES[z.y < 40 ? 5 : 2] : z.x > 50 ? ZONES[z.y < 40 ? 3 : 0] : pick([ZONES[3], ZONES[5]], seed + 1)
-    return { bx: z.x, by: z.y, kx: clampKx(k.x), pose: poseFor(k), label, good, net: true, outcome: o }
-  }
-  if (o === 'save') {
-    const z = pick(ZONES, seed)
-    const kx = clampKx(z.x)
-    const reach = z.x < 50 ? kx - 6 : z.x > 50 ? kx + 6 : kx
-    const high = z.y < 40
-    // Bola alta é espalmada pra fora; rasteira o goleiro segura.
-    return high
-      ? { bx: reach, by: z.y, ex: z.x < 50 ? 4 : 96, ey: GOAL.top - 8, kx, pose: poseFor(z), label, good, net: false, outcome: o }
-      : { bx: reach, by: z.y, kx, pose: poseFor(z), label, good, net: false, outcome: o }
-  }
-  if (o === 'post') {
-    const left = seed % 2 === 0
-    const px = left ? GOAL.left : GOAL.right
-    const py = gy(pick([0.3, 0.55, 0.7], seed))
-    const k = left ? ZONES[5] : ZONES[3]
-    return { bx: px, by: py, ex: left ? px + 14 : px - 14, ey: 86, kx: clampKx(k.x), pose: poseFor(k), label, good, net: false, outcome: o }
-  }
-  if (o === 'wide') {
-    const left = seed % 2 === 0
-    const k = pick(ZONES, seed + 2)
-    return { bx: left ? 11 : 89, by: gy(pick([0.35, 0.6, 0.85], seed)), kx: clampKx(k.x), pose: poseFor(k), label, good, net: false, outcome: o }
-  }
-  if (o === 'over') {
-    const k = pick(ZONES, seed + 1)
-    return { bx: gx(pick([0.2, 0.45, 0.7], seed)), by: GOAL.top - 9, kx: clampKx(k.x), pose: poseFor(k), label, good, net: false, outcome: o }
-  }
-  // Bola fraca: rola até o meio e o goleiro pega sem esforço.
-  return { bx: 50, by: gy(0.82), kx: 50, pose: 'idle', label, good, net: false, outcome: o, slow: true }
-}
-
-// Compatível com o Duelo: 'out' vira trave, pra fora ou por cima.
-export type Kind = 'goal' | 'save' | 'out'
-export function shotFromOutcome(kind: Kind, seed: number): Shot {
-  if (kind === 'goal') return makeShot('goal', { seed, good: true })
-  if (kind === 'save') return makeShot('save', { seed, good: false })
-  return makeShot(pick<Outcome>(['post', 'wide', 'over'], seed), { seed, good: false })
 }
 
 // Batedor visto de costas (camisa verde, número dourado). 'run' = correndo
@@ -224,84 +307,85 @@ export function PenaltyScene({
   compact?: boolean
 }) {
   const ballRef = useRef<HTMLDivElement>(null)
+  const spinRef = useRef<HTMLDivElement>(null)
   const shadowRef = useRef<HTMLDivElement>(null)
   const kickerRef = useRef<HTMLDivElement>(null)
   const sceneRef = useRef<HTMLDivElement>(null)
   const [kickPose, setKickPose] = useState<'run' | 'kick'>('run')
-  // O goleiro reage uma fração de segundo depois do chute.
   const [dive, setDive] = useState(false)
   const [impact, setImpact] = useState(false)
+
+  // Coloca bola e sombra num ponto do mundo (sem re-render do React).
+  const place = (p: P3, angle: number) => {
+    const el = ballRef.current
+    const sh = shadowRef.current
+    const sc = sceneRef.current
+    if (!el || !sh || !sc) return
+    // clientWidth/Height: área interna (sem a borda), a mesma dos filhos absolutos.
+    const W = sc.clientWidth
+    const H = sc.clientHeight
+    const b = project(p)
+    const g = project({ x: p.x, y: 0, z: p.z })
+    el.style.transform = `translate(${(W * b.x) / 100}px, ${(H * b.y) / 100}px) translate(-50%, -50%) scale(${b.s})`
+    // Dentro do gol (atrás da linha) a bola passa atrás do goleiro e da trave.
+    el.style.zIndex = p.z > LINE + 0.05 ? '9' : '20'
+    sh.style.transform = `translate(${(W * g.x) / 100}px, ${(H * g.y) / 100}px) translate(-50%, -50%) scale(${g.s})`
+    sh.style.opacity = String(Math.max(0.1, 0.5 - p.y * 0.12))
+    if (spinRef.current) spinRef.current.style.transform = `rotate(${angle}deg)`
+  }
 
   useEffect(() => {
     setDive(false)
     setImpact(false)
     setKickPose('run')
-    const el = ballRef.current
-    const sh = shadowRef.current
     const kicker = kickerRef.current
-    const scene = sceneRef.current
-    if (!shot || !el || !sh || !kicker || !scene) return
+    const start: P3 = { x: 0, y: R, z: 0 }
+    // Antes de cada lance: bola na marca.
+    requestAnimationFrame(() => {
+      place(start, 0)
+      if (ballRef.current) ballRef.current.style.opacity = '1'
+    })
+    if (!shot || !kicker) return
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-    const { width: W, height: H } = scene.getBoundingClientRect()
-    const px = (v: number) => (W * v) / 100
-    const py = (v: number) => (H * v) / 100
-    const sx = px(50)
-    const sy = py(86)
-    const at = (x: number, y: number, sc: number) => `translate(calc(-50% + ${x - sx}px), calc(-50% + ${y - sy}px)) scale(${sc})`
-
+    const plan = planFor(shot)
     const runUp = reduce ? 0 : 380
-    const flight = reduce ? 1 : shot.slow ? 1000 : shot.label === 'NA GAVETA!' ? 640 : 520
-    const tImpact = runUp + flight
-    const anims: Animation[] = []
+    const total = plan.segs.reduce((a, g) => a + g.ms, 0)
 
-    // 1) Corrida do batedor até a bola.
-    anims.push(
-      kicker.animate(
-        [
-          { transform: 'translate(-70%, 6%) scale(1.06)' },
-          { transform: 'translate(-8%, 0) scale(1)' },
-        ],
-        { duration: Math.max(1, runUp), easing: 'cubic-bezier(.4,.1,.7,1)', fill: 'forwards' },
-      ),
+    const run = kicker.animate(
+      [{ transform: 'translate(-70%, 6%) scale(1.06)' }, { transform: 'translate(-8%, 0) scale(1)' }],
+      { duration: Math.max(1, runUp), easing: 'cubic-bezier(.4,.1,.7,1)', fill: 'forwards' },
     )
 
-    // 2) Voo da bola: arco, curva lateral e encolhendo com a distância.
-    const ix = px(shot.bx)
-    const iy = py(shot.by)
-    const high = shot.by < GOAL.top + (GOAL.bottom - GOAL.top) * 0.45
-    const lift = shot.slow ? 0.02 : high ? 0.14 : 0.05
-    const bend = (shot.bx < 50 ? -1 : shot.bx > 50 ? 1 : 0) * W * 0.05
-    const mx = sx + (ix - sx) * 0.45 + bend
-    const my = Math.min(sy, iy) - H * lift
-    const far = 0.34
-    const bounce = shot.ex !== undefined && shot.ey !== undefined
-    const frames: Keyframe[] = [
-      { transform: at(sx, sy, 1), offset: 0 },
-      { transform: at(mx, my, 0.62), offset: bounce ? 0.32 : 0.5 },
-      { transform: at(ix, iy, far), offset: bounce ? 0.64 : 1 },
-    ]
-    if (bounce) frames.push({ transform: at(px(shot.ex!), py(shot.ey!), 0.5), offset: 1 })
-    const total = bounce ? flight / 0.64 : flight
-    const easing = shot.label === 'NA GAVETA!' ? 'cubic-bezier(.15,.75,.25,1)' : shot.slow ? 'cubic-bezier(.2,.7,.4,1)' : 'cubic-bezier(.22,.62,.35,1)'
-    anims.push(el.animate(frames, { duration: total, delay: runUp, easing, fill: 'forwards' }))
+    let raf = 0
+    let t0 = 0
+    let angle = 0
+    let last: P3 = start
+    const tick = (now: number) => {
+      if (!t0) t0 = now
+      const t = now - t0
+      const { p } = posAt(plan, Math.min(t, total))
+      // Giro proporcional à distância percorrida.
+      const d = Math.hypot(p.x - last.x, p.y - last.y, p.z - last.z)
+      angle += (d / (2 * Math.PI * R)) * 360 * (shot.slow ? 1 : 0.5)
+      last = p
+      place(p, angle)
+      if (plan.fadeOut && ballRef.current) ballRef.current.style.opacity = String(Math.max(0, 1 - Math.max(0, t - plan.impactMs) / 260))
+      if (t < total) raf = requestAnimationFrame(tick)
+    }
 
-    // 3) Sombra da bola no gramado: segue a projeção no chão (linha do gol).
-    const groundY = (y: number) => Math.max(y, py(GOAL.bottom))
-    const sFrames: Keyframe[] = [
-      { transform: at(sx, sy + 12, 1), opacity: 0.55, offset: 0 },
-      { transform: at(ix, groundY(iy) + 2, far), opacity: high ? 0.18 : 0.4, offset: bounce ? 0.64 : 1 },
-    ]
-    if (bounce) sFrames.push({ transform: at(px(shot.ex!), groundY(py(shot.ey!)) + 2, 0.5), opacity: 0.3, offset: 1 })
-    anims.push(sh.animate(sFrames, { duration: total, delay: runUp, easing, fill: 'forwards' }))
-
-    const t0 = setTimeout(() => {
+    const tKick = setTimeout(() => {
       setKickPose('kick')
       sfx.kick()
+      if (reduce) {
+        const { p } = posAt(plan, total)
+        place(p, 0)
+      } else raf = requestAnimationFrame(tick)
     }, runUp)
-    const t1 = setTimeout(() => setDive(true), runUp + (shot.slow ? 350 : 120))
-    const t2 = setTimeout(() => {
+    // O goleiro reage ~0,11 s depois do chute (bola fraca: sem pressa).
+    const tDive = setTimeout(() => setDive(true), runUp + (shot.slow ? 420 : shot.outcome === 'save' ? 0 : 120))
+    const tHit = setTimeout(() => {
       setImpact(true)
-      const o = shot.outcome ?? (shot.net ? 'goal' : 'save')
+      const o = shot.outcome
       if (o === 'goal') sfx.net()
       else if (o === 'save' || o === 'weak') sfx.glove()
       else if (o === 'post') sfx.post()
@@ -312,22 +396,25 @@ export function PenaltyScene({
         if (o !== 'save' && o !== 'weak') sfx.groan()
         buzz.err()
       }
-    }, tImpact)
+    }, runUp + (reduce ? 0 : plan.impactMs))
     return () => {
-      anims.forEach((a) => a.cancel())
-      clearTimeout(t0)
-      clearTimeout(t1)
-      clearTimeout(t2)
+      run.cancel()
+      cancelAnimationFrame(raf)
+      clearTimeout(tKick)
+      clearTimeout(tDive)
+      clearTimeout(tHit)
     }
-  }, [shot])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shot, animKey])
 
   // Goleiro: posição e altura do mergulho (alto sobe, rasteiro cai).
   const kx = shot && dive ? shot.kx : 50
   const pose: Pose = shot && dive ? shot.pose : 'idle'
-  const ky = pose === 'tl' || pose === 'tr' ? -9 : pose === 'dl' || pose === 'dr' ? 5 : pose === 'center' ? -4 : 0
-  const goalTop = `${GOAL.top}%`
+  const ky = pose === 'tl' || pose === 'tr' ? -10 : pose === 'dl' || pose === 'dr' ? 18 : pose === 'center' ? -5 : 0
   const goalH = GOAL.bottom - GOAL.top
+  const goalBox = { left: `${GOAL.left}%`, right: `${100 - GOAL.right}%`, top: `${GOAL.top}%`, height: `${goalH}%` }
   const celebrate = impact && shot?.net && shot.good
+  const bulge = shot && shot.net ? project({ x: shot.tx * 1.03, y: Math.max(R, shot.ty * 0.75), z: LINE + 1.3 }) : null
 
   return (
     <div
@@ -335,7 +422,7 @@ export function PenaltyScene({
       className={`relative ${compact ? 'h-48 sm:h-64' : 'h-72'} w-full max-w-sm overflow-hidden rounded-sm border-2 border-white/20 bg-[#08180f] ${celebrate ? 'animate-shake' : ''}`}
     >
       {/* Noite, refletores e arquibancada */}
-      <div className="absolute inset-x-0 top-0" style={{ height: goalTop, background: 'linear-gradient(#050d09, #0c2117)' }} />
+      <div className="absolute inset-x-0 top-0" style={{ height: `${GOAL.top}%`, background: 'linear-gradient(#050d09, #0c2117)' }} />
       <div className="absolute inset-0" style={{ background: 'radial-gradient(40% 30% at 8% 0%, rgba(238,245,241,0.22), transparent 70%), radial-gradient(40% 30% at 92% 0%, rgba(238,245,241,0.22), transparent 70%)' }} />
       <div
         className={`absolute inset-x-0 grid gap-[2px] px-1 ${celebrate ? 'animate-bob' : ''}`}
@@ -346,63 +433,65 @@ export function PenaltyScene({
           <span key={i} className="aspect-square rounded-full" style={{ background: c, opacity: 0.32 + ((i * 13) % 5) * 0.06 }} />
         ))}
       </div>
-      {/* placa de publicidade/muro atrás do gol */}
       <div className="absolute inset-x-0 h-[4%] bg-[#0f2a1d]" style={{ top: `${GOAL.top - 3}%`, boxShadow: 'inset 0 -1px 0 rgba(238,245,241,0.12)' }} />
 
-      {/* Gramado em perspectiva: faixas que alargam perto da câmera */}
+      {/* Gramado e linhas, projetados do mundo real (pequena área 5,5 m; grande 16,5 m) */}
       <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full" aria-hidden>
         <rect x="0" y={GOAL.top + 1} width="100" height={100 - GOAL.top} fill="#2a6d43" />
-        {Array.from({ length: 7 }).map((_, i) => {
-          const y0 = GOAL.bottom + (100 - GOAL.bottom) * Math.pow(i / 7, 1.7)
-          const y1 = GOAL.bottom + (100 - GOAL.bottom) * Math.pow((i + 1) / 7, 1.7)
-          return i % 2 === 0 ? <rect key={i} x="0" y={y0} width="100" height={y1 - y0} fill="#317a4c" /> : null
+        {Array.from({ length: 8 }).map((_, i) => {
+          const a = project({ x: 0, y: 0, z: LINE - i * 2 }).y
+          const b = project({ x: 0, y: 0, z: LINE - (i + 1) * 2 }).y
+          return i % 2 === 0 ? <rect key={i} x="0" y={a} width="100" height={Math.min(100, b) - a} fill="#317a4c" /> : null
         })}
         <rect x="0" y={GOAL.top + 1} width="100" height={GOAL.bottom - GOAL.top - 1} fill="#2f7549" />
         <g stroke="rgba(238,245,241,0.6)" strokeWidth="0.5" fill="none" vectorEffect="non-scaling-stroke">
-          <line x1="-5" y1={GOAL.bottom} x2="105" y2={GOAL.bottom} />
-          {/* pequena área */}
-          <path d={`M${GOAL.left - 8} ${GOAL.bottom} L${GOAL.left - 13} ${GOAL.bottom + 9} L${GOAL.right + 13} ${GOAL.bottom + 9} L${GOAL.right + 8} ${GOAL.bottom}`} />
-          {/* grande área */}
-          <path d={`M${GOAL.left - 22} ${GOAL.bottom} L${GOAL.left - 40} ${GOAL.bottom + 30} M${GOAL.right + 22} ${GOAL.bottom} L${GOAL.right + 40} ${GOAL.bottom + 30}`} />
+          {(() => {
+            const P = (x: number, z: number) => {
+              const q = project({ x, y: 0, z })
+              return `${q.x} ${q.y}`
+            }
+            return (
+              <>
+                <path d={`M${P(-30, LINE)} L${P(30, LINE)}`} />
+                <path d={`M${P(-9.16, LINE)} L${P(-9.16, LINE - 5.5)} L${P(9.16, LINE - 5.5)} L${P(9.16, LINE)}`} />
+                <path d={`M${P(-20.16, LINE)} L${P(-20.16, LINE - 16.5)} M${P(20.16, LINE)} L${P(20.16, LINE - 16.5)}`} />
+              </>
+            )
+          })()}
         </g>
-        <ellipse cx="50" cy="86" rx="1.6" ry="0.7" fill="rgba(238,245,241,0.85)" />
       </svg>
 
-      {/* Gol com profundidade: rede de fundo, laterais e traves */}
-      <div className={`absolute ${impact && shot?.net ? 'animate-netshake' : ''}`} style={{ left: `${GOAL.left}%`, right: `${100 - GOAL.right}%`, top: goalTop, height: `${goalH}%` }}>
+      {/* Rede (fundo e laterais) — atrás de tudo do gol */}
+      <div className={`absolute z-[5] ${impact && shot?.net ? 'animate-netshake' : ''}`} style={goalBox}>
         <svg viewBox="0 0 100 50" preserveAspectRatio="none" className="h-full w-full overflow-visible" aria-hidden>
           <defs>
             <pattern id="net" width="4" height="4" patternUnits="userSpaceOnUse">
               <path d="M0 0 L4 4 M4 0 L0 4" stroke="rgba(238,245,241,0.28)" strokeWidth="0.35" />
             </pattern>
           </defs>
-          {/* fundo da rede (mais baixo e estreito: está mais longe) */}
           <path d="M5 9 H95 V50 H5 Z" fill="url(#net)" />
           <path d="M0 0 L5 9 L5 50 L0 50 Z M100 0 L95 9 L95 50 L100 50 Z M0 0 H100 L95 9 H5 Z" fill="url(#net)" />
           <path d="M5 9 H95 M5 9 V50 M95 9 V50" stroke="rgba(238,245,241,0.35)" strokeWidth="0.6" fill="none" vectorEffect="non-scaling-stroke" />
-          {/* traves */}
-          <path d="M0 50 V0 H100 V50" fill="none" stroke="#f7f4ec" strokeWidth="3.4" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
         </svg>
       </div>
 
-      {/* Rede estufando no ponto do gol */}
-      {impact && shot?.net && (
-        <span
-          key={`bulge${animKey}`}
-          className="pointer-events-none absolute z-[15] h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full animate-pop"
-          style={{ left: `${shot.bx}%`, top: `${shot.by}%`, background: 'radial-gradient(circle, rgba(255,255,255,0.55), transparent 70%)' }}
-        />
+      {/* Rede estufando onde a bola bate */}
+      {impact && bulge && (
+        <div key={`bulge${animKey}`} className="pointer-events-none absolute z-[6] -translate-x-1/2 -translate-y-1/2" style={{ left: `${bulge.x}%`, top: `${bulge.y}%` }}>
+          <span className="block h-8 w-8 animate-pop rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.5), transparent 70%)' }} />
+        </div>
       )}
 
-      {/* Goleiro, em escala do gol (~78% da altura da trave) */}
+      {/* Goleiro sobre a linha, em escala (~1,9 m pra 2,44 m de trave) */}
       <div
-        className="absolute z-10 -translate-x-1/2"
+        className="absolute z-10"
         style={{
           left: `${kx}%`,
           top: `${GOAL.top + goalH * 0.12}%`,
           height: `${goalH * 0.9}%`,
           transform: `translate(-50%, ${ky}%)`,
-          transition: 'left .3s cubic-bezier(.3,1.3,.5,1), transform .3s cubic-bezier(.3,1.3,.5,1)',
+          // Sem efeito mola: mergulho acelera e assenta.
+          transition: 'left .42s cubic-bezier(.2,.8,.3,1), transform .42s cubic-bezier(.2,.8,.3,1)',
         }}
       >
         <div className={`h-full ${!shot ? 'animate-bob' : ''}`}>
@@ -410,10 +499,17 @@ export function PenaltyScene({
         </div>
       </div>
 
-      {/* Sombra e bola */}
-      <div ref={shadowRef} className="absolute z-[18] h-2.5 w-7 rounded-[50%] bg-black/45 blur-[1.5px]" style={{ left: '50%', top: '86%', transform: 'translate(-50%,-50%)' }} />
-      <div ref={ballRef} className="absolute z-20" style={{ left: '50%', top: '86%', transform: 'translate(-50%,-50%)' }}>
-        <div style={{ animation: shot && !impact && kickPose === 'kick' ? `ballspin ${shot.slow ? 0.9 : 0.25}s linear infinite` : 'none' }}>
+      {/* Traves na frente do goleiro e da bola que entra */}
+      <div className="pointer-events-none absolute z-[14]" style={goalBox}>
+        <svg viewBox="0 0 100 50" preserveAspectRatio="none" className="h-full w-full overflow-visible" aria-hidden>
+          <path d="M0 50 V0 H100 V50" fill="none" stroke="#f7f4ec" strokeWidth="3.4" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+        </svg>
+      </div>
+
+      {/* Sombra e bola: posicionadas por quadro a partir do mundo */}
+      <div ref={shadowRef} className="absolute left-0 top-0 z-[8] h-2.5 w-7 rounded-[50%] bg-black/45 blur-[1.5px]" style={{ transform: 'translate(-100px,-100px)' }} />
+      <div ref={ballRef} className="absolute left-0 top-0 z-20" style={{ transform: 'translate(-100px,-100px)' }}>
+        <div ref={spinRef} className="drop-shadow-[0_3px_4px_rgba(0,0,0,0.4)]">
           <SoccerBall className="h-7 w-7" />
         </div>
       </div>
@@ -423,7 +519,6 @@ export function PenaltyScene({
         <Kicker pose={kickPose} />
       </div>
 
-      {/* Gol a favor: brilho dourado. Lance ruim pra você: vinheta escura. */}
       {celebrate && <div key={`flash${animKey}`} className="pointer-events-none absolute inset-0 z-[26] animate-crowdflash bg-corn-400/40" />}
       {impact && shot && !shot.good && (
         <div key={`dim${animKey}`} className="pointer-events-none absolute inset-0 z-[26] animate-crowdflash" style={{ background: 'radial-gradient(closest-side, transparent 55%, rgba(0,0,0,0.6))' }} />
