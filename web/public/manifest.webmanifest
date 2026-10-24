@@ -1,7 +1,7 @@
 {
   "name": "Encyclobol — o almanaque jogável do futebol",
   "short_name": "Encyclobol",
-  "description": "Seis desafios diários sobre a história do futebol. Sem chute, sem Google.",
+  "description": "Sete desafios diários sobre a história do futebol. Sem chute, sem Google.",
   "lang": "pt-BR",
   "start_url": "./",
   "scope": "./",

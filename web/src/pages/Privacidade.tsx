@@ -43,7 +43,15 @@ export default function Privacidade() {
             <h2 className="font-cond text-sm font-700 uppercase tracking-wide text-ink-900">O que NÃO fazemos</h2>
             <p className="mt-1">
               Não vendemos seus dados, não usamos rastreadores de publicidade e não compartilhamos informações com
-              terceiros para marketing. Se um dia adicionarmos anúncios ou medição de audiência, avisaremos aqui.
+              terceiros para marketing. Se um dia adicionarmos anúncios, avisaremos aqui.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="font-cond text-sm font-700 uppercase tracking-wide text-ink-900">Medição de audiência</h2>
+            <p className="mt-1">
+              Usamos o Cloudflare Web Analytics para contar visitas e páginas vistas, de forma agregada. Ele não usa
+              cookies, não cria identificador de quem joga e não acompanha você em outros sites.
             </p>
           </section>
 

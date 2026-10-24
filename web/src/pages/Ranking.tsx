@@ -129,7 +129,7 @@ export default function Ranking() {
             Ranking
           </h1>
           <p className="mt-3 font-serif text-lg italic text-ink-600">
-            Cada jogo do dia vale uma nota de 0 a 1.000, e o ranking soma as notas dos seis. Assim nenhum jogo pesa mais que outro.
+            Cada jogo do dia vale uma nota de 0 a 1.000, e o ranking soma as notas de todos. Assim nenhum jogo pesa mais que outro.
           </p>
         </header>
 
