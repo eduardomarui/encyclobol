@@ -15,6 +15,7 @@ const programa = [
   { n: '04', nome: 'Linha do Tempo', tipo: 'cronologia', to: '/jogos/linha-do-tempo' },
   { n: '05', nome: 'O Intruso', tipo: 'dedução', to: '/jogos/o-intruso' },
   { n: '06', nome: 'Craque Misterioso', tipo: 'detetive', to: '/jogos/craque-misterioso' },
+  { n: '07', nome: 'Escalação', tipo: 'memória', to: '/jogos/escalacao' },
 ]
 
 function dateline() {

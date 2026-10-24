@@ -15,6 +15,7 @@ const cols: { title: string; links: FLink[] }[] = [
       { label: 'Linha do Tempo', to: '/jogos/linha-do-tempo' },
       { label: 'O Intruso', to: '/jogos/o-intruso' },
       { label: 'Craque Misterioso', to: '/jogos/craque-misterioso' },
+      { label: 'Escalação', to: '/jogos/escalacao' },
     ],
   },
   {
