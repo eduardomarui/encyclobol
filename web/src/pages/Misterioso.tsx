@@ -271,6 +271,9 @@ export default function Misterioso() {
     const row = compare(p, secret)
     const nextRows = [...rows, row]
     setRows(nextRows)
+    // Salva já com este chute: no chute final o efeito de salvar não roda mais
+    // (a partida vira "registrada" no mesmo lance) e a linha da vitória sumia no F5.
+    if (daily && !recorded) saveRun<MystRun>('misterioso', { guesses: nextRows.map((r) => r.player.answer), hints: hints.length })
 
     const sq = `${row.natOk ? '🟩' : '⬛'}${row.contOk ? '🟩' : '⬛'}${row.posOk ? '🟩' : '⬛'}${
       row.decadeOk ? '🟩' : row.close ? '🟨' : '⬛'
@@ -332,7 +335,7 @@ export default function Misterioso() {
       squares,
       lines: [`Total ${career.total} pts`],
       edition: `Edição #${dayNumber()}`,
-      text: `Encyclobol · Craque Misterioso #${dayNumber()} — ${won ? points + ' pts' : 'X'} · ${challengeLink('/jogos/craque-misterioso', points)}`,
+      text: `Encyclobol · Craque Misterioso #${dayNumber()} — ${won ? `${points} pts em ${shareRows.length}/${MAX_GUESSES}` : 'X'}\n${shareRows.map((r) => r.join('')).join('\n')}\n${challengeLink('/jogos/craque-misterioso', points)}`,
     })
     if (res !== 'error') {
       setCopied(true)
@@ -403,8 +406,12 @@ export default function Misterioso() {
               ))}
             </span>
             <span className="font-cond text-xs font-600 uppercase tracking-wider text-ink-500">
-              {guessesLeft} {guessesLeft === 1 ? 'chute' : 'chutes'}
-              {daily && <> · recorde {prevBest}</>}
+              {guessesLeft === 1 ? <span className="animate-pulse text-ochre-400">Último chute!</span> : <>{guessesLeft} chutes</>}
+              {daily && (
+                <>
+                  {' '}· valendo <strong className="text-corn-400">{calcPoints(true, rows.length + 1, hints.length)}</strong>
+                </>
+              )}
             </span>
           </div>
         )}
@@ -535,7 +542,7 @@ export default function Misterioso() {
                   <p className="mt-3 font-serif text-sm italic text-ink-600">Volte amanhã pra somar mais ao total.</p>
                   <button
                     onClick={compartilhar}
-                    className="btn-stamp mt-4 w-full bg-grass-700 px-6 py-2.5 text-ink-900 hover:bg-grass-600"
+                    className="btn-stamp mt-4 w-full bg-corn-500 px-6 py-3 text-paper hover:bg-corn-400"
                   >
                     {copied ? 'Imagem pronta!' : 'Compartilhar imagem'}
                   </button>
@@ -544,7 +551,7 @@ export default function Misterioso() {
 
               <button
                 onClick={praticar}
-                className="btn-stamp mt-2 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700"
+                className="btn-stamp mt-2 w-full border-2 border-white/20 px-6 py-2.5 text-ink-900 hover:bg-grass-700"
               >
                 {daily ? 'Treinar (sem pontos)' : 'Outro mistério'}
               </button>

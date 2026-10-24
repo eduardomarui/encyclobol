@@ -105,6 +105,9 @@
 }
 .animate-crowdflash { animation: crowdflash 0.5s ease-out; }
 .animate-pop { animation: pop 0.36s cubic-bezier(0.2, 0.8, 0.3, 1) both; }
+/* Barra que esvazia: mostra que a tela avança sozinha (duração via style). */
+@keyframes drain { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+.animate-drain { transform-origin: left; animation: drain linear both; }
 .animate-shake { animation: shake 0.4s ease; }
 .animate-rise { animation: riseIn 0.3s ease-out both; }
 

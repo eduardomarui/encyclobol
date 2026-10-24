@@ -179,13 +179,18 @@ function hop(A: P3, B: P3, h: number) {
   return (u: number): P3 => ({ x: A.x + (B.x - A.x) * u, y: Math.max(R, A.y + (B.y - A.y) * u + 4 * h * u * (1 - u)), z: A.z + (B.z - A.z) * u })
 }
 
+const RUN_UP_MS = 240
+// Do toque na resposta até o próximo lance: corrida + voo + rede, e um
+// respiro pra ler o letreiro. Copa, Ranqueada e Duelo usam o mesmo tempo.
+export const REVEAL_MS = 1400
+
 function planFor(shot: NonNullable<Shot>): Plan {
   const S: P3 = { x: 0, y: R, z: 0 }
   const o = shot.outcome
   const side = sgn(shot.tx)
-  // Tempo de voo real (s) e tempo de tela (ms, ~15% mais lento pra dar pra ver).
+  // Tempo de voo real (s), mostrado em tempo real.
   const tf = shot.slow ? 1.0 : shot.fast ? 0.42 : shot.ty < 0.8 ? 0.48 : 0.52
-  const ms = Math.round(tf * 1000 * 1.15)
+  const ms = Math.round(tf * 1000)
   const zHit = o === 'save' ? LINE - 0.35 : o === 'weak' ? LINE - 0.6 : LINE
   const E: P3 = { x: shot.tx, y: shot.ty, z: zHit }
   const curl = shot.slow ? 0 : -0.3
@@ -194,16 +199,16 @@ function planFor(shot: NonNullable<Shot>): Plan {
   if (o === 'goal' || o === 'save' || o === 'post') segs.push({ ms: 70, at: () => E })
   if (o === 'goal') {
     const N: P3 = { x: shot.tx * 1.03, y: Math.max(R, shot.ty * 0.75), z: LINE + 1.3 }
-    segs.push({ ms: 170, at: lerp(E, N) })
-    segs.push({ ms: 320, at: hop(N, { x: N.x, y: R, z: LINE + 1.0 }, 0.05) })
+    segs.push({ ms: 140, at: lerp(E, N) })
+    segs.push({ ms: 220, at: hop(N, { x: N.x, y: R, z: LINE + 1.0 }, 0.05) })
   } else if (o === 'save') {
-    if (shot.ty > 1.1) segs.push({ ms: 320, at: hop(E, { x: side * 4.8 || 4.8, y: shot.ty + 0.6, z: LINE + 0.5 }, 0.4) })
-    else segs.push({ ms: 300, at: hop(E, { x: shot.tx * 0.85, y: R, z: LINE - 1.4 }, 0.15) })
+    if (shot.ty > 1.1) segs.push({ ms: 260, at: hop(E, { x: side * 4.8 || 4.8, y: shot.ty + 0.6, z: LINE + 0.5 }, 0.4) })
+    else segs.push({ ms: 240, at: hop(E, { x: shot.tx * 0.85, y: R, z: LINE - 1.4 }, 0.15) })
   } else if (o === 'post') {
-    segs.push({ ms: 460, at: hop(E, { x: shot.tx - side * 1.8, y: R, z: LINE - 3.5 }, 0.5) })
+    segs.push({ ms: 340, at: hop(E, { x: shot.tx - side * 1.8, y: R, z: LINE - 3.5 }, 0.5) })
   } else if (o === 'wide' || o === 'over') {
     const F: P3 = { x: shot.tx * 1.2, y: shot.ty * 1.1, z: LINE + 4 }
-    segs.push({ ms: 300, at: lerp(E, F) })
+    segs.push({ ms: 260, at: lerp(E, F) })
     return { segs, impactMs: ms, fadeOut: true }
   }
   return { segs, impactMs: ms }
@@ -348,7 +353,7 @@ export function PenaltyScene({
     if (!shot || !kicker) return
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
     const plan = planFor(shot)
-    const runUp = reduce ? 0 : 380
+    const runUp = reduce ? 0 : RUN_UP_MS
     const total = plan.segs.reduce((a, g) => a + g.ms, 0)
 
     const run = kicker.animate(
@@ -369,7 +374,7 @@ export function PenaltyScene({
       angle += (d / (2 * Math.PI * R)) * 360 * (shot.slow ? 1 : 0.5)
       last = p
       place(p, angle)
-      if (plan.fadeOut && ballRef.current) ballRef.current.style.opacity = String(Math.max(0, 1 - Math.max(0, t - plan.impactMs) / 260))
+      if (plan.fadeOut && ballRef.current) ballRef.current.style.opacity = String(Math.max(0, 1 - Math.max(0, t - plan.impactMs) / 200))
       if (t < total) raf = requestAnimationFrame(tick)
     }
 
@@ -491,7 +496,7 @@ export function PenaltyScene({
           height: `${goalH * 0.9}%`,
           transform: `translate(-50%, ${ky}%)`,
           // Sem efeito mola: mergulho acelera e assenta.
-          transition: 'left .42s cubic-bezier(.2,.8,.3,1), transform .42s cubic-bezier(.2,.8,.3,1)',
+          transition: 'left .3s cubic-bezier(.2,.8,.3,1), transform .3s cubic-bezier(.2,.8,.3,1)',
         }}
       >
         <div className={`h-full ${!shot ? 'animate-bob' : ''}`}>

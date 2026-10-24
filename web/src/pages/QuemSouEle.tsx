@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { players } from '../data/players'
 import { famous } from '../data/famous'
 import { dayNumber } from '../lib/daily'
@@ -15,14 +15,17 @@ import { loadRun, saveRun } from '../lib/runSave'
 import { buzz, sfx } from '../lib/sfx'
 import { challengeLink } from '../lib/challenge'
 
-const MAX_ATTEMPTS = 6
+const MAX_ATTEMPTS = 5
 const ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM']
 
 // Cronômetro por craque: começa em 60s e aperta a cada estágio (mín. 25s).
 const TIME_BASE = 60
 const TIME_MIN = 25
 const timeForStage = (s: number) => Math.max(TIME_MIN, TIME_BASE - (s - 1) * 4)
-const CAREER_LIVES = 3
+// Cartões em vez de vidas: 1º erro é amarelo, 2º é vermelho (fim do dia).
+// Pendurado, 3 acertos seguidos limpam o amarelo. `lives`: 2 limpo, 1 amarelo.
+const CAREER_LIVES = 2
+const CLEAN_STREAK = 3
 const HELP_KEY = 'encyclobol:qse:help'
 
 type Mode = 'carreira' | 'practice'
@@ -61,17 +64,33 @@ const keyClass: Record<Cell | 'idle', string> = {
   idle: 'bg-paper-200 text-ink-900 hover:bg-paper-300',
 }
 
-function Heart({ on }: { on: boolean }) {
+function Cartao({ lives }: { lives: number }) {
+  const cor = lives >= 2 ? null : lives === 1 ? '#e6c229' : '#d24a3a'
   return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden>
-      <path
-        d="M12 21C12 21 3.5 14.6 3.5 8.8 3.5 6 5.6 4 8 4c1.9 0 3.2 1.1 4 2.4C12.8 5.1 14.1 4 16 4c2.4 0 4.5 2 4.5 4.8 0 5.8-8.5 12.2-8.5 12.2Z"
-        fill={on ? '#d24a3a' : 'none'}
-        stroke={on ? '#d24a3a' : 'rgba(255,255,255,0.28)'}
-        strokeWidth="1.6"
-      />
-    </svg>
+    <span
+      className={`inline-block h-5 w-3.5 rounded-[2px] border ${cor ? 'animate-pop' : 'border-dashed border-white/30'}`}
+      style={cor ? { background: cor, borderColor: cor, transform: 'rotate(8deg)' } : undefined}
+      aria-label={lives >= 2 ? 'Sem cartão' : lives === 1 ? 'Cartão amarelo' : 'Cartão vermelho'}
+    />
   )
+}
+
+// Linha de emojis da carreira: ✅ acerto, 🟨 amarelo, 🟥 vermelho.
+function cardTrail(h: { ok: boolean }[]): string {
+  let lives = CAREER_LIVES
+  let run = 0
+  return h
+    .map((x) => {
+      if (x.ok) {
+        run++
+        if (lives === 1 && run >= CLEAN_STREAK) lives = CAREER_LIVES
+        return '✅'
+      }
+      run = 0
+      lives--
+      return lives <= 0 ? '🟥' : '🟨'
+    })
+    .join('')
 }
 
 function lenWindow(stage: number): [number, number] {
@@ -109,6 +128,13 @@ type TTRun = {
   history: { name: string; ok: boolean; tries: number }[]
 }
 
+// Acertos seguidos no fim da lista de craques da carreira.
+function streakOf(h: { ok: boolean }[]): number {
+  let n = 0
+  for (let i = h.length - 1; i >= 0 && h[i].ok; i--) n++
+  return n
+}
+
 export default function QuemSouEle() {
   // Estado do dia lido a cada montagem; a carreira é salva a cada jogada e a
   // cada segundo do relógio — F5 retoma do mesmo ponto, com o mesmo tempo.
@@ -121,7 +147,8 @@ export default function QuemSouEle() {
   const [current, setCurrent] = useState('')
 
   const [stage, setStage] = useState(today?.stage ?? run?.stage ?? 1)
-  const [lives, setLives] = useState(run?.lives ?? CAREER_LIVES)
+  const [lives, setLives] = useState(Math.min(run?.lives ?? CAREER_LIVES, CAREER_LIVES))
+  const [cleaned, setCleaned] = useState(false)
   const [careerScore, setCareerScore] = useState(today?.score ?? run?.score ?? 0)
   const [career, setCareerInfo] = useState<Career>(() => loadCareer())
   const [careerDoneToday, setCareerDoneToday] = useState(!!today)
@@ -159,6 +186,7 @@ export default function QuemSouEle() {
     })
   }, [mode, careerDoneToday, pick, guesses, stage, lives, careerScore, revealCount, skipCount, revealed, usedPicks, roundDone, lastGain, timeLeft, timedOut, history])
 
+  const nextRef = useRef<() => void>(() => {})
   const player = players[pick]
   const answer = player.answer
   const careerMode = mode === 'carreira'
@@ -199,10 +227,18 @@ export default function QuemSouEle() {
       setLastGain(gain)
       setCareerScore((s) => s + gain)
       confetti()
-      sfx.ok(8)
+      // Tom sobe a cada acerto seguido.
+      const seq = streakOf(history) + 1
+      sfx.ok(Math.min(8, seq))
       buzz.win()
+      // Pendurado: 3 seguidos limpam o amarelo.
+      if (lives === 1 && seq >= CLEAN_STREAK) {
+        setLives(CAREER_LIVES)
+        setCleaned(true)
+      } else setCleaned(false)
     } else {
       setLastGain(0)
+      setCleaned(false)
       sfx.lifeLost()
       buzz.life()
       const nl = lives - 1
@@ -243,7 +279,11 @@ export default function QuemSouEle() {
 
   const onKey = useCallback(
     (k: string) => {
-      if (over) return
+      if (over) {
+        // Enter (ou espaço) depois do craque revelado já chama o próximo.
+        if (k === 'ENTER' && careerMode && !careerDoneToday) nextRef.current()
+        return
+      }
       if (k === 'ENTER') submit()
       else if (k === 'BACK') setCurrent((c) => c.slice(0, -1))
       else if (/^[A-Z]$/.test(k) && current.length < answer.length) {
@@ -251,12 +291,12 @@ export default function QuemSouEle() {
         setCurrent((c) => c + k)
       }
     },
-    [over, submit, current.length, answer.length],
+    [over, submit, current.length, answer.length, careerMode, careerDoneToday],
   )
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Enter') {
+      if (e.key === 'Enter' || (e.key === ' ' && over)) {
         // Evita o Enter "duplo": enviar o chute E clicar no botão focado (ex.: Revelar letra).
         e.preventDefault()
         onKey('ENTER')
@@ -297,6 +337,7 @@ export default function QuemSouEle() {
     setCareerDoneToday(false)
   }
 
+  nextRef.current = avancar
   function avancar() {
     const ns = stage + 1
     const used = [...usedPicks, pick]
@@ -338,9 +379,9 @@ export default function QuemSouEle() {
       game: 'Tira-Teima · Carreira',
       headline: String(careerScore),
       sub: 'pontos hoje',
-      lines: [`Estágio ${stage}`, `Total ${career.total} pts`],
+      lines: [`Chegou no craque ${stage}`, `Total ${career.total} pts`],
       edition: `Edição #${dayNumber()}`,
-      text: `Encyclobol · Tira-Teima #${dayNumber()} — ${careerScore} pts · ${challengeLink('/jogos/quem-sou-ele', careerScore)}`,
+      text: `Encyclobol · Tira-Teima #${dayNumber()} — ${careerScore} pts, chegou no craque ${stage}\n${cardTrail(history)}\n${challengeLink('/jogos/quem-sou-ele', careerScore)}`,
     })
     if (r !== 'error') {
       setCopied(true)
@@ -373,9 +414,10 @@ export default function QuemSouEle() {
               <span className="font-cond text-[10px] font-500 uppercase tracking-wide text-ink-500">pts</span>
             </div>
             <div className="flex items-center gap-0.5 px-3 py-1.5">
-              {Array.from({ length: CAREER_LIVES }).map((_, i) => (
-                <Heart key={i} on={i < lives} />
-              ))}
+              <Cartao lives={lives} />
+              {lives === 1 && !careerDoneToday && (
+                <span className="ml-1.5 font-cond text-[10px] font-700 uppercase tracking-wide text-[#e6c229]">Pendurado</span>
+              )}
             </div>
             {!over && (
               <div className="flex flex-1 items-center gap-2 px-3 py-1.5">
@@ -532,7 +574,7 @@ export default function QuemSouEle() {
                 </p>
                 <button
                   onClick={compartilhar}
-                  className="btn-stamp mt-4 w-full bg-grass-700 px-6 py-2.5 text-ink-900 hover:bg-grass-600"
+                  className="btn-stamp mt-4 w-full bg-corn-500 px-6 py-3 text-paper hover:bg-corn-400"
                 >
                   {copied ? 'Imagem pronta!' : 'Compartilhar imagem'}
                 </button>
@@ -547,11 +589,13 @@ export default function QuemSouEle() {
             ) : careerMode ? (
               <>
                 <p className="kicker">
+                  {won && streakOf(history) >= 2 && (
+                    <span className="mr-2 animate-pop text-corn-400">{streakOf(history)} seguidos!</span>
+                  )}
                   {won
                     ? `Cravou! +${lastGain} pts`
-                    : timedOut
-                      ? 'Tempo esgotado — perdeu uma vida'
-                      : 'Errou — perdeu uma vida'}
+                    : `${timedOut ? 'Tempo esgotado' : 'Errou'} — cartão ${lives === 1 ? 'amarelo' : 'vermelho'}`}
+                  {won && cleaned && <span className="ml-2 animate-pop text-grass-400">Cartão limpo!</span>}
                 </p>
                 <p className="mt-1 font-display text-3xl uppercase tracking-tight text-ink-900">
                   {player.display}
@@ -564,6 +608,7 @@ export default function QuemSouEle() {
                   className="btn-stamp mt-4 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700"
                 >
                   Próximo craque →
+                  <span className="ml-2 hidden font-cond text-[10px] text-ink-900/60 sm:inline">Enter</span>
                 </button>
               </>
             ) : (
@@ -644,17 +689,15 @@ export default function QuemSouEle() {
                 existe, lugar errado.{' '}
                 <span className="inline-block h-3 w-3 translate-y-0.5 bg-[#3b4a44]" /> escuro: não tem.
               </li>
-              <li>Use as dicas (seleção, posição, época). São 6 tentativas por craque.</li>
+              <li>Use as dicas (seleção, posição, época). São {MAX_ATTEMPTS} tentativas por craque.</li>
               <li>
                 Corra contra o <strong>relógio</strong>: cada craque tem um tempo que{' '}
-                <strong>aperta a cada estágio</strong>. Se o tempo zerar, você perde uma vida.
+                <strong>aperta a cada estágio</strong>. Errar ou deixar o tempo zerar dá cartão.
               </li>
               <li>
-                É uma <strong>carreira</strong>: uma corrida por dia com <strong>3 vidas</strong>{' '}
-                <span className="inline-block translate-y-0.5">
-                  <Heart on />
-                </span>
-                , craques cada vez mais difíceis. Os pontos somam num total que cresce a cada dia.
+                É uma <strong>carreira</strong>: uma corrida por dia, craques cada vez mais difíceis. O 1º erro é{' '}
+                <strong>amarelo</strong>; o 2º, <strong>vermelho</strong> e fim. Pendurado, {CLEAN_STREAK} acertos
+                seguidos limpam o cartão. Os pontos somam num total que cresce a cada dia.
               </li>
         </HelpModal>
       )}

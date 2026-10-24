@@ -27,7 +27,7 @@ const games: Game[] = [
     Icon: PlayerIcon,
     category: 'Carreira',
     title: 'Tira-Teima',
-    desc: 'Carreira diária: adivinhe craques cada vez mais difíceis com 3 vidas. Erre o nome e perde vida; os pontos somam num total que cresce todo dia.',
+    desc: 'Carreira diária: adivinhe craques cada vez mais difíceis. Errou, cartão amarelo; errou de novo, vermelho e fim. Os pontos somam num total que cresce todo dia.',
     status: 'Edição de hoje',
     to: '/jogos/quem-sou-ele',
   },

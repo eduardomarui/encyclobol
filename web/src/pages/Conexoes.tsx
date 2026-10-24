@@ -71,6 +71,7 @@ export default function Conexoes() {
     () => saved?.order ?? seededShuffle(puzzle.groups.flatMap((g) => g.members), (dayNumber() + 1) * 7919),
   )
   const [selected, setSelected] = useState<string[]>([])
+  const [tried, setTried] = useState<string[]>([])
   const [solved, setSolved] = useState<ConGroup[]>(() =>
     today ? puzzle.groups : (saved?.solved ?? []).map((c) => puzzle.groups.find((g) => g.color === c)!).filter(Boolean),
   )
@@ -142,6 +143,14 @@ export default function Conexoes() {
 
   function enviar() {
     if (selected.length !== 4 || over) return
+    // Mesmo palpite de novo não gasta erro.
+    const key = [...selected].sort().join('|')
+    if (tried.includes(key)) {
+      setMessage('Você já tentou esses 4')
+      sfx.nearMiss()
+      return
+    }
+    setTried((t) => [...t, key])
     const colors = selected.map((n) => groupOf[n].color)
     const nextRows = [...rows, colors as string[]]
     setRows(nextRows)
@@ -170,7 +179,13 @@ export default function Conexoes() {
     const m = mistakes + 1
     setMistakes(m)
     setSelected([])
-    setMessage(oneAway ? 'Faltou um! (cuidado com a isca)' : 'Não foi dessa vez')
+    setMessage(
+      oneAway
+        ? 'Faltou um! (cuidado com a isca)'
+        : Math.max(...Object.values(counts)) === 2
+          ? 'Dois e dois: tem grupos misturados aí'
+          : 'Não foi dessa vez',
+    )
     if (m >= MAX_MISTAKES) sfx.lifeLost()
     else if (oneAway) sfx.nearMiss()
     else sfx.err()
@@ -194,6 +209,7 @@ export default function Conexoes() {
       ),
     )
     setSelected([])
+    setTried([])
     setSolved([])
     setSolveSeq([])
     setMistakes(0)
@@ -255,7 +271,12 @@ export default function Conexoes() {
             <span>
               {solved.length === 0 ? '4 grupos pra achar' : `Falta${4 - solved.length === 1 ? '' : 'm'} ${4 - solved.length}`}
             </span>
-            {daily && career.total > 0 && <span className="text-ink-600">· total {career.total}</span>}
+            {daily && <span className="text-corn-400">· {solved.length * SOLVE_PTS} pts</span>}
+            {daily && (
+              <span className={`border px-1.5 py-0.5 text-[10px] ${mistakes === 0 ? 'border-corn-500/70 text-corn-400' : 'border-white/10 text-ink-500 line-through'}`}>
+                Sem erros +{PERFECT_BONUS}
+              </span>
+            )}
           </div>
         )}
 
@@ -374,7 +395,7 @@ export default function Conexoes() {
                   <p className="mt-3 font-serif text-sm italic text-ink-600">Volte amanhã pra somar mais.</p>
                   <button
                     onClick={compartilhar}
-                    className="btn-stamp mt-4 w-full bg-grass-700 px-6 py-2.5 text-ink-900 hover:bg-grass-600"
+                    className="btn-stamp mt-4 w-full bg-corn-500 px-6 py-3 text-paper hover:bg-corn-400"
                   >
                     {copied ? 'Imagem pronta!' : 'Compartilhar imagem'}
                   </button>
@@ -383,7 +404,7 @@ export default function Conexoes() {
 
               <button
                 onClick={treinar}
-                className="btn-stamp mt-2 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700"
+                className="btn-stamp mt-2 w-full border-2 border-white/20 px-6 py-2.5 text-ink-900 hover:bg-grass-700"
               >
                 {daily ? 'Treinar (sem pontos)' : 'Outro puzzle'}
               </button>

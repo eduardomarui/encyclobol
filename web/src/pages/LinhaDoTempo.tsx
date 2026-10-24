@@ -89,6 +89,7 @@ export default function LinhaDoTempo() {
 
   const current = cursor < deck.length ? deck[cursor] : null
   const over = status === 'over'
+  const [ending, setEnding] = useState(false)
   const daily = mode === 'daily'
   const maxLives = hard ? 1 : 3
   const beating = daily && points > prevBest && points > 0
@@ -117,8 +118,12 @@ export default function LinhaDoTempo() {
   }
 
   function place(slot: number) {
-    if (over || !current) return
+    if (over || ending || !current) return
     const ok = validSlot(placed, slot, current.year)
+    // Quanto errou: distância até o vizinho que quebrou a ordem.
+    const before = slot > 0 ? placed[slot - 1].year : -Infinity
+    const after = slot < placed.length ? placed[slot].year : Infinity
+    const miss = ok ? 0 : current.year < before ? before - current.year : current.year - after
     const at = lowerBound(placed, current.year)
     setPlaced([...placed.slice(0, at), current, ...placed.slice(at)])
     setLastPlaced(current.player.answer)
@@ -147,12 +152,23 @@ export default function LinhaDoTempo() {
       buzz.life()
       setCombo(0)
       setFlashOk(false)
-      setFlash(`Fora de época — ${current.player.display} surgiu em ${current.year} (${decadeOf(current.year)})`)
+      setFlash(
+        miss <= 3
+          ? `Quase! Errou por ${miss} ${miss === 1 ? 'ano' : 'anos'} · ${current.player.display} surgiu em ${current.year}`
+          : `Fora de época — ${current.player.display} surgiu em ${current.year} (${decadeOf(current.year)})`,
+      )
     }
 
     const nextCursor = cursor + 1
     setCursor(nextCursor)
-    if (newLives <= 0 || nextCursor >= deck.length || (daily && nextCursor > DAILY_CARDS)) finish(newScore, newPoints)
+    if (newLives <= 0 || nextCursor >= deck.length || (daily && nextCursor > DAILY_CARDS)) {
+      // Deixa ver a última jogada antes do resumo.
+      setEnding(true)
+      setTimeout(() => {
+        setEnding(false)
+        finish(newScore, newPoints)
+      }, 900)
+    }
   }
 
   function restart(isHard: boolean) {
@@ -272,14 +288,14 @@ export default function LinhaDoTempo() {
           <div className="mt-1 flex flex-wrap items-stretch justify-center gap-y-1.5 pb-2">
             {Array.from({ length: placed.length + 1 }).map((_, slot) => (
               <div key={slot} className="flex items-stretch">
-                {!over && current ? (
+                {!over && !ending && current ? (
                   <button
                     onClick={() => place(slot)}
                     aria-label={slot === 0 ? 'Encaixar antes de todos' : `Encaixar depois de ${placed[slot - 1].player.display}`}
-                    className="group mx-0.5 flex w-6 flex-none items-center justify-center self-stretch rounded-sm border-2 border-dashed border-grass-500/50 bg-grass-600/5 text-grass-400 transition-colors hover:border-grass-400 hover:bg-grass-600/20 active:bg-grass-600/40"
+                    className="group mx-0.5 flex w-9 flex-none items-center justify-center self-stretch rounded-sm border-2 border-dashed border-grass-500/50 bg-grass-600/5 text-grass-400 transition-colors hover:border-grass-400 hover:bg-grass-600/20 active:bg-grass-600/40"
                     title="Encaixar aqui"
                   >
-                    <span className="font-cond text-base font-700">+</span>
+                    <span className="font-cond text-xl font-700">+</span>
                   </button>
                 ) : (
                   <span className="w-1 flex-none" />
@@ -334,7 +350,7 @@ export default function LinhaDoTempo() {
                 <p className="mt-3 font-serif text-sm italic text-ink-600">Volte amanhã pra somar mais ao total.</p>
                 <button
                   onClick={compartilhar}
-                  className="btn-stamp mt-4 w-full bg-grass-700 px-6 py-2.5 text-ink-900 hover:bg-grass-600"
+                  className="btn-stamp mt-4 w-full bg-corn-500 px-6 py-3 text-paper hover:bg-corn-400"
                 >
                   {copied ? 'Imagem pronta!' : 'Compartilhar imagem'}
                 </button>

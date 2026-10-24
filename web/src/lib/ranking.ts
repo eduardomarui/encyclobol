@@ -15,7 +15,7 @@ export type BoardRow = { nick: string; total: number; rank: number; is_me?: bool
 // teto, decidiam o ranking sozinhos.
 const TODAY_KEYS: { game: string; key: string; field: string; full: number }[] = [
   { game: 'Tira-Teima', key: 'encyclobol:qse:career-today', field: 'score', full: 2400 },
-  { game: 'Copa de Pênaltis', key: 'encyclobol:copa:today', field: 'points', full: 1840 },
+  { game: 'Copa de Pênaltis', key: 'encyclobol:copa:today', field: 'points', full: 1600 },
   { game: 'Quarteto', key: 'encyclobol:quarteto:today', field: 'points', full: 960 },
   { game: 'Linha do Tempo', key: 'encyclobol:timeline:today', field: 'points', full: 330 },
   { game: 'O Intruso', key: 'encyclobol:intruso:today', field: 'points', full: 2000 },

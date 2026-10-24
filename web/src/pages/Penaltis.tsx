@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { quiz } from '../data/quiz'
 import { dayNumber, seededShuffle } from '../lib/daily'
@@ -8,7 +8,7 @@ import {
   recordCopa,
   type CopaStats,
 } from '../lib/penaltisStats'
-import { PenaltyScene, makeShot, type Outcome, type Shot } from '../components/PenaltyScene'
+import { PenaltyScene, REVEAL_MS, makeShot, type Outcome, type Shot } from '../components/PenaltyScene'
 import { confetti } from '../lib/juice'
 import { shareScoreImage } from '../lib/shareCard'
 import { GameHeader, HelpModal, StatGrid, ThemePicker, TimeBar, NextUp, ChallengeBanner } from '../components/GameShell'
@@ -19,7 +19,8 @@ import { challengeLink } from '../lib/challenge'
 
 const HELP_KEY = 'encyclobol:copa:help'
 
-// Copa: 4 fases, cada uma mais difícil (menos tempo).
+// Copa: 4 fases, cada uma mais difícil (menos tempo), melhor de 3 cobranças.
+const KICKS = 3
 const ROUND_NAMES = ['Oitavas', 'Quartas', 'Semifinal', 'Final']
 const RIVALS = ['os Estreantes', 'os Veteranos', 'os Craques', 'as Lendas']
 const ATK = [8, 7, 6, 6] // segundos pra cobrar, por fase
@@ -45,7 +46,7 @@ function prepQ(bi: number, seed: number): PQ {
 // Intercala cobrança (fácil) e defesa (difícil): A, D, A, D...
 function interleave(eIdx: number[], hIdx: number[], seed: number): PQ[] {
   const out: PQ[] = []
-  for (let p = 0; p < 5; p++) {
+  for (let p = 0; p < eIdx.length; p++) {
     out.push(prepQ(eIdx[p], seed + p * 7 + 1))
     out.push(prepQ(hIdx[p], seed + p * 7 + 4))
   }
@@ -62,23 +63,23 @@ function take(pool: number[], seed: number, offset: number, n: number): number[]
 function dailyShootout(round: number, theme: string): PQ[] {
   const day = dayNumber() * 100 + themeSeed(theme)
   const p = poolsFor(theme)
-  const e = take(p.easy, day + 1, (round - 1) * 5, 5)
-  const h = take(p.hard, day + 2, (round - 1) * 5, 5)
+  const e = take(p.easy, day + 1, (round - 1) * KICKS, KICKS)
+  const h = take(p.hard, day + 2, (round - 1) * KICKS, KICKS)
   return interleave(e, h, day + round * 7)
 }
 function randomShootout(theme: string): PQ[] {
   const s = Math.floor(Math.random() * 1e9) + 1
   const p = poolsFor(theme)
-  return interleave(take(p.easy, s, 0, 5), take(p.hard, s + 1, 0, 5), s)
+  return interleave(take(p.easy, s, 0, KICKS), take(p.hard, s + 1, 0, KICKS), s)
 }
 // Morte súbita: na Copa do dia as cobranças extras também são iguais pra
-// todos (continuam a fila embaralhada do dia depois das 5 da fase); no treino,
+// todos (continuam a fila embaralhada do dia depois das cobranças das 4 fases); no treino,
 // sorteio livre.
 function extraPair(theme: string, daily: boolean, round: number, pair: number): PQ[] {
   const p = poolsFor(theme)
   if (daily) {
     const day = dayNumber() * 100 + themeSeed(theme)
-    const off = 20 + (round - 1) * 6 + pair
+    const off = 4 * KICKS + (round - 1) * 6 + pair
     return [
       prepQ(take(p.easy, day + 1, off, 1)[0], day + round * 7 + pair * 11 + 1),
       prepQ(take(p.hard, day + 2, off, 1)[0], day + round * 7 + pair * 11 + 4),
@@ -93,9 +94,9 @@ function extraPair(theme: string, daily: boolean, round: number, pair: number): 
 function Pip({ mark, team }: { mark?: Mark; team: 'me' | 'op' }) {
   if (!mark) return <span className="h-3.5 w-3.5 rounded-full border border-ink-900/40" />
   if (mark === 'goal')
-    return <span className={`h-3.5 w-3.5 rounded-full ${team === 'me' ? 'bg-grass-400' : 'bg-ochre-500'}`} />
+    return <span className={`h-3.5 w-3.5 animate-pop rounded-full ${team === 'me' ? 'bg-grass-400' : 'bg-ochre-500'}`} />
   return (
-    <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full border border-ink-900/40 text-[9px] text-ink-900/60">
+    <span className="flex h-3.5 w-3.5 animate-pop items-center justify-center rounded-full border border-ink-900/40 text-[9px] text-ink-900/60">
       ✕
     </span>
   )
@@ -144,8 +145,9 @@ function Bracket({ reached, champion }: { reached: number; champion: boolean }) 
   )
 }
 
+// v2: melhor de 3 (a corrida salva no formato antigo, melhor de 5, é descartada).
 type CopaRun = {
-  theme: string; round: number; index: number; len: number; meus: Mark[]; rival: Mark[]
+  v?: number; marks?: string[]; theme: string; round: number; index: number; len: number; meus: Mark[]; rival: Mark[]
   my: number; opp: number; copaScore: number; interRound: boolean; lastGain: number; timeLeft: number
 }
 
@@ -160,7 +162,10 @@ export default function Penaltis() {
   // Copa do dia lida a cada montagem; a corrida é salva a cada lance e a cada
   // segundo do relógio — F5 volta na mesma pergunta, com o mesmo tempo.
   const [copaToday] = useState(loadCopaToday)
-  const [run] = useState(() => (copaToday ? null : loadRun<CopaRun>('copa')))
+  const [run] = useState(() => {
+    const r = copaToday ? null : loadRun<CopaRun>('copa')
+    return r?.v === 2 ? r : null
+  })
   const [mode, setMode] = useState<'copa' | 'practice'>('copa')
   const [round, setRound] = useState(copaToday?.round ?? run?.round ?? 1)
   const [theme, setTheme] = useState(() => run?.theme ?? loadTheme())
@@ -185,6 +190,11 @@ export default function Penaltis() {
   const [copaDone, setCopaDone] = useState(!!copaToday)
   const [copa, setCopa] = useState<CopaStats>(() => loadCopaStats())
   const [copied, setCopied] = useState(false)
+  // Uma linha de emojis por fase disputada, pro compartilhamento.
+  const [marks, setMarks] = useState<string[]>(run?.marks ?? [])
+  // Próximo passo depois do lance: tocar na cena adianta.
+  const next = useRef<{ t: ReturnType<typeof setTimeout>; go: () => void; at: number } | null>(null)
+  const [interLeft, setInterLeft] = useState(3)
   const [showHelp, setShowHelp] = useState(() => {
     try {
       return !localStorage.getItem(HELP_KEY)
@@ -196,7 +206,7 @@ export default function Penaltis() {
   const current = prepared[index]
   const attacking = index % 2 === 0
   const pair = Math.floor(index / 2) + 1
-  const slots = Math.max(5, meus.length, rival.length)
+  const slots = Math.max(KICKS, meus.length, rival.length)
   const copaMode = mode === 'copa'
   const wonShootout = my > opp
   const showGame = started && !copaDone && !interRound && !shootoutOver
@@ -219,6 +229,8 @@ export default function Penaltis() {
   useEffect(() => {
     if (!shootoutOver || bracketResolved || !copaMode) return
     setBracketResolved(true)
+    const line = meus.map((m) => (m === 'goal' ? '⚽' : '❌')).join('') + ' ' + rival.map((m) => (m === 'goal' ? '🥅' : '🧤')).join('')
+    setMarks((ms) => [...ms, line])
     if (my > opp) {
       const pts = ROUND_PTS[round - 1] + (my - opp) * 20
       if (round >= 4) {
@@ -227,12 +239,14 @@ export default function Penaltis() {
         setChampion(true)
         setCopaDone(true)
         setCopa(recordCopa(total, 4, true))
-        confetti()
+        confetti(220)
+        setTimeout(() => confetti(160), 450)
         sfx.fanfare()
         buzz.win()
       } else {
         setLastGain(pts)
         setCopaScore((s) => s + pts)
+        setInterLeft(3)
         setInterRound(true)
         confetti()
       }
@@ -252,9 +266,21 @@ export default function Penaltis() {
     // Só salva entre lances (pergunta aberta), não durante a animação do chute.
     if (phase !== 'ask' && !interRound) return
     saveRun<CopaRun>('copa', {
-      theme, round, index, len: prepared.length, meus, rival, my, opp, copaScore, interRound, lastGain, timeLeft,
+      v: 2, marks, theme, round, index, len: prepared.length, meus, rival, my, opp, copaScore, interRound, lastGain, timeLeft,
     })
-  }, [copaMode, started, copaDone, phase, theme, round, index, prepared.length, meus, rival, my, opp, copaScore, interRound, lastGain, timeLeft])
+  }, [copaMode, started, copaDone, phase, theme, round, index, prepared.length, meus, rival, my, opp, copaScore, interRound, lastGain, timeLeft, marks])
+
+  // Entre fases: avança sozinho em 3 s (ou no toque).
+  useEffect(() => {
+    if (!interRound) return
+    if (interLeft <= 0) {
+      startShootout(round + 1, copaMode)
+      return
+    }
+    const t = setTimeout(() => setInterLeft((s) => s - 1), 1000)
+    return () => clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [interRound, interLeft])
 
   function startShootout(r: number, daily: boolean) {
     setRound(r)
@@ -322,14 +348,15 @@ export default function Penaltis() {
     setPhase('shoot')
 
     // Decisão antecipada (como na disputa real): se a vantagem já não pode
-    // ser alcançada com as cobranças que faltam na melhor de 5, acabou.
+    // ser alcançada com as cobranças que faltam, acabou.
     const myKicks = Math.floor(index / 2) + 1
     const rivalKicks = Math.floor((index + 1) / 2)
-    const myRem = Math.max(0, 5 - myKicks)
-    const rivalRem = Math.max(0, 5 - rivalKicks)
-    const clinched = index < 10 && (myG > oppG + rivalRem || oppG > myG + myRem)
+    const myRem = Math.max(0, KICKS - myKicks)
+    const rivalRem = Math.max(0, KICKS - rivalKicks)
+    const clinched = index < 2 * KICKS && (myG > oppG + rivalRem || oppG > myG + myRem)
 
-    setTimeout(() => {
+    const go = () => {
+      next.current = null
       const i = index + 1
       if (clinched) finishShootout(myG, oppG)
       else if (i < prepared.length) goAsk(i)
@@ -338,7 +365,37 @@ export default function Penaltis() {
         setPrepared((pp) => [...pp, ...extraPair(theme, copaMode, round, pp.length / 2)])
         goAsk(i)
       }
-    }, 2100)
+    }
+    next.current = { t: setTimeout(go, REVEAL_MS), go, at: Date.now() }
+  }
+
+  // Tocar na cena depois do impacto adianta o próximo lance (antes dele, a
+  // bola ainda está no ar: o toque não corta o lance).
+  function pular() {
+    const n = next.current
+    if (!n || Date.now() - n.at < 850) return
+    clearTimeout(n.t)
+    n.go()
+  }
+
+  // Esta cobrança decide a fase? (fazer/pegar classifica, errar/tomar elimina)
+  function decisive(): string | null {
+    const p = Math.floor(index / 2)
+    if (index >= 2 * KICKS) {
+      if (attacking) return 'Morte súbita!'
+      return meus[p] === 'goal' ? 'Se pegar, classifica!' : 'Se tomar, está fora!'
+    }
+    if (attacking) {
+      const myRem = KICKS - (p + 1) // minhas cobranças depois desta
+      const rivalRem = KICKS - p
+      if (my + 1 > opp + rivalRem) return 'Se fizer, classifica!'
+      if (opp > my + myRem) return 'Se errar, está fora!'
+    } else {
+      const rem = KICKS - (p + 1) // cobranças de cada lado depois desta
+      if (my > opp + rem) return 'Se pegar, classifica!'
+      if (opp + 1 > my + rem) return 'Se tomar, está fora!'
+    }
+    return null
   }
 
   // Escolheu o campeonato: começa a Copa do dia (ou o treino).
@@ -380,7 +437,7 @@ export default function Penaltis() {
         `Total ${copa.total} pts · ${copa.cups} copa${copa.cups === 1 ? '' : 's'}`,
       ],
       edition: `Edição #${dayNumber()}`,
-      text: `Encyclobol · Copa de Pênaltis #${dayNumber()} — ${champion ? 'CAMPEÃO' : copaScore + ' pts'} · ${challengeLink('/jogos/penaltis', copaScore)}`,
+      text: `Encyclobol · Copa de Pênaltis #${dayNumber()} — ${champion ? 'CAMPEÃO 🏆' : copaScore + ' pts'}\n${marks.map((m, i) => `${ROUND_NAMES[i]}: ${m}`).join('\n')}\n${challengeLink('/jogos/penaltis', copaScore)}`,
     })
     if (r !== 'error') {
       setCopied(true)
@@ -488,7 +545,7 @@ export default function Penaltis() {
 
         {showGame && (
           <p className="mt-2 font-cond text-xs font-600 uppercase tracking-[0.16em] text-ink-500">
-            {pair <= 5 ? `Cobrança ${pair}/5` : 'Morte súbita'} ·{' '}
+            {pair <= KICKS ? `Cobrança ${pair}/${KICKS}` : 'Morte súbita'} ·{' '}
             <span className={attacking ? 'text-grass-400' : 'text-ochre-400'}>
               {attacking ? `Você cobra · ${secsFor(round, index)}s` : `Você defende · difícil · ${secsFor(round, index)}s`}
             </span>
@@ -498,13 +555,18 @@ export default function Penaltis() {
         {/* CENA */}
         {showGame && (
           <div className="mt-3 flex w-full justify-center">
-            <PenaltyScene shot={shot} animKey={index} compact />
+            <div className="flex w-full justify-center" onClick={pular}>
+              <PenaltyScene shot={shot} animKey={index} compact />
+            </div>
           </div>
         )}
 
         {/* PERGUNTA */}
         {showGame && current && (
-          <div className="mt-4 w-full max-w-sm">
+          <div className="mt-4 w-full max-w-sm" onClick={phase === 'shoot' ? pular : undefined}>
+            {phase === 'ask' && decisive() && (
+              <p className="mb-2 animate-pulse text-center font-display text-xl uppercase tracking-tight text-corn-400">{decisive()}</p>
+            )}
             <div className="mb-1.5 flex items-center gap-2">
               <TimeBar left={timeLeft} total={secsFor(round, index)} danger={3} />
               <span className={`w-5 text-right font-display text-base leading-none tabular-nums ${timeLeft <= 3 ? 'animate-pulse text-ochre-500' : 'text-ink-700'}`}>
@@ -552,7 +614,7 @@ export default function Penaltis() {
               onClick={() => startShootout(round + 1, copaMode)}
               className="btn-stamp mt-5 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700"
             >
-              Avançar pra {ROUND_NAMES[round]} →
+              {ROUND_NAMES[round]} em {interLeft}… →
             </button>
           </div>
         )}
@@ -603,7 +665,7 @@ export default function Penaltis() {
 
             <button
               onClick={compartilhar}
-              className="btn-stamp mt-4 w-full bg-grass-700 px-6 py-2.5 text-ink-900 hover:bg-grass-600"
+              className="btn-stamp mt-4 w-full bg-corn-500 px-6 py-3 text-paper hover:bg-corn-400"
             >
               {copied ? 'Imagem pronta!' : 'Compartilhar imagem'}
             </button>
@@ -636,7 +698,7 @@ export default function Penaltis() {
                 <strong>Quando você defende:</strong> acertar a pergunta significa que você{' '}
                 <em>pegou</em>; errar é gol do rival. E o tempo é <strong>mais curto</strong>.
               </li>
-              <li>Cada confronto é melhor de cinco — empatou, vai pra morte súbita.</li>
+              <li>Cada confronto é melhor de três cobranças — empatou, vai pra morte súbita.</li>
               <li>
                 É um <strong>mata-mata</strong>: Oitavas → Quartas → Semi → Final, cada rival mais
                 difícil (menos tempo). Venceu, avança; perdeu, acabou o dia. Os pontos somam num{' '}

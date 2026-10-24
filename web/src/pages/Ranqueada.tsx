@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { GameHeader, HelpModal, TimeBar } from '../components/GameShell'
-import { PenaltyScene, makeShot, type Outcome, type Shot } from '../components/PenaltyScene'
+import { PenaltyScene, REVEAL_MS, makeShot, type Outcome, type Shot } from '../components/PenaltyScene'
 import { duelDefense, duelShot, type PQ } from '../lib/duel'
 import { SaveProgress } from '../components/SaveProgress'
 import { getStreak } from '../lib/streak'
@@ -240,7 +240,7 @@ export default function Ranqueada() {
       setShot(null)
       setTimeLeft(iKick(nr, ghost) ? ATTACK_SEC : DEF_SEC)
       startedAt.current = Date.now()
-    }, 2300)
+    }, REVEAL_MS)
   }
 
   async function fechar(all: Answer[], myG: boolean[], opG: boolean[]) {

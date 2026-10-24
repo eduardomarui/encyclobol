@@ -169,6 +169,9 @@ export default function Jogos() {
   const total = entries.length
   const jogadosHoje = entries.filter((g) => g.played).length
   const fechou = jogadosHoje === total
+  const proximo = entries.find((g) => !g.played)
+  // Pendentes primeiro: o caderno mostra o que falta antes do que já foi.
+  const cards = [...entries.filter((g) => !g.played), ...entries.filter((g) => g.played)]
 
   async function compartilharDia() {
     const squares: Sq[][] = [entries.map((g) => (!g.played ? 'k' : g.good ? 'g' : 'o'))]
@@ -178,7 +181,7 @@ export default function Jogos() {
       sub: fechou ? 'fechei o dia!' : 'jogos de hoje',
       squares,
       edition: `Edição #${dayNumber()}`,
-      text: `Encyclobol · ${fechou ? 'Fechei o dia!' : `${jogadosHoje}/${total} jogos`} #${dayNumber()} · ${siteLink('/jogos')}`,
+      text: `Encyclobol #${dayNumber()} · ${fechou ? 'Fechei o dia!' : `${jogadosHoje}/${total} jogos`}\n${entries.map((g) => (!g.played ? '⬜' : g.good ? '🟩' : '🟧')).join('')}\n${siteLink('/jogos')}`,
     })
     if (r !== 'error') {
       setCopied(true)
@@ -200,12 +203,22 @@ export default function Jogos() {
               ? 'Você fechou todas as edições de hoje. Volte amanhã para mais.'
               : `Você jogou ${jogadosHoje} de ${total} hoje. Bora completar o caderno?`}
           </p>
-          <Link
-            to="/ranking"
-            className="btn-stamp mt-4 inline-block bg-grass-600 px-5 py-2.5 text-ink-900 hover:bg-grass-700"
-          >
-            Ver o ranking →
-          </Link>
+          <div className="mt-4 flex flex-wrap items-center gap-4">
+            {proximo ? (
+              <Link to={proximo.route} className="btn-stamp inline-block bg-grass-600 px-5 py-3 text-ink-900 hover:bg-grass-700">
+                {jogadosHoje === 0 ? 'Começar' : 'Jogar'}: {proximo.title} →
+              </Link>
+            ) : (
+              <Link to="/ranking" className="btn-stamp inline-block bg-grass-600 px-5 py-3 text-ink-900 hover:bg-grass-700">
+                Ver o ranking →
+              </Link>
+            )}
+            {proximo && (
+              <Link to="/ranking" className="font-cond text-xs font-600 uppercase tracking-wider text-ink-500 hover:text-corn-500">
+                Ver o ranking
+              </Link>
+            )}
+          </div>
         </header>
 
         {/* Ofensiva */}
@@ -251,7 +264,7 @@ export default function Jogos() {
         </section>
 
         <div className="mt-2 grid sm:grid-cols-2 lg:grid-cols-3">
-          {entries.map((g) => (
+          {cards.map((g) => (
             <Link
               key={g.route}
               to={g.route}

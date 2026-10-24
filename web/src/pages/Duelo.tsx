@@ -17,7 +17,7 @@ import {
   type Match,
   type Move,
 } from '../lib/duel'
-import { PenaltyScene, shotFromOutcome, type Kind } from '../components/PenaltyScene'
+import { PenaltyScene, REVEAL_MS, shotFromOutcome, type Kind } from '../components/PenaltyScene'
 import { GameHeader, HelpModal, ThemePicker } from '../components/GameShell'
 import { loadTheme, saveTheme, themeLabel } from '../lib/themes'
 import { siteLink } from '../lib/site'
@@ -314,7 +314,7 @@ export default function Duelo() {
       revealTimer.current = setTimeout(() => {
         setRevealing(false)
         setShown((s) => s + 1)
-      }, 2100)
+      }, REVEAL_MS)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resolved, shown, revealing, phase, match])

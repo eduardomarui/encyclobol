@@ -1,11 +1,13 @@
-import { useSyncExternalStore, type ReactNode } from 'react'
+import { useEffect, useState, useSyncExternalStore, type ReactNode } from 'react'
 import { setSoundOn, soundOn, subscribeSound, sfx } from '../lib/sfx'
 import { Link } from 'react-router-dom'
 import { availableThemes, themeSize } from '../lib/themes'
 import { gatherGames } from '../lib/profile'
 import { getStreak, hoursUntilMidnight } from '../lib/streak'
 import { Flame } from './Streak'
-import { readChallenge } from '../lib/challenge'
+import { challengeLink, readChallenge } from '../lib/challenge'
+import { confetti } from '../lib/juice'
+import { dayNumber } from '../lib/daily'
 
 // Peças compartilhadas pelas seis páginas de jogo: cabeçalho fixo, modal
 // "Como jogar" e a grade de números do fim de rodada.
@@ -125,13 +127,13 @@ export function HelpModal({
 export function StatGrid({ items }: { items: [string, string | number][] }) {
   return (
     <div
-      className="mt-5 grid gap-px overflow-hidden border-2 border-white/20 bg-ink-900/15"
+      className="mt-5 grid gap-px overflow-hidden border-y border-white/10 bg-white/5"
       style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}
     >
       {items.map(([k, v]) => (
         <div key={k} className="bg-paper-100 px-1 py-2">
-          <div className="font-display text-2xl text-ink-900">{typeof v === 'number' ? v.toLocaleString('pt-BR') : v}</div>
-          <div className="font-cond text-[9px] font-500 uppercase tracking-wide text-ink-600">{k}</div>
+          <div className="font-display text-xl text-ink-800">{typeof v === 'number' ? v.toLocaleString('pt-BR') : v}</div>
+          <div className="font-cond text-[10px] font-500 uppercase tracking-wide text-ink-500">{k}</div>
         </div>
       ))}
     </div>
@@ -214,6 +216,7 @@ export function NextUp({ current }: { current: string }) {
           <span key={g.key} className={`h-1.5 flex-1 rounded-full ${g.playedToday ? 'bg-corn-500' : 'bg-ink-900/15'}`} />
         ))}
       </div>
+      {!next && <DayClosed />}
       {next ? (
         <Link
           to={next.route}
@@ -223,8 +226,17 @@ export function NextUp({ current }: { current: string }) {
           <span aria-hidden>→</span>
         </Link>
       ) : (
-        <p className="mt-3 font-serif text-sm italic text-ink-600">
-          Fechou o caderno de hoje. A próxima edição sai em {hours} {hours === 1 ? 'hora' : 'horas'}.
+        <Link
+          to="/jogos"
+          className="btn-stamp mt-3 flex w-full items-center justify-between bg-corn-500 px-5 py-3 text-paper hover:bg-corn-400"
+        >
+          <span>Compartilhar o dia</span>
+          <span aria-hidden>→</span>
+        </Link>
+      )}
+      {!next && (
+        <p className="mt-2 text-center font-serif text-sm italic text-ink-600">
+          A próxima edição sai em {hours} {hours === 1 ? 'hora' : 'horas'}.
         </p>
       )}
       <Link
@@ -233,6 +245,28 @@ export function NextUp({ current }: { current: string }) {
       >
         Todos os jogos
       </Link>
+    </div>
+  )
+}
+
+// Fechou os 6 do dia: festa uma vez por dia (a primeira tela que mostrar).
+const CLOSED_KEY = 'encyclobol:closed-day'
+function DayClosed() {
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(CLOSED_KEY) === String(dayNumber())) return
+      localStorage.setItem(CLOSED_KEY, String(dayNumber()))
+    } catch {
+      return
+    }
+    confetti(220)
+    setTimeout(() => confetti(160), 450)
+    sfx.fanfare()
+  }, [])
+  return (
+    <div className="mt-3 animate-pop border-2 border-corn-500 bg-corn-500/15 px-4 py-3 text-center">
+      <p className="font-display text-2xl uppercase leading-none tracking-tight text-corn-400">Caderno fechado!</p>
+      <p className="mt-1 font-cond text-[11px] font-600 uppercase tracking-wider text-ink-700">Os 6 jogos de hoje, completos</p>
     </div>
   )
 }
@@ -249,6 +283,22 @@ export function ChallengeBanner({ game, mine, over }: { game: string; mine: numb
     )
   const won = mine > ch.pts
   const tie = mine === ch.pts
+  return <ChallengeResult game={game} mine={mine} from={ch.from} pts={ch.pts} won={won} tie={tie} />
+}
+
+function ChallengeResult({ game, mine, from, pts, won, tie }: { game: string; mine: number; from: string; pts: number; won: boolean; tie: boolean }) {
+  const [sent, setSent] = useState(false)
+  async function devolver() {
+    const text = `Fiz ${mine} no ${game} de hoje${won ? ` e passei os seus ${pts}` : ''}. Bate essa: ${challengeLink(window.location.pathname, mine)}`
+    try {
+      if (navigator.share) await navigator.share({ text })
+      else await navigator.clipboard.writeText(text)
+      setSent(true)
+    } catch {
+      /* cancelou */
+    }
+  }
+  const ch = { from, pts }
   return (
     <div className={`mt-3 w-full max-w-md border-2 px-3 py-2 text-center ${won ? 'border-grass-500 bg-grass-700/40' : tie ? 'border-white/20 bg-paper-100' : 'border-ochre-500 bg-ochre-500/10'}`}>
       <p className="font-cond text-[11px] font-600 uppercase tracking-wider text-ink-600">Desafio de {ch.from}</p>
@@ -256,8 +306,14 @@ export function ChallengeBanner({ game, mine, over }: { game: string; mine: numb
         Você {mine} <span className="text-ink-500">×</span> {ch.pts} {ch.from}
       </p>
       <p className={`font-cond text-xs font-700 uppercase tracking-wider ${won ? 'text-grass-400' : tie ? 'text-ink-700' : 'text-ochre-400'}`}>
-        {won ? 'Ganhou! Manda de volta' : tie ? 'Empate. Desempata amanhã' : 'Perdeu dessa vez'}
+        {won ? 'Ganhou!' : tie ? 'Empate' : 'Perdeu dessa vez'}
       </p>
+      <button
+        onClick={devolver}
+        className="btn-stamp mt-2 w-full bg-corn-500 px-4 py-2 text-xs text-paper hover:bg-corn-400"
+      >
+        {sent ? 'Desafio enviado!' : `Devolver o desafio pra ${from}`}
+      </button>
     </div>
   )
 }

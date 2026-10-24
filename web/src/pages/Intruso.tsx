@@ -21,6 +21,8 @@ const LIVES = 3
 const DAILY_ROUNDS = 10
 const COMBO_CAP = 3
 const REASON_BONUS = 50
+// As 3 primeiras rodadas são só "ache o intruso" (um toque): o elo entra na 4ª.
+const ELO_FROM = 3
 // Relógio: 15 s pra achar o intruso, 10 s pra cravar o elo. Rapidez vale até +30.
 const ROUND_SEC = 15
 const ELO_SEC = 10
@@ -183,11 +185,13 @@ export default function Intruso() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeLeft, step, over, showHelp])
 
+  // Acerto passa rápido; erro fica mais, que é quando se aprende a regra.
+  const revealMs = selIntruder === current?.intruderIdx && (reasonGot || index < ELO_FROM) ? 1500 : 3400
+
   // Depois da revelação o jogo segue sozinho (o botão só adianta).
   useEffect(() => {
     if (step !== 'revealed' || over) return
-    const ok = selIntruder === current?.intruderIdx && reasonGot
-    const t = setTimeout(advance, ok ? 1800 : 3400)
+    const t = setTimeout(advance, revealMs)
     return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step, index])
@@ -204,8 +208,13 @@ export default function Intruso() {
       setCaught((c) => c + 1)
       setPoints((p) => p + gain)
       setLastGain(gain)
-      setStep('reason')
-      setTimeLeft(ELO_SEC)
+      if (index < ELO_FROM) {
+        setReasonGot(false)
+        setStep('revealed')
+      } else {
+        setStep('reason')
+        setTimeLeft(ELO_SEC)
+      }
       sfx.ok(nc)
       buzz.ok()
     } else {
@@ -437,7 +446,7 @@ export default function Intruso() {
                   {selIntruder === current.intruderIdx ? (
                     <span className="text-grass-400">
                       Acertou! +{lastGain}
-                      {reasonGot ? ` +${REASON_BONUS} (elo certo)` : ' (elo errado)'} ·{' '}
+                      {index < ELO_FROM ? '' : reasonGot ? ` +${REASON_BONUS} (elo certo)` : ' (elo errado)'} ·{' '}
                     </span>
                   ) : (
                     <span className="text-ochre-400">
@@ -448,10 +457,14 @@ export default function Intruso() {
                 </p>
                 <button
                   onClick={advance}
-                  className="btn-stamp mt-4 bg-grass-600 px-8 py-2.5 text-ink-900 hover:bg-grass-700"
+                  className="btn-stamp relative mt-4 overflow-hidden bg-grass-600 px-8 py-2.5 text-ink-900 hover:bg-grass-700"
                 >
+                  <span key={index} className="animate-drain absolute inset-x-0 bottom-0 h-1 bg-corn-400" style={{ animationDuration: `${revealMs}ms` }} />
                   {lives <= 0 || (daily && index + 1 >= DAILY_ROUNDS) ? 'Ver resultado →' : 'Continuar →'}
                 </button>
+                {index + 1 === ELO_FROM && selIntruder === current.intruderIdx && (
+                  <p className="mt-2 animate-pop font-cond text-xs font-700 uppercase tracking-wider text-corn-400">Agora vale o elo: +{REASON_BONUS} por rodada</p>
+                )}
               </div>
             )}
           </div>
@@ -484,7 +497,7 @@ export default function Intruso() {
                 <p className="mt-3 font-serif text-sm italic text-ink-600">Volte amanhã pra somar mais ao total.</p>
                 <button
                   onClick={compartilhar}
-                  className="btn-stamp mt-4 w-full bg-grass-700 px-6 py-2.5 text-ink-900 hover:bg-grass-600"
+                  className="btn-stamp mt-4 w-full bg-corn-500 px-6 py-3 text-paper hover:bg-corn-400"
                 >
                   {copied ? 'Imagem pronta!' : 'Compartilhar imagem'}
                 </button>
@@ -493,7 +506,7 @@ export default function Intruso() {
 
             <button
               onClick={jogarTreino}
-              className="btn-stamp mt-2 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700"
+              className="btn-stamp mt-2 w-full border-2 border-white/20 px-6 py-2.5 text-ink-900 hover:bg-grass-700"
             >
               {daily ? 'Treinar (sem pontos)' : 'Outra caçada'}
             </button>
@@ -509,8 +522,8 @@ export default function Intruso() {
                 Ache o intruso em até <strong>{ROUND_SEC} segundos</strong> — quanto mais rápido, mais pontos.
               </li>
               <li>
-                Acertou? Diga <strong>o que liga os outros três</strong>, entre três opções (+{REASON_BONUS}).
-                Só uma é verdadeira.
+                A partir da {ELO_FROM + 1}ª rodada, depois de achar o intruso, diga{' '}
+                <strong>o que liga os outros três</strong>, entre três opções (+{REASON_BONUS}). Só uma é verdadeira.
               </li>
               <li>
                 Acertos seguidos viram combo (até x{COMBO_CAP}). Errar ou deixar o tempo zerar{' '}
