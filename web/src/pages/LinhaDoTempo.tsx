@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { players, type Player } from '../data/players'
 import { GameHeader, GameTitle, HelpModal, Lives, StatGrid, NextUp } from '../components/GameShell'
 import { dayNumber, seededShuffle } from '../lib/daily'
@@ -94,18 +94,6 @@ export default function LinhaDoTempo() {
   const beating = daily && points > prevBest && points > 0
   const newRecord = over && daily && points > prevBest && points > 0
 
-  // Rola só a linha (de lado) até a carta encaixada. Antes usava
-  // scrollIntoView, que rolava a página inteira no celular a cada clique.
-  const lineRef = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    const box = lineRef.current
-    if (!lastPlaced || !box) return
-    const el = document.getElementById(`tl-${lastPlaced}`)
-    if (!el) return
-    const left = el.offsetLeft - box.clientWidth / 2 + el.offsetWidth / 2
-    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-    box.scrollTo({ left: Math.max(0, left), behavior: reduce ? 'auto' : 'smooth' })
-  }, [lastPlaced])
 
   useEffect(() => {
     if (!daily) return
@@ -254,9 +242,9 @@ export default function LinhaDoTempo() {
 
         {/* Carta atual */}
         {!over && current && (
-          <div className="mt-6 w-full max-w-sm border-2 border-white/20 bg-paper-100 p-5 text-center">
+          <div className="mt-4 w-full max-w-sm border-2 border-white/20 bg-paper-100 px-4 py-3 text-center">
             <p className="kicker">Onde ele se encaixa?</p>
-            <p className="mt-2 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900">
+            <p className="mt-1 font-display text-2xl uppercase leading-[1.05] tracking-tight text-ink-900 sm:text-3xl">
               {current.player.display}
             </p>
             {!hard && (
@@ -265,54 +253,56 @@ export default function LinhaDoTempo() {
               </p>
             )}
             {/* Espaço reservado: a mensagem não empurra a tela quando aparece */}
-            <p className={`mt-2 min-h-[2.5rem] font-serif text-sm italic ${flashOk ? 'text-grass-400' : 'text-ochre-400'}`}>
+            <p className={`mt-1 min-h-[2.5rem] font-serif text-sm italic ${flashOk ? 'text-grass-400' : 'text-ochre-400'}`}>
               {flash}
             </p>
           </div>
         )}
 
         {/* Linha do tempo */}
-        <div className="mt-6 w-full max-w-3xl">
+        <div className="mt-3 w-full max-w-3xl">
           <div className="flex items-center justify-between font-cond text-[10px] font-600 uppercase tracking-[0.16em] text-ink-500">
             <span>← mais antigo</span>
             <span>{daily ? `carta ${Math.min(cursor, DAILY_CARDS)} de ${DAILY_CARDS}` : `${placed.length} na linha`}</span>
             <span>mais recente →</span>
           </div>
-          <div ref={lineRef} className="no-scrollbar relative mt-1 overflow-x-auto overscroll-x-contain pb-3">
-            <div className="flex items-stretch justify-start gap-0 px-1">
-              {Array.from({ length: placed.length + 1 }).map((_, slot) => (
-                <div key={slot} className="flex items-stretch">
-                  {!over && current ? (
-                    <button
-                      onClick={() => place(slot)}
-                      className="group mx-0.5 flex w-8 flex-none items-center justify-center self-stretch rounded-sm border-2 border-dashed border-grass-500/50 bg-grass-600/5 text-grass-400 transition-colors hover:border-grass-400 hover:bg-grass-600/20 active:bg-grass-600/40"
-                      title="Encaixar aqui"
-                    >
-                      <span className="font-cond text-lg font-700">+</span>
-                    </button>
-                  ) : (
-                    <span className="w-1.5 flex-none" />
-                  )}
-                  {slot < placed.length && (
-                    <div
-                      id={`tl-${placed[slot].player.answer}`}
-                      className={`flex w-[84px] flex-none flex-col items-center justify-between border-2 p-2 text-center transition-colors ${
-                        placed[slot].player.answer === lastPlaced
-                          ? lastOk
-                            ? 'animate-pop border-corn-500 bg-corn-500/10'
-                            : 'animate-shake border-ochre-500 bg-ochre-500/10'
-                          : 'border-white/20 bg-paper'
-                      }`}
-                    >
-                      <span className="font-cond text-[11px] font-600 uppercase leading-tight text-ink-900">
-                        {placed[slot].player.display}
-                      </span>
-                      <span className="mt-1 font-display text-lg text-grass-500">{placed[slot].year}</span>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+          {/* A linha quebra em fileiras (como texto): todas as cartas à vista,
+              sem rolar de lado. Lê-se da esquerda pra direita, de cima pra baixo. */}
+          <div className="mt-1 flex flex-wrap items-stretch justify-center gap-y-1.5 pb-2">
+            {Array.from({ length: placed.length + 1 }).map((_, slot) => (
+              <div key={slot} className="flex items-stretch">
+                {!over && current ? (
+                  <button
+                    onClick={() => place(slot)}
+                    aria-label={slot === 0 ? 'Encaixar antes de todos' : `Encaixar depois de ${placed[slot - 1].player.display}`}
+                    className="group mx-0.5 flex w-6 flex-none items-center justify-center self-stretch rounded-sm border-2 border-dashed border-grass-500/50 bg-grass-600/5 text-grass-400 transition-colors hover:border-grass-400 hover:bg-grass-600/20 active:bg-grass-600/40"
+                    title="Encaixar aqui"
+                  >
+                    <span className="font-cond text-base font-700">+</span>
+                  </button>
+                ) : (
+                  <span className="w-1 flex-none" />
+                )}
+                {slot < placed.length && (
+                  <div
+                    id={`tl-${placed[slot].player.answer}`}
+                    className={`flex min-h-[46px] w-[58px] flex-none flex-col items-center justify-between border-2 px-1 py-1.5 text-center transition-colors ${
+                      placed[slot].player.answer === lastPlaced
+                        ? lastOk
+                          ? 'animate-pop border-corn-500 bg-corn-500/10'
+                          : 'animate-shake border-ochre-500 bg-ochre-500/10'
+                        : 'border-white/20 bg-paper'
+                    }`}
+                    title={placed[slot].player.display}
+                  >
+                    <span className="line-clamp-2 break-words font-cond text-[10px] font-600 uppercase leading-tight text-ink-900">
+                      {placed[slot].player.display.split(' ').slice(-1)[0]}
+                    </span>
+                    <span className="font-display text-base leading-none text-grass-500">{placed[slot].year}</span>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
 
