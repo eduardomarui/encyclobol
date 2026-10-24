@@ -5,6 +5,7 @@ import { availableThemes, themeSize } from '../lib/themes'
 import { gatherGames } from '../lib/profile'
 import { getStreak, hoursUntilMidnight } from '../lib/streak'
 import { Flame } from './Streak'
+import { readChallenge } from '../lib/challenge'
 
 // Peças compartilhadas pelas seis páginas de jogo: cabeçalho fixo, modal
 // "Como jogar" e a grade de números do fim de rodada.
@@ -232,6 +233,31 @@ export function NextUp({ current }: { current: string }) {
       >
         Todos os jogos
       </Link>
+    </div>
+  )
+}
+
+// Faixa do desafio recebido por link: a meta durante o jogo e o placar no fim.
+export function ChallengeBanner({ game, mine, over }: { game: string; mine: number; over: boolean }) {
+  const ch = readChallenge()
+  if (!ch) return null
+  if (!over)
+    return (
+      <div className="mt-3 w-full max-w-md border-2 border-corn-500/70 bg-corn-500/10 px-3 py-2 text-center font-cond text-xs font-700 uppercase tracking-wider text-corn-400">
+        {ch.from} fez {ch.pts} no {game} de hoje. Bate essa.
+      </div>
+    )
+  const won = mine > ch.pts
+  const tie = mine === ch.pts
+  return (
+    <div className={`mt-3 w-full max-w-md border-2 px-3 py-2 text-center ${won ? 'border-grass-500 bg-grass-700/40' : tie ? 'border-white/20 bg-paper-100' : 'border-ochre-500 bg-ochre-500/10'}`}>
+      <p className="font-cond text-[11px] font-600 uppercase tracking-wider text-ink-600">Desafio de {ch.from}</p>
+      <p className="font-display text-2xl leading-tight text-ink-900">
+        Você {mine} <span className="text-ink-500">×</span> {ch.pts} {ch.from}
+      </p>
+      <p className={`font-cond text-xs font-700 uppercase tracking-wider ${won ? 'text-grass-400' : tie ? 'text-ink-700' : 'text-ochre-400'}`}>
+        {won ? 'Ganhou! Manda de volta' : tie ? 'Empate. Desempata amanhã' : 'Perdeu dessa vez'}
+      </p>
     </div>
   )
 }

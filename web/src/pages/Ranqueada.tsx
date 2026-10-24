@@ -28,6 +28,8 @@ import {
 } from '../lib/ranked'
 import { buzz, sfx } from '../lib/sfx'
 import { confetti } from '../lib/juice'
+import { shareScoreImage } from '../lib/shareCard'
+import { siteLink } from '../lib/site'
 
 const ATTACK_SEC = 10
 const DEF_SEC = 6
@@ -253,6 +255,28 @@ export default function Ranqueada() {
     }
   }
 
+  // Card do resultado com a divisão: "Subi pra Série B" é o que se posta.
+  const [shared, setShared] = useState(false)
+  async function compartilhar() {
+    if (!ghost || !final) return
+    const subiu = divisionOf(final.rating).id !== divisionOf(final.before).id && final.rating > final.before
+    const div = divisionOf(final.rating).name
+    const r = await shareScoreImage({
+      game: 'Ranqueada · Pênaltis',
+      stamp: subiu ? 'Acesso' : undefined,
+      headline: `${my} × ${opp}`,
+      sub: subiu ? `subi pra ${div}` : `${my > opp ? 'vitória' : my === opp ? 'empate' : 'derrota'} contra ${ghost.nick}`,
+      lines: [`${div} · ${final.rating} pts`, seasonLabel(season)],
+      text: subiu
+        ? `Subi pra ${div} na ranqueada do Encyclobol. Vem me encarar: ${siteLink('/jogos/penaltis/ranqueada')}`
+        : `${div} na ranqueada do Encyclobol (${final.rating} pts). Vem me encarar: ${siteLink('/jogos/penaltis/ranqueada')}`,
+    })
+    if (r !== 'error') {
+      setShared(true)
+      setTimeout(() => setShared(false), 2500)
+    }
+  }
+
   function closeHelp() {
     setShowHelp(false)
     try {
@@ -465,7 +489,12 @@ export default function Ranqueada() {
             ) : (
               <p className="mt-3 font-serif italic text-ink-600">{msg || 'Lançando o resultado na súmula…'}</p>
             )}
-            <button onClick={practice ? treinarRobo : jogar} className="btn-stamp mt-5 w-full bg-grass-600 px-6 py-3 text-ink-900 hover:bg-grass-700">
+            {final && !practice && (
+              <button onClick={compartilhar} className="btn-stamp mt-5 w-full bg-corn-500 px-6 py-3 text-paper hover:bg-corn-400">
+                {shared ? 'Imagem pronta!' : 'Compartilhar resultado'}
+              </button>
+            )}
+            <button onClick={practice ? treinarRobo : jogar} className="btn-stamp mt-2 w-full bg-grass-600 px-6 py-3 text-ink-900 hover:bg-grass-700">
               Jogar outra →
             </button>
             <button onClick={() => setPhase('lobby')} className="btn-stamp mt-2 w-full border-2 border-white/20 px-6 py-2.5 text-ink-900 hover:bg-grass-700">

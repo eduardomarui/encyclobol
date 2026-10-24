@@ -9,10 +9,10 @@ import {
 } from '../lib/conexoesStats'
 import { confetti } from '../lib/juice'
 import { shareScoreImage, type Sq } from '../lib/shareCard'
-import { GameHeader, GameTitle, HelpModal, StatGrid, NextUp } from '../components/GameShell'
-import { siteLink } from '../lib/site'
+import { GameHeader, GameTitle, HelpModal, StatGrid, NextUp, ChallengeBanner } from '../components/GameShell'
 import { clearRun, loadRun, saveRun } from '../lib/runSave'
 import { buzz, sfx } from '../lib/sfx'
+import { challengeLink } from '../lib/challenge'
 
 const MAX_MISTAKES = 4
 const SOLVE_PTS = 100
@@ -222,7 +222,7 @@ export default function Conexoes() {
       squares,
       lines: [`Total ${career.total} pts`],
       edition: `Edição #${dayNumber()}`,
-      text: `Encyclobol · Quarteto #${dayNumber()} — ${points} pts · ${siteLink('/jogos/conexoes')}`,
+      text: `Encyclobol · Quarteto #${dayNumber()} — ${points} pts · ${challengeLink('/jogos/conexoes', points)}`,
     })
     if (r !== 'error') {
       setCopied(true)
@@ -240,6 +240,7 @@ export default function Conexoes() {
           title="Quarteto"
           blurb="Ache os quatro grupos de quatro craques. Sempre tem uma isca: alguém que parece caber em dois lugares — mas só fecha de um jeito."
         />
+        <ChallengeBanner game="Quarteto" mine={points} over={over} />
 
         {!over && (
           <div className="mt-3 flex items-center gap-3 font-cond text-xs font-600 uppercase tracking-wider text-ink-500">

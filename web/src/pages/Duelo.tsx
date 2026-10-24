@@ -20,6 +20,7 @@ import {
 import { PenaltyScene, shotFromOutcome, type Kind } from '../components/PenaltyScene'
 import { GameHeader, HelpModal, ThemePicker } from '../components/GameShell'
 import { loadTheme, saveTheme, themeLabel } from '../lib/themes'
+import { siteLink } from '../lib/site'
 
 const ATTACK_SEC = 10 // tempo pra cobrar
 const DEF_SEC = 6 // tempo pra defender (menos — pressão; e perguntas mais difíceis)
@@ -150,7 +151,14 @@ export default function Duelo() {
     ;(async () => {
       await ensureSession()
       setMe(await myId())
-      setNickState((await getProfile())?.nick ?? null)
+      const nk = (await getProfile())?.nick ?? null
+      setNickState(nk)
+      // Convite por link (?sala=CODIGO): entra direto na sala do amigo.
+      const sala = params.get('sala')
+      if (sala) {
+        setCode(sala.toUpperCase().slice(0, 6))
+        if (nk) entrar(sala)
+      }
       const mid = params.get('m')
       if (mid) {
         const m = await getMatch(mid)
@@ -190,6 +198,8 @@ export default function Duelo() {
     try {
       setNickState((await apiSetNick(n))?.nick ?? n)
       setMsg('')
+      const sala = params.get('sala')
+      if (sala && phase === 'lobby') entrar(sala)
     } catch (e) {
       setMsg((e as Error).message)
     }
@@ -213,8 +223,8 @@ export default function Duelo() {
       setBusy(false)
     }
   }
-  async function entrar() {
-    const c = code.trim()
+  async function entrar(codeArg?: string) {
+    const c = (codeArg ?? code).trim()
     if (c.length < 4) {
       setMsg('Digite o código da sala.')
       return
@@ -364,12 +374,26 @@ export default function Duelo() {
     submitMove(match.id, shown, i, correct)
   }
 
-  function convidar() {
+  // Convite: link que já abre a sala. No celular, usa o compartilhar nativo (WhatsApp).
+  async function convidar() {
     if (!match) return
-    const url = `${window.location.origin}${import.meta.env.BASE_URL}jogos/penaltis/online`
-    navigator.clipboard?.writeText(`Te desafiei no Encyclobol! Código da sala: ${match.code}\nEntra em ${url}`)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    const url = siteLink(`/jogos/penaltis/online?sala=${match.code}`)
+    const text = `Te desafiei pra um duelo de pênaltis no Encyclobol. Toca pra entrar na sala ${match.code}:`
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'Duelo de Pênaltis', text, url })
+        return
+      }
+    } catch {
+      return // cancelou
+    }
+    try {
+      await navigator.clipboard?.writeText(`${text} ${url}`)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      setMsg(`Manda pro seu amigo: ${url}`)
+    }
   }
 
   const header = (
@@ -444,7 +468,7 @@ export default function Duelo() {
                   placeholder="Código"
                   className="flex-1 border-2 border-white/20 bg-paper px-4 py-2.5 font-cond uppercase tracking-[0.2em] text-ink-900 outline-none"
                 />
-                <button onClick={entrar} disabled={busy} className="btn-stamp border-2 border-white/20 px-5 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900 disabled:opacity-50">
+                <button onClick={() => entrar()} disabled={busy} className="btn-stamp border-2 border-white/20 px-5 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900 disabled:opacity-50">
                   {busy ? 'Entrando…' : 'Entrar'}
                 </button>
               </div>

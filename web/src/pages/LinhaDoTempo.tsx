@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { players, type Player } from '../data/players'
-import { GameHeader, GameTitle, HelpModal, Lives, StatGrid, NextUp } from '../components/GameShell'
+import { GameHeader, GameTitle, HelpModal, Lives, StatGrid, NextUp, ChallengeBanner } from '../components/GameShell'
 import { dayNumber, seededShuffle } from '../lib/daily'
 import {
   loadTLCareer,
@@ -10,9 +10,9 @@ import {
 } from '../lib/timelineStats'
 import { confetti } from '../lib/juice'
 import { shareScoreImage } from '../lib/shareCard'
-import { siteLink } from '../lib/site'
 import { clearRun, loadRun, saveRun } from '../lib/runSave'
 import { buzz, sfx } from '../lib/sfx'
+import { challengeLink } from '../lib/challenge'
 
 const HELP_KEY = 'encyclobol:timeline:help'
 
@@ -190,7 +190,7 @@ export default function LinhaDoTempo() {
       sub: newRecord ? 'novo recorde!' : 'pontos',
       lines: [`${score} cartas em sequência`, `Total ${career.total} pts`],
       edition: `Edição #${dayNumber()}`,
-      text: `Encyclobol · Linha do Tempo #${dayNumber()} — ${points} pts (${score} cartas) · ${siteLink('/jogos/linha-do-tempo')}`,
+      text: `Encyclobol · Linha do Tempo #${dayNumber()} — ${points} pts (${score} cartas) · ${challengeLink('/jogos/linha-do-tempo', points)}`,
     })
     if (r !== 'error') {
       setCopied(true)
@@ -211,6 +211,7 @@ export default function LinhaDoTempo() {
           title="Linha do Tempo"
           blurb="Empilhe os craques na ordem da história, pelo início de carreira. Acertos seguidos valem mais; errou a época, perde vida. Vá o mais longe que conseguir."
         />
+        <ChallengeBanner game="Linha do Tempo" mine={points} over={over} />
 
         {/* Placar / combo / vidas */}
         <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2">

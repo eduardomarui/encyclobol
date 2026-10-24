@@ -13,9 +13,9 @@ import {
 } from '../lib/misteriosoStats'
 import { confetti } from '../lib/juice'
 import { shareScoreImage, type Sq } from '../lib/shareCard'
-import { GameHeader, GameTitle, HelpModal, StatGrid, NextUp } from '../components/GameShell'
-import { siteLink } from '../lib/site'
+import { GameHeader, GameTitle, HelpModal, StatGrid, NextUp, ChallengeBanner } from '../components/GameShell'
 import { buzz, sfx } from '../lib/sfx'
+import { challengeLink } from '../lib/challenge'
 
 const MAX_GUESSES = 8
 const HINT_COST = 75
@@ -332,7 +332,7 @@ export default function Misterioso() {
       squares,
       lines: [`Total ${career.total} pts`],
       edition: `Edição #${dayNumber()}`,
-      text: `Encyclobol · Craque Misterioso #${dayNumber()} — ${won ? points + ' pts' : 'X'} · ${siteLink('/jogos/craque-misterioso')}`,
+      text: `Encyclobol · Craque Misterioso #${dayNumber()} — ${won ? points + ' pts' : 'X'} · ${challengeLink('/jogos/craque-misterioso', points)}`,
     })
     if (res !== 'error') {
       setCopied(true)
@@ -390,6 +390,7 @@ export default function Misterioso() {
           title="Craque Misterioso"
           blurb="Chute craques e leia as pistas: seleção, continente, posição e época. Verde acertou; amarelo na época é quente. Menos chutes valem mais pontos."
         />
+        <ChallengeBanner game="Craque Misterioso" mine={points} over={over} />
 
         {!over && (
           <div className="mt-3 flex items-center gap-3">

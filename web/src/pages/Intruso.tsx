@@ -10,11 +10,11 @@ import {
 import { confetti } from '../lib/juice'
 import { shareScoreImage } from '../lib/shareCard'
 import { players } from '../data/players'
-import { GameHeader, GameTitle, HelpModal, Lives, StatGrid, NextUp, TimeBar } from '../components/GameShell'
-import { siteLink } from '../lib/site'
+import { GameHeader, GameTitle, HelpModal, Lives, StatGrid, NextUp, TimeBar, ChallengeBanner } from '../components/GameShell'
 import { clearRun, loadRun, saveRun } from '../lib/runSave'
 import { buzz, sfx } from '../lib/sfx'
 import { buildElos, tierOf, type EloOptions } from '../lib/intrusoElos'
+import { challengeLink } from '../lib/challenge'
 
 const LIVES = 3
 // Caçada do dia tem fim: 10 rodadas. O infinito fica no treino.
@@ -276,7 +276,7 @@ export default function Intruso() {
       sub: newRecord ? 'novo recorde!' : 'pontos',
       lines: [`${caught} intrusos caçados`, `Total ${career.total} pts`],
       edition: `Edição #${dayNumber()}`,
-      text: `Encyclobol · O Intruso #${dayNumber()} — ${points} pts · ${caught} caçados · ${siteLink('/jogos/o-intruso')}`,
+      text: `Encyclobol · O Intruso #${dayNumber()} — ${points} pts · ${caught} caçados · ${challengeLink('/jogos/o-intruso', points)}`,
     })
     if (r !== 'error') {
       setCopied(true)
@@ -294,6 +294,7 @@ export default function Intruso() {
           title="O Intruso"
           blurb="Três craques têm algo em comum, um não. Ache o infiltrado — e depois crave o porquê. Erre o intruso e perde vida; vá o mais longe que conseguir."
         />
+        <ChallengeBanner game="O Intruso" mine={points} over={over} />
 
         {/* HUD */}
         <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2">

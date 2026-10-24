@@ -2,6 +2,7 @@
 // Tudo no-op quando o Supabase não está configurado.
 import { supabase, rankingEnabled } from './supabase'
 import { dayNumber } from './daily'
+import { rememberNick } from './challenge'
 
 export { rankingEnabled }
 
@@ -42,6 +43,7 @@ export async function getProfile(): Promise<Profile | null> {
     .select('nick, friend_code')
     .eq('id', u.user.id)
     .maybeSingle()
+  rememberNick((data as Profile | null)?.nick)
   return (data as Profile) ?? null
 }
 
@@ -49,6 +51,7 @@ export async function setNick(nick: string): Promise<Profile | null> {
   if (!supabase) return null
   const { data, error } = await supabase.rpc('set_nick', { p_nick: nick })
   if (error) throw new Error(error.message)
+  rememberNick((data as Profile | null)?.nick ?? nick)
   return data as Profile
 }
 

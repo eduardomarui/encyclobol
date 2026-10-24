@@ -20,6 +20,9 @@ import { loadTLCareer, loadTLToday } from '../lib/timelineStats'
 import { loadIntrusoCareer, loadIntrusoToday } from '../lib/intrusoStats'
 import { loadMystCareer, loadMystToday } from '../lib/misteriosoStats'
 import { siteLink } from '../lib/site'
+import { Camisa } from '../components/Camisa'
+import { TimePicker, useMyTeam } from '../components/TimePicker'
+import { doClube } from '../data/clubes'
 
 type Result = { played: boolean; streak: number; detail: string; good: boolean }
 
@@ -135,6 +138,31 @@ const games: GameInfo[] = [
   },
 ]
 
+function TeamStrip() {
+  const team = useMyTeam()
+  const [open, setOpen] = useState(false)
+  if (team)
+    return (
+      <Link to="/ranking" className="mt-3 flex items-center gap-3 border-2 border-white/10 bg-paper-100 px-4 py-2 hover:border-corn-500/60">
+        <Camisa clube={team} className="h-8 w-8" />
+        <span className="flex-1 font-cond text-xs font-600 uppercase tracking-wider text-ink-700">
+          Seus pontos somam pra torcida {doClube(team)}
+        </span>
+        <span className="font-cond text-xs font-700 uppercase tracking-wider text-corn-500">Torcidas →</span>
+      </Link>
+    )
+  return (
+    <>
+      <button onClick={() => setOpen(true)} className="mt-3 flex w-full items-center gap-3 border-2 border-corn-500/60 bg-corn-500/10 px-4 py-2.5 text-left hover:bg-corn-500/20">
+        <span className="font-display text-xl leading-none text-corn-500">?</span>
+        <span className="flex-1 font-cond text-sm font-700 uppercase tracking-wider text-ink-900">Escolha seu time do coração</span>
+        <span className="font-cond text-xs font-600 uppercase tracking-wider text-corn-500">Torcida contra torcida →</span>
+      </button>
+      {open && <TimePicker onClose={() => setOpen(false)} />}
+    </>
+  )
+}
+
 export default function Jogos() {
   const [copied, setCopied] = useState(false)
   const entries = games.map((g) => ({ ...g, ...g.result() }))
@@ -184,6 +212,9 @@ export default function Jogos() {
         <div className="mt-6">
           <StreakPanel compact />
         </div>
+
+        {/* Time do coração: convite até escolher */}
+        <TeamStrip />
 
         {/* Resumo do dia */}
         <section className="mt-3 border-2 border-white/20 bg-paper-100 p-5 sm:p-6">

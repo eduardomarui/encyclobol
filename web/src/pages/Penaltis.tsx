@@ -11,11 +11,11 @@ import {
 import { PenaltyScene, makeShot, type Outcome, type Shot } from '../components/PenaltyScene'
 import { confetti } from '../lib/juice'
 import { shareScoreImage } from '../lib/shareCard'
-import { GameHeader, HelpModal, StatGrid, ThemePicker, TimeBar, NextUp } from '../components/GameShell'
+import { GameHeader, HelpModal, StatGrid, ThemePicker, TimeBar, NextUp, ChallengeBanner } from '../components/GameShell'
 import { loadTheme, poolsFor, saveTheme, themeLabel, themeSeed } from '../lib/themes'
-import { siteLink } from '../lib/site'
 import { clearRun, loadRun, saveRun } from '../lib/runSave'
 import { buzz, sfx } from '../lib/sfx'
+import { challengeLink } from '../lib/challenge'
 
 const HELP_KEY = 'encyclobol:copa:help'
 
@@ -380,7 +380,7 @@ export default function Penaltis() {
         `Total ${copa.total} pts · ${copa.cups} copa${copa.cups === 1 ? '' : 's'}`,
       ],
       edition: `Edição #${dayNumber()}`,
-      text: `Encyclobol · Copa de Pênaltis #${dayNumber()} — ${champion ? 'CAMPEÃO' : copaScore + ' pts'} · ${siteLink('/jogos/penaltis')}`,
+      text: `Encyclobol · Copa de Pênaltis #${dayNumber()} — ${champion ? 'CAMPEÃO' : copaScore + ' pts'} · ${challengeLink('/jogos/penaltis', copaScore)}`,
     })
     if (r !== 'error') {
       setCopied(true)
@@ -404,6 +404,7 @@ export default function Penaltis() {
       />
 
       <main className="container-page flex flex-1 flex-col items-center py-3 sm:py-5">
+        <ChallengeBanner game="Copa de Pênaltis" mine={copaScore} over={copaDone} />
         {/* Escolha do campeonato (antes de começar) */}
         {!started && !copaDone && (
           <div className="mt-2 w-full max-w-sm border-2 border-white/20 bg-paper-100 p-5">

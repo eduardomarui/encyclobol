@@ -10,10 +10,10 @@ import {
 } from '../lib/stats'
 import { confetti } from '../lib/juice'
 import { shareScoreImage } from '../lib/shareCard'
-import { GameHeader, HelpModal, StatGrid, TimeBar, NextUp } from '../components/GameShell'
-import { siteLink } from '../lib/site'
+import { GameHeader, HelpModal, StatGrid, TimeBar, NextUp, ChallengeBanner } from '../components/GameShell'
 import { loadRun, saveRun } from '../lib/runSave'
 import { buzz, sfx } from '../lib/sfx'
+import { challengeLink } from '../lib/challenge'
 
 const MAX_ATTEMPTS = 6
 const ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM']
@@ -340,7 +340,7 @@ export default function QuemSouEle() {
       sub: 'pontos hoje',
       lines: [`Estágio ${stage}`, `Total ${career.total} pts`],
       edition: `Edição #${dayNumber()}`,
-      text: `Encyclobol · Tira-Teima #${dayNumber()} — ${careerScore} pts · ${siteLink('/jogos/quem-sou-ele')}`,
+      text: `Encyclobol · Tira-Teima #${dayNumber()} — ${careerScore} pts · ${challengeLink('/jogos/quem-sou-ele', careerScore)}`,
     })
     if (r !== 'error') {
       setCopied(true)
@@ -359,6 +359,7 @@ export default function QuemSouEle() {
         {/* Título compacto: a página inteira (tabuleiro + teclado) tem que caber sem rolar */}
         <p className="kicker">Carreira · jogo 01</p>
         <h1 className="mt-1 font-display text-3xl uppercase leading-none tracking-tight text-ink-900">Tira-Teima</h1>
+        <ChallengeBanner game="Tira-Teima" mine={careerScore} over={careerMode && careerDoneToday} />
 
         {/* HUD da carreira numa linha: estágio · pontos · vidas · relógio */}
         {careerMode && !careerDoneToday && (

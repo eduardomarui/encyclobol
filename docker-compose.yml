@@ -28,6 +28,7 @@ services:
       - ./supabase/local/00-supabase-shim.sql:/docker-entrypoint-initdb.d/00-supabase-shim.sql:ro
       - ./supabase/schema.sql:/docker-entrypoint-initdb.d/10-schema.sql:ro
       - ./supabase/ranked.sql:/docker-entrypoint-initdb.d/20-ranked.sql:ro
+      - ./supabase/torcidas.sql:/docker-entrypoint-initdb.d/30-torcidas.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U encyclobol -d encyclobol"]
       interval: 5s

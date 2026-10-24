@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { syncToday } from './lib/ranking'
+import { pushTeam } from './lib/team'
 import Landing from './pages/Landing'
 import Jogos from './pages/Jogos'
 import QuemSouEle from './pages/QuemSouEle'
@@ -25,6 +26,9 @@ function ScoreSync() {
   useEffect(() => {
     syncToday().catch(() => {})
   }, [pathname])
+  useEffect(() => {
+    pushTeam().catch(() => {})
+  }, [])
   useEffect(() => {
     const onHide = () => {
       if (document.visibilityState === 'hidden') syncToday().catch(() => {})

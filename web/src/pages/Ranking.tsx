@@ -17,13 +17,14 @@ import {
   type BoardRow,
 } from '../lib/ranking'
 import { siteLink } from '../lib/site'
+import { Torcidas } from '../components/Torcidas'
 
 export default function Ranking() {
   const [loading, setLoading] = useState(true)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [nick, setNick] = useState('')
   const [saving, setSaving] = useState(false)
-  const [tab, setTab] = useState<'global' | 'friends'>('global')
+  const [tab, setTab] = useState<'global' | 'friends' | 'torcidas'>('global')
   const [global, setGlobal] = useState<BoardRow[]>([])
   const [friends, setFriends] = useState<BoardRow[]>([])
   const [code, setCode] = useState('')
@@ -255,7 +256,7 @@ export default function Ranking() {
 
             {/* Abas */}
             <div className="mt-4 flex border-b border-white/10">
-              {(['global', 'friends'] as const).map((t) => (
+              {(['global', 'friends', 'torcidas'] as const).map((t) => (
                 <button
                   key={t}
                   onClick={() => setTab(t)}
@@ -263,13 +264,15 @@ export default function Ranking() {
                     tab === t ? 'border-grass-600 text-ink-900' : 'border-transparent text-ink-500'
                   }`}
                 >
-                  {t === 'global' ? 'Global' : 'Amigos'}
+                  {t === 'global' ? 'Global' : t === 'friends' ? 'Amigos' : 'Torcidas'}
                 </button>
               ))}
             </div>
 
+            {tab === 'torcidas' && <Torcidas />}
+
             {/* Tabela */}
-            <div className="mt-3 overflow-hidden border-2 border-white/20">
+            <div className={`mt-3 overflow-hidden border-2 border-white/20 ${tab === 'torcidas' ? 'hidden' : ''}`}>
               {rows.length === 0 && (
                 <p className="bg-paper-100 px-4 py-6 text-center font-serif text-sm italic text-ink-600">
                   {tab === 'friends'

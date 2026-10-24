@@ -1,4 +1,6 @@
 import { SITE_LABEL } from './site'
+import { myTeam } from './team'
+import { doClube } from '../data/clubes'
 // Gera um card de resultado em imagem (canvas) com a identidade do Encyclobol
 // e dispara o compartilhamento nativo (Web Share). Sem dependências.
 
@@ -213,6 +215,14 @@ async function draw(o: ShareOpts): Promise<Blob | null> {
     ctx.restore()
     ctx.textBaseline = 'alphabetic'
     ctx.textAlign = 'center'
+  }
+
+  // Torcida (quando o jogador já escolheu o time)
+  const team = myTeam()
+  if (team) {
+    ctx.fillStyle = C.corn
+    ctx.font = '600 26px Oswald, sans-serif'
+    ctx.fillText(`TORCEDOR ${doClube(team).toUpperCase()}`, cx, S - 150)
   }
 
   // Rodapé
