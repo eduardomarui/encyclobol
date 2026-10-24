@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { GameHeader, HelpModal, TimeBar } from '../components/GameShell'
 import { PenaltyScene, makeShot, type Outcome, type Shot } from '../components/PenaltyScene'
 import { duelDefense, duelShot, type PQ } from '../lib/duel'
@@ -13,6 +13,9 @@ import {
   divisionProgress,
   botGhost,
   findGhost,
+  queueJoin,
+  queueLeave,
+  queuePoll,
   rankedBoard,
   rankedMe,
   rankedMissing,
@@ -30,7 +33,8 @@ const ATTACK_SEC = 10
 const DEF_SEC = 6
 const HELP_KEY = 'encyclobol:ranqueada:help'
 
-type Phase = 'lobby' | 'loading' | 'play' | 'done'
+type Phase = 'lobby' | 'queue' | 'loading' | 'play' | 'done'
+const QUEUE_SEC = 12 // espera por um adversário ao vivo antes de cair no fantasma
 
 function DivisionBadge({ rating, big = false }: { rating: number; big?: boolean }) {
   const d = divisionOf(rating)
@@ -61,6 +65,9 @@ export default function Ranqueada() {
   const [final, setFinal] = useState<(RankedProfile & { delta: number; before: number }) | null>(null)
   // Treino contra o robô: funciona sem banco e não mexe na nota.
   const [practice, setPractice] = useState(false)
+  const [queueLeft, setQueueLeft] = useState(QUEUE_SEC)
+  const queueOn = useRef(false)
+  const navigate = useNavigate()
   const startedAt = useRef(0)
   const [showHelp, setShowHelp] = useState(() => {
     try {
@@ -139,18 +146,56 @@ export default function Ranqueada() {
     comecarCom(botGhost(me?.rating ?? 900, Math.random() < 0.5))
   }
 
+  // 1) Fila ao vivo por até QUEUE_SEC; 2) senão, fantasma; 3) senão, robô.
   async function jogar() {
     if (!me) return
     setPractice(false)
-    setPhase('loading')
     setMsg('')
+    setPhase('queue')
+    setQueueLeft(QUEUE_SEC)
+    queueOn.current = true
+    const ao = (id: string) => {
+      queueOn.current = false
+      sfx.whistle()
+      navigate(`/jogos/penaltis/online?m=${id}`)
+    }
     try {
+      const now = await queueJoin(season)
+      if (now) return ao(now)
+      const t0 = Date.now()
+      while (queueOn.current && Date.now() - t0 < QUEUE_SEC * 1000) {
+        await new Promise((r) => setTimeout(r, 1500))
+        setQueueLeft(Math.max(0, QUEUE_SEC - Math.round((Date.now() - t0) / 1000)))
+        const id = await queuePoll()
+        if (id) return ao(id)
+      }
+      if (!queueOn.current) return // cancelou
+      const late = await queueLeave()
+      if (late) return ao(late)
+      queueOn.current = false
+      setPhase('loading')
       comecarCom(await findGhost(me.rating, season))
     } catch (e) {
+      queueOn.current = false
       setMsg((e as Error).message)
       setPhase('lobby')
     }
   }
+
+  async function cancelarFila() {
+    queueOn.current = false
+    const late = await queueLeave().catch(() => null)
+    if (late) return navigate(`/jogos/penaltis/online?m=${late}`)
+    setPhase('lobby')
+  }
+
+  // Saiu da página com a fila aberta: tira da fila.
+  useEffect(
+    () => () => {
+      if (queueOn.current) queueLeave().catch(() => {})
+    },
+    [],
+  )
 
   function answer(choice: number) {
     if (!ghost || !question || selected !== null) return
@@ -282,7 +327,7 @@ export default function Ranqueada() {
                     </p>
                   </div>
                   <button onClick={jogar} disabled={phase === 'loading'} className="btn-stamp mt-5 w-full bg-grass-600 px-6 py-3 text-ink-900 hover:bg-grass-700 disabled:opacity-50">
-                    {phase === 'loading' ? 'Procurando adversário…' : 'Jogar ranqueada →'}
+                    {phase === 'loading' ? 'Chamando o adversário…' : 'Jogar ranqueada →'}
                   </button>
                 </>
               ) : (
@@ -315,6 +360,23 @@ export default function Ranqueada() {
             <p className="mt-3 font-serif text-xs italic text-ink-500">
               No fim do mês a temporada vira: sua nota encolhe pela metade em direção à Série D e a briga recomeça.
             </p>
+          </div>
+        )}
+
+        {/* Procurando adversário ao vivo */}
+        {phase === 'queue' && (
+          <div className="mt-6 w-full max-w-sm border-2 border-white/20 bg-paper-100 p-6 text-center">
+            <p className="kicker">Procurando adversário ao vivo</p>
+            <p className="mt-2 font-display text-6xl leading-none text-ink-900">{queueLeft}</p>
+            <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-ink-900/10">
+              <div className="h-full bg-corn-500 transition-[width] duration-1000 ease-linear" style={{ width: `${(queueLeft / QUEUE_SEC) * 100}%` }} />
+            </div>
+            <p className="mt-3 font-serif text-sm italic text-ink-600">
+              Se ninguém do seu nível aparecer, você enfrenta a partida gravada de um jogador parecido.
+            </p>
+            <button onClick={cancelarFila} className="btn-stamp mt-4 w-full border-2 border-white/20 px-6 py-2.5 text-ink-900 hover:bg-grass-700">
+              Cancelar
+            </button>
           </div>
         )}
 

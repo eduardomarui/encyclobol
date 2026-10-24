@@ -15,6 +15,7 @@ export type Match = {
   rounds: number
   status: 'waiting' | 'playing' | 'done'
   theme?: string | null // campeonato das perguntas ('geral' quando a coluna não existe)
+  ranked?: boolean // partida da ranqueada ao vivo (vale pontos, sem revanche)
 }
 
 export type Move = {

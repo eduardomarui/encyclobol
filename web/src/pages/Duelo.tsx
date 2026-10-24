@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
+import { divisionOf, liveResult } from '../lib/ranked'
 import { rankingEnabled, ensureSession, getProfile, setNick as apiSetNick } from '../lib/ranking'
 import {
   createMatch,
@@ -141,12 +142,26 @@ export default function Duelo() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, matchId])
 
+  // Ranqueada ao vivo: a fila manda pra cá com ?m=<sala>; entra direto na partida.
+  const [params] = useSearchParams()
+  const [live, setLive] = useState<{ rating: number; delta: number } | null>(null)
   useEffect(() => {
     if (!rankingEnabled) return
     ;(async () => {
       await ensureSession()
       setMe(await myId())
       setNickState((await getProfile())?.nick ?? null)
+      const mid = params.get('m')
+      if (mid) {
+        const m = await getMatch(mid)
+        if (m) {
+          seedRef.current = m.seed
+          setMatch(m)
+          setMoves(await getMoves(m.id))
+          listen(m.id)
+          setPhase('play')
+        }
+      }
     })()
     return () => cleanup.current?.()
   }, [])
@@ -293,6 +308,23 @@ export default function Duelo() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resolved, shown, revealing, phase, match])
+
+  // Ranqueada ao vivo terminou: o servidor conta o placar e aplica o ELO.
+  useEffect(() => {
+    if (phase !== 'done' || !match?.ranked || live) return
+    let tries = 0
+    const go = async () => {
+      try {
+        const r = await liveResult(match.id)
+        if (r) setLive({ rating: r.rating, delta: r.delta })
+      } catch {
+        // a última jogada do outro pode ainda estar chegando: tenta de novo
+        if (++tries < 6) setTimeout(go, 1500)
+      }
+    }
+    go()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, match?.id])
 
   // Fim de jogo (após revelar tudo): melhor de N + morte súbita.
   useEffect(() => {
@@ -500,9 +532,28 @@ export default function Duelo() {
             <p className="mt-1 font-serif text-base italic text-ink-600">
               {myScore > oppScore ? 'Frieza na cobrança e mão firme na defesa!' : 'Faltou pontaria. Revanche?'}
             </p>
-            <button onClick={pedirRevanche} className="btn-stamp mt-5 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700">
-              Revanche
-            </button>
+            {match.ranked ? (
+              <>
+                {live ? (
+                  <>
+                    <p className={`mt-3 font-display text-3xl ${live.delta >= 0 ? 'text-grass-400' : 'text-ochre-400'}`}>
+                      {live.delta >= 0 ? '+' : ''}
+                      {live.delta} pts · {divisionOf(live.rating).name}
+                    </p>
+                    <p className="font-cond text-xs font-600 uppercase tracking-wider text-ink-600">Nota da temporada: {live.rating}</p>
+                  </>
+                ) : (
+                  <p className="mt-3 font-serif italic text-ink-600">Lançando o resultado na súmula…</p>
+                )}
+                <Link to="/jogos/penaltis/ranqueada" className="btn-stamp mt-5 block w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700">
+                  Jogar outra ranqueada →
+                </Link>
+              </>
+            ) : (
+              <button onClick={pedirRevanche} className="btn-stamp mt-5 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700">
+                Revanche
+              </button>
+            )}
             {msg && <p className="mt-2 font-cond text-xs uppercase tracking-wider text-ochre-400">{msg}</p>}
             <button onClick={resetToLobby} className="btn-stamp mt-2 w-full border-2 border-white/20 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900">
               Sair da sala

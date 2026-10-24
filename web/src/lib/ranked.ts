@@ -58,20 +58,51 @@ export async function rankedMe(season = currentSeason()): Promise<RankedProfile>
   return data as RankedProfile
 }
 
-// Robô de reserva quando ainda não há fantasma: acerta conforme a nota
-// (Série D erra bastante; Elite quase não erra). Determinístico pelo seed.
+// Robôs de reserva (sempre identificados como robô, fora da tabela): um por
+// divisão, cada um com um jeito. `atk`/`def`: chance de acertar cobrando/defendendo.
+const BOTS: Record<string, { nick: string; atk: number; def: number }> = {
+  d: { nick: 'Robô Peladeiro', atk: 0.55, def: 0.3 },
+  c: { nick: 'Robô Volante', atk: 0.55, def: 0.5 },
+  b: { nick: 'Robô Camisa 10', atk: 0.75, def: 0.45 },
+  a: { nick: 'Robô Professor', atk: 0.75, def: 0.65 },
+  elite: { nick: 'Robô Lenda', atk: 0.88, def: 0.75 },
+}
 export function botGhost(rating: number, kicksEven: boolean): Ghost {
   const seed = Math.floor(Math.random() * 1e9)
   let s = seed || 1
   const rnd = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 2 ** 32)
-  const skill = Math.max(0.35, Math.min(0.85, 0.35 + (rating - 800) / 1400))
+  const bot = BOTS[divisionOf(rating).id]
   const answers: Answer[] = Array.from({ length: ROUNDS }, (_, r) => {
     const kicking = (r % 2 === 0) === kicksEven
-    // Cobrar (pergunta fácil) acerta mais que defender (difícil).
-    const p = kicking ? skill + 0.12 : skill - 0.1
-    return { r, c: rnd() < p, ms: 2500 + Math.floor(rnd() * 4000) }
+    return { r, c: rnd() < (kicking ? bot.atk : bot.def), ms: 2500 + Math.floor(rnd() * 4000) }
   })
-  return { id: null, seed, kicksEven, answers, rating, nick: 'Robô do treino', bot: true }
+  return { id: null, seed, kicksEven, answers, rating, nick: bot.nick, bot: true }
+}
+
+// ---------- Fila ao vivo ----------
+export async function queueJoin(season = currentSeason()): Promise<string | null> {
+  if (!supabase) return null
+  const { data, error } = await supabase.rpc('ranked_queue_join', { p_season: season })
+  check(error)
+  return (data as string | null) ?? null
+}
+export async function queuePoll(): Promise<string | null> {
+  if (!supabase) return null
+  const { data, error } = await supabase.rpc('ranked_queue_poll')
+  check(error)
+  return (data as string | null) ?? null
+}
+export async function queueLeave(): Promise<string | null> {
+  if (!supabase) return null
+  const { data } = await supabase.rpc('ranked_queue_leave')
+  return (data as string | null) ?? null
+}
+// Fecha a ranqueada ao vivo (placar contado no servidor pelas jogadas dos dois).
+export async function liveResult(matchId: string): Promise<{ rating: number; delta: number; opp_rating: number } | null> {
+  if (!supabase) return null
+  const { data, error } = await supabase.rpc('ranked_live_result', { p_match: matchId })
+  if (error) throw new Error(error.message)
+  return ((data as { rating: number; delta: number; opp_rating: number }[]) ?? [])[0] ?? null
 }
 
 export async function findGhost(myRating: number, season = currentSeason()): Promise<Ghost> {
