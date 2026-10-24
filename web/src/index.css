@@ -60,6 +60,10 @@
   }
 }
 
+/* Rolagem lateral sem barra (a linha do tempo continua deslizando no dedo) */
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
 /* === Juice: micro-animações === */
 @keyframes pop {
   0% { transform: scale(0.55); opacity: 0; }

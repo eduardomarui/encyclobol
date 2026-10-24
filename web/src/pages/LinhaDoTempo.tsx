@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { players, type Player } from '../data/players'
 import { GameHeader, GameTitle, HelpModal, Lives, StatGrid, NextUp } from '../components/GameShell'
 import { dayNumber, seededShuffle } from '../lib/daily'
@@ -94,10 +94,17 @@ export default function LinhaDoTempo() {
   const beating = daily && points > prevBest && points > 0
   const newRecord = over && daily && points > prevBest && points > 0
 
+  // Rola só a linha (de lado) até a carta encaixada. Antes usava
+  // scrollIntoView, que rolava a página inteira no celular a cada clique.
+  const lineRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
-    if (!lastPlaced) return
+    const box = lineRef.current
+    if (!lastPlaced || !box) return
     const el = document.getElementById(`tl-${lastPlaced}`)
-    el?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
+    if (!el) return
+    const left = el.offsetLeft - box.clientWidth / 2 + el.offsetWidth / 2
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    box.scrollTo({ left: Math.max(0, left), behavior: reduce ? 'auto' : 'smooth' })
   }, [lastPlaced])
 
   useEffect(() => {
@@ -257,11 +264,10 @@ export default function LinhaDoTempo() {
                 {current.player.nat} · {current.player.pos}
               </p>
             )}
-            {flash && (
-              <p className={`mt-2 font-serif text-sm italic ${flashOk ? 'text-grass-400' : 'text-ochre-400'}`}>
-                {flash}
-              </p>
-            )}
+            {/* Espaço reservado: a mensagem não empurra a tela quando aparece */}
+            <p className={`mt-2 min-h-[2.5rem] font-serif text-sm italic ${flashOk ? 'text-grass-400' : 'text-ochre-400'}`}>
+              {flash}
+            </p>
           </div>
         )}
 
@@ -272,7 +278,7 @@ export default function LinhaDoTempo() {
             <span>{daily ? `carta ${Math.min(cursor, DAILY_CARDS)} de ${DAILY_CARDS}` : `${placed.length} na linha`}</span>
             <span>mais recente →</span>
           </div>
-          <div className="mt-1 overflow-x-auto pb-3">
+          <div ref={lineRef} className="no-scrollbar relative mt-1 overflow-x-auto overscroll-x-contain pb-3">
             <div className="flex items-stretch justify-start gap-0 px-1">
               {Array.from({ length: placed.length + 1 }).map((_, slot) => (
                 <div key={slot} className="flex items-stretch">
