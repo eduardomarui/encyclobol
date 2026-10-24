@@ -17,7 +17,7 @@ const TODAY_KEYS: { game: string; key: string; field: string; full: number }[] =
   { game: 'Copa de Pênaltis', key: 'encyclobol:copa:today', field: 'points', full: 1840 },
   { game: 'Quarteto', key: 'encyclobol:quarteto:today', field: 'points', full: 960 },
   { game: 'Linha do Tempo', key: 'encyclobol:timeline:today', field: 'points', full: 330 },
-  { game: 'O Intruso', key: 'encyclobol:intruso:today', field: 'points', full: 1840 },
+  { game: 'O Intruso', key: 'encyclobol:intruso:today', field: 'points', full: 2000 },
   { game: 'Craque Misterioso', key: 'encyclobol:misterioso:today', field: 'points', full: 800 },
 ]
 
