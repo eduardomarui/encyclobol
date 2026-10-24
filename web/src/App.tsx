@@ -11,6 +11,7 @@ import Conexoes from './pages/Conexoes'
 import LinhaDoTempo from './pages/LinhaDoTempo'
 import Intruso from './pages/Intruso'
 import Misterioso from './pages/Misterioso'
+import Escalacao from './pages/Escalacao'
 import Ranking from './pages/Ranking'
 import Duelo from './pages/Duelo'
 import Ranqueada from './pages/Ranqueada'
@@ -66,6 +67,7 @@ export default function App() {
         <Route path="/jogos/linha-do-tempo" element={<LinhaDoTempo />} />
         <Route path="/jogos/o-intruso" element={<Intruso />} />
         <Route path="/jogos/craque-misterioso" element={<Misterioso />} />
+        <Route path="/jogos/escalacao" element={<Escalacao />} />
       </Routes>
     </BrowserRouter>
   )

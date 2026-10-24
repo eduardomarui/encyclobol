@@ -229,6 +229,16 @@ export default function Jogos() {
         {/* Time do coração: convite até escolher */}
         <TeamStrip />
 
+        {/* Jogo novo em teste */}
+        <Link
+          to="/jogos/escalacao"
+          className="mt-3 flex items-center gap-3 border-2 border-dashed border-corn-500/60 px-4 py-2.5 hover:bg-corn-500/10"
+        >
+          <span className="font-cond text-[10px] font-700 uppercase tracking-wider text-corn-400">Novo · beta</span>
+          <span className="flex-1 font-cond text-sm font-700 uppercase tracking-wider text-ink-900">Escalação: quem sabe todos é mago</span>
+          <span className="font-cond text-xs font-600 uppercase tracking-wider text-corn-500">Jogar →</span>
+        </Link>
+
         {/* Resumo do dia */}
         <section className="mt-3 border-2 border-white/20 bg-paper-100 p-5 sm:p-6">
           <div className="flex items-center justify-between">
