@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { buzz, sfx } from '../lib/sfx'
-import LottieBox from './LottieBox'
 
 // Bola de futebol "de verdade": branca com gomos pretos (pentágonos).
 function SoccerBall({ className }: { className?: string }) {
@@ -33,7 +32,6 @@ function SoccerBall({ className }: { className?: string }) {
   )
 }
 
-const LOTTIE_KEEPER = `${import.meta.env.BASE_URL}lottie/keeper.json`
 
 export type Pose = 'idle' | 'center' | 'tl' | 'tr' | 'dl' | 'dr'
 export type Zone = { x: number; y: number }
@@ -56,7 +54,8 @@ export type Shot = {
 // O gol, em % da cena. Bola, goleiro e desenho usam a MESMA régua — antes o
 // gol tinha altura fixa em pixels e o destino da bola era em %, então no
 // celular o "ângulo" passava por cima do travessão e contava gol.
-export const GOAL = { left: 14, right: 86, top: 24, bottom: 62 }
+// Câmera atrás do batedor: o gol fica no fundo, menor, centrado.
+export const GOAL = { left: 22, right: 78, top: 30, bottom: 60 }
 const gx = (u: number) => GOAL.left + u * (GOAL.right - GOAL.left)
 const gy = (v: number) => GOAL.top + v * (GOAL.bottom - GOAL.top)
 
@@ -86,10 +85,10 @@ const POSES: Record<Pose, PoseDef> = {
   dr: { tilt: 16, handL: [42, 30], handR: [56, 36], footL: [10, 42], footR: [16, 48] },
 }
 
-function Keeper({ pose }: { pose: Pose }) {
+function Keeper({ pose, className = 'h-24 w-24' }: { pose: Pose; className?: string }) {
   const P = POSES[pose]
   return (
-    <svg viewBox="0 0 60 64" className="h-24 w-24 overflow-visible">
+    <svg viewBox="0 0 60 64" className={`${className} overflow-visible`}>
       <g transform={`rotate(${P.tilt} 30 34)`} style={{ transition: 'transform .14s' }}>
         {([P.footL, P.footR] as [number, number][]).map((f, i) => (
           <g key={i}>
@@ -119,7 +118,7 @@ export function poseFor(z: Zone): Pose {
   return high ? 'tr' : 'dr'
 }
 
-const clampKx = (x: number) => Math.min(66, Math.max(34, x))
+const clampKx = (x: number) => Math.min(68, Math.max(32, x))
 const pick = <T,>(arr: T[], seed: number) => arr[((seed % arr.length) + arr.length) % arr.length]
 
 const LABEL: Record<Outcome, string> = {
@@ -145,7 +144,7 @@ export function makeShot(o: Outcome, opts: { seed: number; fast?: boolean; good:
   if (o === 'save') {
     const z = pick(ZONES, seed)
     const kx = clampKx(z.x)
-    const reach = z.x < 50 ? kx - 9 : z.x > 50 ? kx + 9 : kx
+    const reach = z.x < 50 ? kx - 6 : z.x > 50 ? kx + 6 : kx
     const high = z.y < 40
     // Bola alta é espalmada pra fora; rasteira o goleiro segura.
     return high
@@ -162,11 +161,11 @@ export function makeShot(o: Outcome, opts: { seed: number; fast?: boolean; good:
   if (o === 'wide') {
     const left = seed % 2 === 0
     const k = pick(ZONES, seed + 2)
-    return { bx: left ? 5 : 95, by: gy(pick([0.35, 0.6, 0.85], seed)), kx: clampKx(k.x), pose: poseFor(k), label, good, net: false, outcome: o }
+    return { bx: left ? 11 : 89, by: gy(pick([0.35, 0.6, 0.85], seed)), kx: clampKx(k.x), pose: poseFor(k), label, good, net: false, outcome: o }
   }
   if (o === 'over') {
     const k = pick(ZONES, seed + 1)
-    return { bx: gx(pick([0.2, 0.45, 0.7], seed)), by: GOAL.top - 13, kx: clampKx(k.x), pose: poseFor(k), label, good, net: false, outcome: o }
+    return { bx: gx(pick([0.2, 0.45, 0.7], seed)), by: GOAL.top - 9, kx: clampKx(k.x), pose: poseFor(k), label, good, net: false, outcome: o }
   }
   // Bola fraca: rola até o meio e o goleiro pega sem esforço.
   return { bx: 50, by: gy(0.82), kx: 50, pose: 'idle', label, good, net: false, outcome: o, slow: true }
@@ -180,6 +179,41 @@ export function shotFromOutcome(kind: Kind, seed: number): Shot {
   return makeShot(pick<Outcome>(['post', 'wide', 'over'], seed), { seed, good: false })
 }
 
+// Batedor visto de costas (camisa verde, número dourado). 'run' = correndo
+// pra bola; 'kick' = perna de chute à frente.
+function Kicker({ pose }: { pose: 'run' | 'kick' }) {
+  const kick = pose === 'kick'
+  return (
+    <svg viewBox="0 0 40 80" className="h-full w-auto overflow-visible" aria-hidden>
+      {/* pernas */}
+      <path d={kick ? 'M17 46 L11 63 L9 76' : 'M17 46 L13 61 L10 74'} stroke="#e0b48a" strokeWidth="5" strokeLinecap="round" fill="none" />
+      <path d={kick ? 'M23 46 L31 58 L38 63' : 'M23 46 L26 61 L29 74'} stroke="#e0b48a" strokeWidth="5" strokeLinecap="round" fill="none" />
+      <path d={kick ? 'M11 63 L9 76' : 'M13 61 L10 74'} stroke="#2c7d4f" strokeWidth="5.6" strokeLinecap="round" />
+      <path d={kick ? 'M31 58 L38 63' : 'M26 61 L29 74'} stroke="#2c7d4f" strokeWidth="5.6" strokeLinecap="round" />
+      <ellipse cx={kick ? 9 : 10} cy={kick ? 77.5 : 75.5} rx="3.6" ry="2" fill="#16130d" />
+      <ellipse cx={kick ? 39.5 : 29.5} cy={kick ? 64 : 75.5} rx="3.6" ry="2" fill="#16130d" />
+      {/* calção */}
+      <path d="M13 40 H27 L28 50 H21 L20 46 L19 50 H12 Z" fill="#eef5f1" />
+      {/* braços */}
+      <path d={kick ? 'M13 24 L4 34' : 'M13 24 L8 37'} stroke="#e0b48a" strokeWidth="4" strokeLinecap="round" />
+      <path d={kick ? 'M27 24 L35 30' : 'M27 24 L32 37'} stroke="#e0b48a" strokeWidth="4" strokeLinecap="round" />
+      {/* camisa */}
+      <path d="M12 20 Q20 16 28 20 L29 41 H11 Z" fill="#2c7d4f" />
+      <path d="M12 20 L8 28 L11 30 L13 25 M28 20 L32 28 L29 30 L27 25" fill="#2c7d4f" />
+      <text x="20" y="35" textAnchor="middle" fontSize="11" fontWeight="700" fontFamily="Oswald, sans-serif" fill="#e6b73e">10</text>
+      {/* cabeça de costas */}
+      <circle cx="20" cy="12" r="5.6" fill="#3a2a1a" />
+      <path d="M15 14 Q20 18.5 25 14 L25 16 Q20 19 15 16 Z" fill="#e0b48a" />
+    </svg>
+  )
+}
+
+// Torcida: fileiras de cabeças em cores apagadas, iluminadas pelos refletores.
+const CROWD = Array.from({ length: 3 * 34 }, (_, i) => {
+  const palette = ['#2c7d4f', '#d8a72e', '#eef5f1', '#1f5a3b', '#b8901f', '#84a094']
+  return palette[(i * 7 + Math.floor(i / 34) * 3) % palette.length]
+})
+
 export function PenaltyScene({
   shot,
   animKey = 0,
@@ -190,47 +224,81 @@ export function PenaltyScene({
   compact?: boolean
 }) {
   const ballRef = useRef<HTMLDivElement>(null)
+  const shadowRef = useRef<HTMLDivElement>(null)
+  const kickerRef = useRef<HTMLDivElement>(null)
   const sceneRef = useRef<HTMLDivElement>(null)
-  // O goleiro reage uma fração de segundo depois do chute (antes já saía voando).
+  const [kickPose, setKickPose] = useState<'run' | 'kick'>('run')
+  // O goleiro reage uma fração de segundo depois do chute.
   const [dive, setDive] = useState(false)
   const [impact, setImpact] = useState(false)
 
   useEffect(() => {
     setDive(false)
     setImpact(false)
+    setKickPose('run')
     const el = ballRef.current
+    const sh = shadowRef.current
+    const kicker = kickerRef.current
     const scene = sceneRef.current
-    if (!shot || !el || !scene) return
+    if (!shot || !el || !sh || !kicker || !scene) return
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
     const { width: W, height: H } = scene.getBoundingClientRect()
-    const sx = W * 0.5
-    const sy = H * 0.84
     const px = (v: number) => (W * v) / 100
     const py = (v: number) => (H * v) / 100
-    const at = (x: number, y: number, sc: number) =>
-      `translate(calc(-50% + ${x - sx}px), calc(-50% + ${y - sy}px)) scale(${sc})`
+    const sx = px(50)
+    const sy = py(86)
+    const at = (x: number, y: number, sc: number) => `translate(calc(-50% + ${x - sx}px), calc(-50% + ${y - sy}px)) scale(${sc})`
+
+    const runUp = reduce ? 0 : 380
+    const flight = reduce ? 1 : shot.slow ? 1000 : shot.label === 'NA GAVETA!' ? 640 : 520
+    const tImpact = runUp + flight
+    const anims: Animation[] = []
+
+    // 1) Corrida do batedor até a bola.
+    anims.push(
+      kicker.animate(
+        [
+          { transform: 'translate(-70%, 6%) scale(1.06)' },
+          { transform: 'translate(-8%, 0) scale(1)' },
+        ],
+        { duration: Math.max(1, runUp), easing: 'cubic-bezier(.4,.1,.7,1)', fill: 'forwards' },
+      ),
+    )
+
+    // 2) Voo da bola: arco, curva lateral e encolhendo com a distância.
     const ix = px(shot.bx)
     const iy = py(shot.by)
-    // Arco: sobe mais quando a bola vai alta; rasteira quase não sobe.
-    const lift = shot.slow ? 0.02 : shot.by < GOAL.top + 12 ? 0.2 : 0.09
-    const mx = (sx + ix) / 2
+    const high = shot.by < GOAL.top + (GOAL.bottom - GOAL.top) * 0.45
+    const lift = shot.slow ? 0.02 : high ? 0.14 : 0.05
+    const bend = (shot.bx < 50 ? -1 : shot.bx > 50 ? 1 : 0) * W * 0.05
+    const mx = sx + (ix - sx) * 0.45 + bend
     const my = Math.min(sy, iy) - H * lift
-    const tImpact = shot.slow ? 1100 : 560
+    const far = 0.34
+    const bounce = shot.ex !== undefined && shot.ey !== undefined
     const frames: Keyframe[] = [
       { transform: at(sx, sy, 1), offset: 0 },
-      { transform: at(mx, my, 0.78), offset: shot.ex !== undefined ? 0.32 : 0.5 },
-      { transform: at(ix, iy, 0.56), offset: shot.ex !== undefined ? 0.64 : 1 },
+      { transform: at(mx, my, 0.62), offset: bounce ? 0.32 : 0.5 },
+      { transform: at(ix, iy, far), offset: bounce ? 0.64 : 1 },
     ]
-    if (shot.ex !== undefined && shot.ey !== undefined) frames.push({ transform: at(px(shot.ex), py(shot.ey), 0.66), offset: 1 })
-    const total = shot.ex !== undefined ? tImpact / 0.64 : tImpact
-    const anim = el.animate(frames, {
-      duration: reduce ? 1 : total,
-      easing: shot.slow ? 'cubic-bezier(.2,.7,.4,1)' : 'cubic-bezier(.22,.62,.35,1)',
-      fill: 'forwards',
-    })
+    if (bounce) frames.push({ transform: at(px(shot.ex!), py(shot.ey!), 0.5), offset: 1 })
+    const total = bounce ? flight / 0.64 : flight
+    const easing = shot.label === 'NA GAVETA!' ? 'cubic-bezier(.15,.75,.25,1)' : shot.slow ? 'cubic-bezier(.2,.7,.4,1)' : 'cubic-bezier(.22,.62,.35,1)'
+    anims.push(el.animate(frames, { duration: total, delay: runUp, easing, fill: 'forwards' }))
 
-    sfx.kick()
-    const t1 = setTimeout(() => setDive(true), shot.slow ? 350 : 130)
+    // 3) Sombra da bola no gramado: segue a projeção no chão (linha do gol).
+    const groundY = (y: number) => Math.max(y, py(GOAL.bottom))
+    const sFrames: Keyframe[] = [
+      { transform: at(sx, sy + 12, 1), opacity: 0.55, offset: 0 },
+      { transform: at(ix, groundY(iy) + 2, far), opacity: high ? 0.18 : 0.4, offset: bounce ? 0.64 : 1 },
+    ]
+    if (bounce) sFrames.push({ transform: at(px(shot.ex!), groundY(py(shot.ey!)) + 2, 0.5), opacity: 0.3, offset: 1 })
+    anims.push(sh.animate(sFrames, { duration: total, delay: runUp, easing, fill: 'forwards' }))
+
+    const t0 = setTimeout(() => {
+      setKickPose('kick')
+      sfx.kick()
+    }, runUp)
+    const t1 = setTimeout(() => setDive(true), runUp + (shot.slow ? 350 : 120))
     const t2 = setTimeout(() => {
       setImpact(true)
       const o = shot.outcome ?? (shot.net ? 'goal' : 'save')
@@ -244,45 +312,76 @@ export function PenaltyScene({
         if (o !== 'save' && o !== 'weak') sfx.groan()
         buzz.err()
       }
-    }, reduce ? 0 : tImpact)
+    }, tImpact)
     return () => {
-      anim.cancel()
+      anims.forEach((a) => a.cancel())
+      clearTimeout(t0)
       clearTimeout(t1)
       clearTimeout(t2)
     }
   }, [shot])
 
+  // Goleiro: posição e altura do mergulho (alto sobe, rasteiro cai).
   const kx = shot && dive ? shot.kx : 50
   const pose: Pose = shot && dive ? shot.pose : 'idle'
-  const goalStyle = { left: `${GOAL.left}%`, right: `${100 - GOAL.right}%`, top: `${GOAL.top}%`, bottom: `${100 - GOAL.bottom}%` }
+  const ky = pose === 'tl' || pose === 'tr' ? -9 : pose === 'dl' || pose === 'dr' ? 5 : pose === 'center' ? -4 : 0
+  const goalTop = `${GOAL.top}%`
+  const goalH = GOAL.bottom - GOAL.top
+  const celebrate = impact && shot?.net && shot.good
 
   return (
     <div
       ref={sceneRef}
-      className={`relative ${compact ? 'h-44 sm:h-60' : 'h-64'} w-full max-w-sm overflow-hidden rounded-sm border-2 border-white/20 ${impact && shot?.net && shot.good ? 'animate-shake' : ''}`}
+      className={`relative ${compact ? 'h-48 sm:h-64' : 'h-72'} w-full max-w-sm overflow-hidden rounded-sm border-2 border-white/20 bg-[#08180f] ${celebrate ? 'animate-shake' : ''}`}
     >
-      <div className="absolute inset-0 bg-gradient-to-b from-[#9ec7d8] via-[#86b98f] to-grass-700" />
-      <div className="absolute inset-0" style={{ background: 'radial-gradient(120% 55% at 50% 0%, rgba(255,255,255,0.22), transparent 60%)' }} />
-      <div className="absolute inset-x-0 bottom-0" style={{ top: `${GOAL.bottom}%`, backgroundImage: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.06) 0 20px, transparent 20px 40px)' }} />
-      <div className="absolute inset-x-0 top-0 h-[16%] bg-[#0e1f19]" style={{ backgroundImage: 'radial-gradient(rgba(242,238,226,0.35) 1px, transparent 1.4px)', backgroundSize: '6px 6px' }} />
-      {/* linha do gol e marca do pênalti */}
-      <div className="absolute inset-x-0 h-px bg-white/45" style={{ top: `${GOAL.bottom}%` }} />
-      <div className="absolute left-1/2 top-[84%] h-2 w-2 -translate-x-1/2 rounded-full bg-white/80" />
-      <div className="absolute left-1/2 h-8 w-28 -translate-x-1/2 rounded-[100%] border-2 border-b-0 border-white/25" style={{ top: `${GOAL.bottom + 8}%` }} />
+      {/* Noite, refletores e arquibancada */}
+      <div className="absolute inset-x-0 top-0" style={{ height: goalTop, background: 'linear-gradient(#050d09, #0c2117)' }} />
+      <div className="absolute inset-0" style={{ background: 'radial-gradient(40% 30% at 8% 0%, rgba(238,245,241,0.22), transparent 70%), radial-gradient(40% 30% at 92% 0%, rgba(238,245,241,0.22), transparent 70%)' }} />
+      <div
+        className={`absolute inset-x-0 grid gap-[2px] px-1 ${celebrate ? 'animate-bob' : ''}`}
+        style={{ top: `${GOAL.top - 14}%`, gridTemplateColumns: 'repeat(34, minmax(0, 1fr))' }}
+        aria-hidden
+      >
+        {CROWD.map((c, i) => (
+          <span key={i} className="aspect-square rounded-full" style={{ background: c, opacity: 0.32 + ((i * 13) % 5) * 0.06 }} />
+        ))}
+      </div>
+      {/* placa de publicidade/muro atrás do gol */}
+      <div className="absolute inset-x-0 h-[4%] bg-[#0f2a1d]" style={{ top: `${GOAL.top - 3}%`, boxShadow: 'inset 0 -1px 0 rgba(238,245,241,0.12)' }} />
 
-      {/* Gol: rede + traves, ocupando exatamente a caixa GOAL */}
-      <div className={`absolute ${impact && shot?.net ? 'animate-netshake' : ''}`} style={goalStyle}>
-        <svg viewBox="0 0 100 50" preserveAspectRatio="none" className="h-full w-full overflow-visible">
-          <rect x="0" y="0" width="100" height="50" fill="rgba(255,255,255,0.06)" />
-          <g stroke="#f2eee2" strokeWidth="0.35" opacity="0.55" vectorEffect="non-scaling-stroke">
-            {Array.from({ length: 13 }).map((_, i) => (
-              <line key={`v${i}`} x1={(i * 100) / 12} y1="0" x2={(i * 100) / 12} y2="50" />
-            ))}
-            {Array.from({ length: 7 }).map((_, i) => (
-              <line key={`h${i}`} x1="0" y1={(i * 50) / 6} x2="100" y2={(i * 50) / 6} />
-            ))}
-          </g>
-          <path d="M0 50 V0 H100 V50" fill="none" stroke="#f7f4ec" strokeWidth="3.2" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+      {/* Gramado em perspectiva: faixas que alargam perto da câmera */}
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full" aria-hidden>
+        <rect x="0" y={GOAL.top + 1} width="100" height={100 - GOAL.top} fill="#2a6d43" />
+        {Array.from({ length: 7 }).map((_, i) => {
+          const y0 = GOAL.bottom + (100 - GOAL.bottom) * Math.pow(i / 7, 1.7)
+          const y1 = GOAL.bottom + (100 - GOAL.bottom) * Math.pow((i + 1) / 7, 1.7)
+          return i % 2 === 0 ? <rect key={i} x="0" y={y0} width="100" height={y1 - y0} fill="#317a4c" /> : null
+        })}
+        <rect x="0" y={GOAL.top + 1} width="100" height={GOAL.bottom - GOAL.top - 1} fill="#2f7549" />
+        <g stroke="rgba(238,245,241,0.6)" strokeWidth="0.5" fill="none" vectorEffect="non-scaling-stroke">
+          <line x1="-5" y1={GOAL.bottom} x2="105" y2={GOAL.bottom} />
+          {/* pequena área */}
+          <path d={`M${GOAL.left - 8} ${GOAL.bottom} L${GOAL.left - 13} ${GOAL.bottom + 9} L${GOAL.right + 13} ${GOAL.bottom + 9} L${GOAL.right + 8} ${GOAL.bottom}`} />
+          {/* grande área */}
+          <path d={`M${GOAL.left - 22} ${GOAL.bottom} L${GOAL.left - 40} ${GOAL.bottom + 30} M${GOAL.right + 22} ${GOAL.bottom} L${GOAL.right + 40} ${GOAL.bottom + 30}`} />
+        </g>
+        <ellipse cx="50" cy="86" rx="1.6" ry="0.7" fill="rgba(238,245,241,0.85)" />
+      </svg>
+
+      {/* Gol com profundidade: rede de fundo, laterais e traves */}
+      <div className={`absolute ${impact && shot?.net ? 'animate-netshake' : ''}`} style={{ left: `${GOAL.left}%`, right: `${100 - GOAL.right}%`, top: goalTop, height: `${goalH}%` }}>
+        <svg viewBox="0 0 100 50" preserveAspectRatio="none" className="h-full w-full overflow-visible" aria-hidden>
+          <defs>
+            <pattern id="net" width="4" height="4" patternUnits="userSpaceOnUse">
+              <path d="M0 0 L4 4 M4 0 L0 4" stroke="rgba(238,245,241,0.28)" strokeWidth="0.35" />
+            </pattern>
+          </defs>
+          {/* fundo da rede (mais baixo e estreito: está mais longe) */}
+          <path d="M5 9 H95 V50 H5 Z" fill="url(#net)" />
+          <path d="M0 0 L5 9 L5 50 L0 50 Z M100 0 L95 9 L95 50 L100 50 Z M0 0 H100 L95 9 H5 Z" fill="url(#net)" />
+          <path d="M5 9 H95 M5 9 V50 M95 9 V50" stroke="rgba(238,245,241,0.35)" strokeWidth="0.6" fill="none" vectorEffect="non-scaling-stroke" />
+          {/* traves */}
+          <path d="M0 50 V0 H100 V50" fill="none" stroke="#f7f4ec" strokeWidth="3.4" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
         </svg>
       </div>
 
@@ -290,45 +389,49 @@ export function PenaltyScene({
       {impact && shot?.net && (
         <span
           key={`bulge${animKey}`}
-          className="pointer-events-none absolute z-[15] h-10 w-10 -translate-x-1/2 -translate-y-1/2 rounded-full animate-pop"
+          className="pointer-events-none absolute z-[15] h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full animate-pop"
           style={{ left: `${shot.bx}%`, top: `${shot.by}%`, background: 'radial-gradient(circle, rgba(255,255,255,0.55), transparent 70%)' }}
         />
       )}
 
+      {/* Goleiro, em escala do gol (~78% da altura da trave) */}
       <div
-        className="absolute z-10 -translate-x-1/2 -translate-y-1/2"
-        style={{ left: `${kx}%`, top: `${(GOAL.top + GOAL.bottom) / 2 + 2}%`, transition: 'left .32s cubic-bezier(.3,1.3,.5,1)' }}
+        className="absolute z-10 -translate-x-1/2"
+        style={{
+          left: `${kx}%`,
+          top: `${GOAL.top + goalH * 0.12}%`,
+          height: `${goalH * 0.9}%`,
+          transform: `translate(-50%, ${ky}%)`,
+          transition: 'left .3s cubic-bezier(.3,1.3,.5,1), transform .3s cubic-bezier(.3,1.3,.5,1)',
+        }}
       >
-        <div className={!shot ? 'animate-bob' : ''}>
-          <LottieBox path={LOTTIE_KEEPER} className={compact ? 'h-20 w-20 sm:h-24 sm:w-24' : 'h-24 w-24'} fallback={<Keeper pose={pose} />} />
+        <div className={`h-full ${!shot ? 'animate-bob' : ''}`}>
+          <Keeper pose={pose} className="h-full w-auto" />
         </div>
       </div>
 
-      {shot && (
-        <div key={`dust${animKey}`} className="absolute left-1/2 top-[84%] z-10 -translate-x-1/2 -translate-y-1/2">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="absolute" style={{ transform: `rotate(${i * 60}deg)` }}>
-              <span className="block h-1.5 w-1.5 rounded-full bg-white/70" style={{ animation: 'dustfly 0.5s ease-out forwards' }} />
-            </div>
-          ))}
+      {/* Sombra e bola */}
+      <div ref={shadowRef} className="absolute z-[18] h-2.5 w-7 rounded-[50%] bg-black/45 blur-[1.5px]" style={{ left: '50%', top: '86%', transform: 'translate(-50%,-50%)' }} />
+      <div ref={ballRef} className="absolute z-20" style={{ left: '50%', top: '86%', transform: 'translate(-50%,-50%)' }}>
+        <div style={{ animation: shot && !impact && kickPose === 'kick' ? `ballspin ${shot.slow ? 0.9 : 0.25}s linear infinite` : 'none' }}>
+          <SoccerBall className="h-7 w-7" />
         </div>
-      )}
+      </div>
 
-      {/* Gol a favor: brilho dourado. Gol sofrido: vinheta escura, sem festa. */}
-      {impact && shot?.net && shot.good && <div key={`flash${animKey}`} className="pointer-events-none absolute inset-0 z-20 animate-crowdflash bg-corn-400/50" />}
+      {/* Batedor de costas, perto da câmera */}
+      <div ref={kickerRef} className="pointer-events-none absolute bottom-[-6%] left-[38%] z-[25] h-[42%]" style={{ transform: 'translate(-70%, 6%) scale(1.06)' }}>
+        <Kicker pose={kickPose} />
+      </div>
+
+      {/* Gol a favor: brilho dourado. Lance ruim pra você: vinheta escura. */}
+      {celebrate && <div key={`flash${animKey}`} className="pointer-events-none absolute inset-0 z-[26] animate-crowdflash bg-corn-400/40" />}
       {impact && shot && !shot.good && (
-        <div key={`dim${animKey}`} className="pointer-events-none absolute inset-0 z-20 animate-crowdflash" style={{ background: 'radial-gradient(closest-side, transparent 55%, rgba(0,0,0,0.6))' }} />
+        <div key={`dim${animKey}`} className="pointer-events-none absolute inset-0 z-[26] animate-crowdflash" style={{ background: 'radial-gradient(closest-side, transparent 55%, rgba(0,0,0,0.6))' }} />
       )}
-
-      <div ref={ballRef} className="absolute z-20" style={{ left: '50%', top: '84%', transform: 'translate(-50%,-50%)' }}>
-        <div className="drop-shadow-[0_3px_4px_rgba(0,0,0,0.4)]" style={{ animation: shot && !impact ? `ballspin ${shot.slow ? 0.9 : 0.3}s linear infinite` : 'none' }}>
-          <SoccerBall className="h-8 w-8" />
-        </div>
-      </div>
 
       {shot && impact && (
-        <div className="absolute inset-x-0 bottom-3 z-30 flex justify-center">
-          <span className={`animate-pop rounded-sm px-4 py-1.5 font-display text-3xl uppercase tracking-tight shadow-lg ${shot.good ? 'bg-grass-600 text-ink-900' : 'bg-ochre-500 text-ink-900'}`}>
+        <div className="absolute inset-x-0 top-3 z-30 flex justify-center">
+          <span className={`animate-pop rounded-sm px-4 py-1 font-display text-2xl uppercase tracking-tight text-ink-900 shadow-lg sm:text-3xl ${shot.good ? 'bg-grass-600' : 'bg-ochre-500'}`}>
             {shot.label}
           </span>
         </div>
