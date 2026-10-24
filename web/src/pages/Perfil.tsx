@@ -121,7 +121,7 @@ export default function Perfil() {
         </div>
 
         <p className="mt-8 font-serif text-sm italic text-ink-500">
-          Os números desta página ficam guardados neste aparelho. Apelido, divisão, time e ranking vão com a conta salva.
+          Com o progresso salvo por e-mail, tudo desta página vai junto pra qualquer aparelho.
         </p>
       </main>
       <Footer />

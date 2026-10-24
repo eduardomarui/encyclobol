@@ -72,8 +72,8 @@ export function SaveProgress({ nudge = false, why }: { nudge?: boolean; why?: st
       <p className="kicker">{m === 'save' ? 'Salvar meu progresso' : 'Entrar na conta salva'}</p>
       <p className="mt-1 font-serif text-sm text-ink-700">
         {m === 'save'
-          ? `${why ? `${why} ` : ''}Hoje sua conta mora só neste navegador. Salve com seu e-mail pra não perder apelido, divisão e time, e jogar em qualquer aparelho.`
-          : 'Use o e-mail em que você salvou. Este aparelho passa a usar aquele progresso.'}
+          ? `${why ? `${why} ` : ''}Hoje sua conta mora só neste navegador. Salve com seu e-mail pra não perder nada (ofensiva, recordes, conquistas, divisão, ranking e time) e jogar em qualquer aparelho.`
+          : 'Use o e-mail em que você salvou. O progresso daqui se junta ao da conta.'}
       </p>
 
       {!sent ? (
@@ -128,7 +128,7 @@ export function SaveProgress({ nudge = false, why }: { nudge?: boolean; why?: st
       {err && <p className="mt-2 font-cond text-xs uppercase tracking-wider text-ochre-400">{ERR[err]}</p>}
       {err === 'email-used' && (
         <button type="button" onClick={() => trocar('enter')} className={link}>
-          Entrar nessa conta (o progresso daqui fica pra trás)
+          Entrar nessa conta (o progresso daqui se junta ao dela)
         </button>
       )}
 

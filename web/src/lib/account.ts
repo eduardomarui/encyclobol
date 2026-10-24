@@ -6,6 +6,7 @@
 import { useEffect, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from './supabase'
+import { pushProgress, syncProgress } from './progress'
 
 export type Account = { user: User | null; saved: boolean; email: string | null }
 
@@ -60,6 +61,14 @@ export async function confirmCode(mode: Mode, email: string, token: string) {
   if (!supabase) return
   const { error } = await supabase.auth.verifyOtp({ email, token, type: mode === 'save' ? 'email_change' : 'email' })
   if (error) fail(error.message, error.code)
+  if (mode === 'save') {
+    await pushProgress().catch(() => {})
+    return
+  }
+  // Entrou numa conta salva: junta o progresso dela com o daqui e recarrega,
+  // pra todas as telas lerem apelido, ofensiva e recordes da conta.
+  await syncProgress().catch(() => {})
+  window.location.reload()
 }
 
 // Lembrete de salvar: "Agora não" some por uma semana.

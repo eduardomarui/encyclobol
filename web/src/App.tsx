@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { syncToday } from './lib/ranking'
 import { pushTeam } from './lib/team'
+import { pushProgress, syncProgress } from './lib/progress'
 import Landing from './pages/Landing'
 import Jogos from './pages/Jogos'
 import QuemSouEle from './pages/QuemSouEle'
@@ -25,13 +26,18 @@ function ScoreSync() {
   const { pathname } = useLocation()
   useEffect(() => {
     syncToday().catch(() => {})
+    pushProgress().catch(() => {})
   }, [pathname])
   useEffect(() => {
     pushTeam().catch(() => {})
+    syncProgress().catch(() => {})
   }, [])
   useEffect(() => {
     const onHide = () => {
-      if (document.visibilityState === 'hidden') syncToday().catch(() => {})
+      if (document.visibilityState === 'hidden') {
+        syncToday().catch(() => {})
+        pushProgress().catch(() => {})
+      }
     }
     document.addEventListener('visibilitychange', onHide)
     return () => document.removeEventListener('visibilitychange', onHide)
