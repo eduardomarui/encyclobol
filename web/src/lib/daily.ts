@@ -33,3 +33,15 @@ export function dailySequence(length: number, count: number, date = new Date()):
   const idx = Array.from({ length }, (_, i) => i)
   return seededShuffle(idx, seed).slice(0, Math.min(count, length))
 }
+
+// Edição do dia por permutação fixa: cada item sai uma vez por ciclo, em ordem
+// imprevisível (antes era `dia % n`, que andava pelo arquivo na ordem em que os
+// itens foram escritos — o Craque Misterioso seguia país por país).
+// Até `legacyUntil` mantém a regra antiga, pra não trocar a edição de quem já jogou hoje.
+export function dailyPick(length: number, salt: number, legacyUntil = 295, date = new Date()): number {
+  if (length <= 0) return 0
+  const n = dayNumber(date)
+  if (n <= legacyUntil) return ((n % length) + length) % length
+  const perm = seededShuffle(Array.from({ length }, (_, i) => i), salt)
+  return perm[((n % length) + length) % length]
+}

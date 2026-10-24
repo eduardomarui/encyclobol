@@ -1,3 +1,4 @@
+import { SITE_LABEL } from './site'
 // Gera um card de resultado em imagem (canvas) com a identidade do Encyclobol
 // e dispara o compartilhamento nativo (Web Share). Sem dependências.
 
@@ -175,7 +176,7 @@ async function draw(o: ShareOpts): Promise<Blob | null> {
   // Rodapé
   ctx.fillStyle = C.ink
   ctx.font = '600 34px Oswald, sans-serif'
-  ctx.fillText('encyclobol.com.br', cx, S - 110)
+  ctx.fillText(SITE_LABEL, cx, S - 110)
   if (o.edition) {
     ctx.fillStyle = C.ink2
     ctx.font = '500 28px Oswald, sans-serif'

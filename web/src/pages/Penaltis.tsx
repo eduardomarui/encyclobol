@@ -13,6 +13,8 @@ import { confetti } from '../lib/juice'
 import { shareScoreImage } from '../lib/shareCard'
 import { GameHeader, HelpModal, StatGrid, ThemePicker, TimeBar } from '../components/GameShell'
 import { loadTheme, poolsFor, saveTheme, themeLabel, themeSeed } from '../lib/themes'
+import { siteLink } from '../lib/site'
+import { clearRun, loadRun, saveRun } from '../lib/runSave'
 
 const HELP_KEY = 'encyclobol:copa:help'
 
@@ -68,8 +70,19 @@ function randomShootout(theme: string): PQ[] {
   const p = poolsFor(theme)
   return interleave(take(p.easy, s, 0, 5), take(p.hard, s + 1, 0, 5), s)
 }
-function extraPair(theme: string): PQ[] {
+// Morte súbita: na Copa do dia as cobranças extras também são iguais pra
+// todos (continuam a fila embaralhada do dia depois das 5 da fase); no treino,
+// sorteio livre.
+function extraPair(theme: string, daily: boolean, round: number, pair: number): PQ[] {
   const p = poolsFor(theme)
+  if (daily) {
+    const day = dayNumber() * 100 + themeSeed(theme)
+    const off = 20 + (round - 1) * 6 + pair
+    return [
+      prepQ(take(p.easy, day + 1, off, 1)[0], day + round * 7 + pair * 11 + 1),
+      prepQ(take(p.hard, day + 2, off, 1)[0], day + round * 7 + pair * 11 + 4),
+    ]
+  }
   return [
     prepQ(p.easy[Math.floor(Math.random() * p.easy.length)], Math.floor(Math.random() * 1e9) + 1),
     prepQ(p.hard[Math.floor(Math.random() * p.hard.length)], Math.floor(Math.random() * 1e9) + 1),
@@ -130,29 +143,43 @@ function Bracket({ reached, champion }: { reached: number; champion: boolean }) 
   )
 }
 
-const copaToday = loadCopaToday()
+type CopaRun = {
+  theme: string; round: number; index: number; len: number; meus: Mark[]; rival: Mark[]
+  my: number; opp: number; copaScore: number; interRound: boolean; lastGain: number; timeLeft: number
+}
+
+// Refaz a fila de perguntas da fase (determinística no dia) até o tamanho salvo.
+function rebuild(r: CopaRun): PQ[] {
+  const q = dailyShootout(r.round, r.theme)
+  while (q.length < r.len) q.push(...extraPair(r.theme, true, r.round, q.length / 2))
+  return q
+}
 
 export default function Penaltis() {
+  // Copa do dia lida a cada montagem; a corrida é salva a cada lance e a cada
+  // segundo do relógio — F5 volta na mesma pergunta, com o mesmo tempo.
+  const [copaToday] = useState(loadCopaToday)
+  const [run] = useState(() => (copaToday ? null : loadRun<CopaRun>('copa')))
   const [mode, setMode] = useState<'copa' | 'practice'>('copa')
-  const [round, setRound] = useState(copaToday?.round ?? 1)
-  const [theme, setTheme] = useState(loadTheme)
-  const [started, setStarted] = useState(false)
-  const [prepared, setPrepared] = useState<PQ[]>([])
-  const [index, setIndex] = useState(0)
-  const [meus, setMeus] = useState<Mark[]>([])
-  const [rival, setRival] = useState<Mark[]>([])
-  const [my, setMy] = useState(0)
-  const [opp, setOpp] = useState(0)
+  const [round, setRound] = useState(copaToday?.round ?? run?.round ?? 1)
+  const [theme, setTheme] = useState(() => run?.theme ?? loadTheme())
+  const [started, setStarted] = useState(!!run)
+  const [prepared, setPrepared] = useState<PQ[]>(() => (run ? rebuild(run) : []))
+  const [index, setIndex] = useState(run?.index ?? 0)
+  const [meus, setMeus] = useState<Mark[]>(run?.meus ?? [])
+  const [rival, setRival] = useState<Mark[]>(run?.rival ?? [])
+  const [my, setMy] = useState(run?.my ?? 0)
+  const [opp, setOpp] = useState(run?.opp ?? 0)
   const [phase, setPhase] = useState<'ask' | 'shoot'>('ask')
   const [selected, setSelected] = useState<number | null>(null)
-  const [timeLeft, setTimeLeft] = useState(ATK[0])
+  const [timeLeft, setTimeLeft] = useState(run?.timeLeft ?? ATK[0])
   const [shot, setShot] = useState<Shot>(null)
 
   const [shootoutOver, setShootoutOver] = useState(false)
   const [bracketResolved, setBracketResolved] = useState(false)
-  const [interRound, setInterRound] = useState(false)
-  const [copaScore, setCopaScore] = useState(copaToday?.points ?? 0)
-  const [lastGain, setLastGain] = useState(0)
+  const [interRound, setInterRound] = useState(run?.interRound ?? false)
+  const [copaScore, setCopaScore] = useState(copaToday?.points ?? run?.copaScore ?? 0)
+  const [lastGain, setLastGain] = useState(run?.lastGain ?? 0)
   const [champion, setChampion] = useState(copaToday?.champion ?? false)
   const [copaDone, setCopaDone] = useState(!!copaToday)
   const [copa, setCopa] = useState<CopaStats>(() => loadCopaStats())
@@ -211,6 +238,19 @@ export default function Penaltis() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shootoutOver, bracketResolved])
+
+  useEffect(() => {
+    if (!copaMode || !started) return
+    if (copaDone) {
+      clearRun('copa')
+      return
+    }
+    // Só salva entre lances (pergunta aberta), não durante a animação do chute.
+    if (phase !== 'ask' && !interRound) return
+    saveRun<CopaRun>('copa', {
+      theme, round, index, len: prepared.length, meus, rival, my, opp, copaScore, interRound, lastGain, timeLeft,
+    })
+  }, [copaMode, started, copaDone, phase, theme, round, index, prepared.length, meus, rival, my, opp, copaScore, interRound, lastGain, timeLeft])
 
   function startShootout(r: number, daily: boolean) {
     setRound(r)
@@ -304,7 +344,7 @@ export default function Penaltis() {
       else if (i < prepared.length) goAsk(i)
       else if (myG !== oppG) finishShootout(myG, oppG)
       else {
-        setPrepared((pp) => [...pp, ...extraPair(theme)])
+        setPrepared((pp) => [...pp, ...extraPair(theme, copaMode, round, pp.length / 2)])
         goAsk(i)
       }
     }, 1800)
@@ -347,7 +387,7 @@ export default function Penaltis() {
         `Total ${copa.total} pts · ${copa.cups} copa${copa.cups === 1 ? '' : 's'}`,
       ],
       edition: `Edição #${dayNumber()}`,
-      text: `Encyclobol · Copa de Pênaltis #${dayNumber()} — ${champion ? 'CAMPEÃO' : copaScore + ' pts'} · encyclobol.com.br`,
+      text: `Encyclobol · Copa de Pênaltis #${dayNumber()} — ${champion ? 'CAMPEÃO' : copaScore + ' pts'} · ${siteLink('/jogos/penaltis')}`,
     })
     if (r !== 'error') {
       setCopied(true)

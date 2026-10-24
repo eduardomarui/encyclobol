@@ -1,9 +1,10 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { players, type Player } from '../data/players'
 import { clubHint } from '../data/clubs'
 import PlayerInput from '../components/PlayerInput'
-import { dailyIndex, dayNumber } from '../lib/daily'
+import { dailyPick, dayNumber } from '../lib/daily'
+import { loadRun, saveRun } from '../lib/runSave'
 import {
   loadMystCareer,
   loadMystToday,
@@ -13,6 +14,7 @@ import {
 import { confetti } from '../lib/juice'
 import { shareScoreImage, type Sq } from '../lib/shareCard'
 import { GameHeader, GameTitle, HelpModal, StatGrid } from '../components/GameShell'
+import { siteLink } from '../lib/site'
 
 const MAX_GUESSES = 8
 const HINT_COST = 75
@@ -146,14 +148,39 @@ type Row = {
   dir: 'up' | 'down' | 'same'
 }
 
-const today = loadMystToday()
+function compare(p: Player, secret: Player): Row {
+  const secretYear = startYear(secret.era)
+  const gy = startYear(p.era)
+  const decadeOk = Math.floor(gy / 10) === Math.floor(secretYear / 10)
+  return {
+    player: p,
+    natOk: p.nat === secret.nat,
+    contOk: continentOf(p.nat) === continentOf(secret.nat),
+    posOk: p.pos === secret.pos,
+    decadeOk,
+    close: !decadeOk && Math.abs(secretYear - gy) <= 10,
+    dir: secretYear > gy ? 'up' : secretYear < gy ? 'down' : 'same',
+  }
+}
+
+type MystRun = { guesses: string[]; hints: number }
+const dailySecret = () => players[dailyPick(players.length, 90210)]
 
 export default function Misterioso() {
+  // Estado do dia lido a cada montagem; chutes do dia salvos (F5 retoma e o
+  // compartilhar continua com a grade depois de recarregar).
+  const [today] = useState(loadMystToday)
+  const [saved] = useState(() => loadRun<MystRun>('misterioso'))
   const [mode, setMode] = useState<'daily' | 'practice'>('daily')
-  const [secret, setSecret] = useState<Player>(() => players[dailyIndex(players.length)])
+  const [secret, setSecret] = useState<Player>(dailySecret)
   const secretYear = useMemo(() => startYear(secret.era), [secret])
 
-  const [rows, setRows] = useState<Row[]>([])
+  const [rows, setRows] = useState<Row[]>(() =>
+    (saved?.guesses ?? [])
+      .map((a) => players.find((p) => p.answer === a))
+      .filter((p): p is Player => !!p)
+      .map((p) => compare(p, dailySecret())),
+  )
   const [note, setNote] = useState('')
   const [status, setStatus] = useState<'playing' | 'won' | 'lost'>(
     today ? (today.won ? 'won' : 'lost') : 'playing',
@@ -161,6 +188,7 @@ export default function Misterioso() {
   const [shareRows, setShareRows] = useState<string[][]>(today?.rows ?? [])
   const [points, setPoints] = useState(today?.points ?? 0)
   const [hints, setHints] = useState<string[]>([])
+  const [restoredHints] = useState(saved?.hints ?? 0)
   const [career, setCareer] = useState<MystCareer>(() => loadMystCareer())
   const [prevBest] = useState(() => loadMystCareer().best)
   const [recorded, setRecorded] = useState(!!today)
@@ -190,6 +218,17 @@ export default function Misterioso() {
       `O nome começa com "${first}"`,
     ]
   }, [secret, secretYear])
+
+  // Dicas já pedidas hoje voltam depois de recarregar.
+  useEffect(() => {
+    if (restoredHints > 0) setHints(hintPool.slice(0, restoredHints))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (!daily || recorded) return
+    if (rows.length || hints.length) saveRun<MystRun>('misterioso', { guesses: rows.map((r) => r.player.answer), hints: hints.length })
+  }, [daily, recorded, rows, hints])
 
   function pedirDica() {
     if (over || hints.length >= hintPool.length) return
@@ -225,17 +264,7 @@ export default function Misterioso() {
     }
     setNote('')
 
-    const gy = startYear(p.era)
-    const decadeOk = Math.floor(gy / 10) === Math.floor(secretYear / 10)
-    const row: Row = {
-      player: p,
-      natOk: p.nat === secret.nat,
-      contOk: continentOf(p.nat) === continentOf(secret.nat),
-      posOk: p.pos === secret.pos,
-      decadeOk,
-      close: !decadeOk && Math.abs(secretYear - gy) <= 10,
-      dir: secretYear > gy ? 'up' : secretYear < gy ? 'down' : 'same',
-    }
+    const row = compare(p, secret)
     const nextRows = [...rows, row]
     setRows(nextRows)
 
@@ -286,7 +315,7 @@ export default function Misterioso() {
       squares,
       lines: [`Total ${career.total} pts`],
       edition: `Edição #${dayNumber()}`,
-      text: `Encyclobol · Craque Misterioso #${dayNumber()} — ${won ? points + ' pts' : 'X'} · encyclobol.com.br`,
+      text: `Encyclobol · Craque Misterioso #${dayNumber()} — ${won ? points + ' pts' : 'X'} · ${siteLink('/jogos/craque-misterioso')}`,
     })
     if (res !== 'error') {
       setCopied(true)

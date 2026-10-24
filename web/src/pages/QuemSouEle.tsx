@@ -10,6 +10,8 @@ import {
 import { confetti } from '../lib/juice'
 import { shareScoreImage } from '../lib/shareCard'
 import { GameHeader, HelpModal, StatGrid, TimeBar } from '../components/GameShell'
+import { siteLink } from '../lib/site'
+import { loadRun, saveRun } from '../lib/runSave'
 
 const MAX_ATTEMPTS = 6
 const ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM']
@@ -89,31 +91,41 @@ function ladderPick(stage: number, used: number[]): number {
   return arr[h % arr.length]
 }
 
-const today = loadCareerToday()
+type TTRun = {
+  pick: number; guesses: string[]; stage: number; lives: number; score: number
+  revealCount: number; skipCount: number; revealed: number; usedPicks: number[]
+  roundDone: boolean; lastGain: number; timeLeft: number; timedOut: boolean
+  history: { name: string; ok: boolean; tries: number }[]
+}
 
 export default function QuemSouEle() {
+  // Estado do dia lido a cada montagem; a carreira é salva a cada jogada e a
+  // cada segundo do relógio — F5 retoma do mesmo ponto, com o mesmo tempo.
+  const [today] = useState(loadCareerToday)
+  const [saved] = useState(() => loadRun<TTRun>('tirateima'))
+  const run = today ? null : saved
   const [mode, setMode] = useState<Mode>('carreira')
-  const [pick, setPick] = useState(() => ladderPick(1, []))
-  const [guesses, setGuesses] = useState<string[]>([])
+  const [pick, setPick] = useState(() => run?.pick ?? ladderPick(1, []))
+  const [guesses, setGuesses] = useState<string[]>(run?.guesses ?? [])
   const [current, setCurrent] = useState('')
 
-  const [stage, setStage] = useState(today?.stage ?? 1)
-  const [lives, setLives] = useState(CAREER_LIVES)
-  const [careerScore, setCareerScore] = useState(today?.score ?? 0)
+  const [stage, setStage] = useState(today?.stage ?? run?.stage ?? 1)
+  const [lives, setLives] = useState(run?.lives ?? CAREER_LIVES)
+  const [careerScore, setCareerScore] = useState(today?.score ?? run?.score ?? 0)
   const [career, setCareerInfo] = useState<Career>(() => loadCareer())
   const [careerDoneToday, setCareerDoneToday] = useState(!!today)
-  const [revealCount, setRevealCount] = useState(1)
-  const [skipCount, setSkipCount] = useState(1)
-  const [revealed, setRevealed] = useState(0)
-  const [usedPicks, setUsedPicks] = useState<number[]>([])
-  const [roundDone, setRoundDone] = useState(false)
-  const [lastGain, setLastGain] = useState(0)
+  const [revealCount, setRevealCount] = useState(run?.revealCount ?? 1)
+  const [skipCount, setSkipCount] = useState(run?.skipCount ?? 1)
+  const [revealed, setRevealed] = useState(run?.revealed ?? 0)
+  const [usedPicks, setUsedPicks] = useState<number[]>(run?.usedPicks ?? [])
+  const [roundDone, setRoundDone] = useState(run?.roundDone ?? false)
+  const [lastGain, setLastGain] = useState(run?.lastGain ?? 0)
   const [celebrated, setCelebrated] = useState(false)
   const [copied, setCopied] = useState(false)
-  const [timeLeft, setTimeLeft] = useState(() => timeForStage(today?.stage ?? 1))
-  const [timedOut, setTimedOut] = useState(false)
-  // Craques enfrentados na corrida de hoje (pra ficha do fim).
-  const [history, setHistory] = useState<{ name: string; ok: boolean; tries: number }[]>([])
+  const [timeLeft, setTimeLeft] = useState(() => run?.timeLeft ?? timeForStage(today?.stage ?? 1))
+  const [timedOut, setTimedOut] = useState(run?.timedOut ?? false)
+  // Craques enfrentados na corrida de hoje (pra ficha do fim) — sobrevive ao F5.
+  const [history, setHistory] = useState<{ name: string; ok: boolean; tries: number }[]>(saved?.history ?? [])
   const [showHelp, setShowHelp] = useState(() => {
     try {
       return !localStorage.getItem(HELP_KEY)
@@ -121,6 +133,19 @@ export default function QuemSouEle() {
       return false
     }
   })
+
+  useEffect(() => {
+    if (mode !== 'carreira') return
+    if (careerDoneToday) {
+      // Mantém só a ficha dos craques depois de encerrar o dia.
+      if (history.length) saveRun<Partial<TTRun>>('tirateima', { history })
+      return
+    }
+    saveRun<TTRun>('tirateima', {
+      pick, guesses, stage, lives, score: careerScore, revealCount, skipCount, revealed,
+      usedPicks, roundDone, lastGain, timeLeft, timedOut, history,
+    })
+  }, [mode, careerDoneToday, pick, guesses, stage, lives, careerScore, revealCount, skipCount, revealed, usedPicks, roundDone, lastGain, timeLeft, timedOut, history])
 
   const player = players[pick]
   const answer = player.answer
@@ -203,7 +228,11 @@ export default function QuemSouEle() {
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Enter') onKey('ENTER')
+      if (e.key === 'Enter') {
+        // Evita o Enter "duplo": enviar o chute E clicar no botão focado (ex.: Revelar letra).
+        e.preventDefault()
+        onKey('ENTER')
+      }
       else if (e.key === 'Backspace') onKey('BACK')
       else {
         const up = e.key.toUpperCase()
@@ -283,7 +312,7 @@ export default function QuemSouEle() {
       sub: 'pontos hoje',
       lines: [`Estágio ${stage}`, `Total ${career.total} pts`],
       edition: `Edição #${dayNumber()}`,
-      text: `Encyclobol · Tira-Teima #${dayNumber()} — ${careerScore} pts · encyclobol.com.br`,
+      text: `Encyclobol · Tira-Teima #${dayNumber()} — ${careerScore} pts · ${siteLink('/jogos/quem-sou-ele')}`,
     })
     if (r !== 'error') {
       setCopied(true)

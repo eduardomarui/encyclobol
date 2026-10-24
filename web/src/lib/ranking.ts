@@ -58,7 +58,9 @@ export async function addFriend(code: string): Promise<Profile> {
 // Envia os resultados de hoje (lidos do localStorage) pro banco.
 export async function syncToday() {
   if (!supabase) return
-  const { data: u } = await supabase.auth.getUser()
+  // getSession lê a sessão local (sem ida ao servidor); sem sessão = não entrou no ranking.
+  const { data: sess } = await supabase.auth.getSession()
+  const u = { user: sess.session?.user ?? null }
   if (!u.user) return
   const day = dayNumber()
   const rows: { user_id: string; game: string; day: number; points: number }[] = []

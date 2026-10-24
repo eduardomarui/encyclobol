@@ -16,6 +16,7 @@ import {
   type Profile,
   type BoardRow,
 } from '../lib/ranking'
+import { siteLink } from '../lib/site'
 
 export default function Ranking() {
   const [loading, setLoading] = useState(true)
@@ -110,7 +111,7 @@ export default function Ranking() {
 
   function copiarCodigo() {
     if (!profile) return
-    navigator.clipboard?.writeText(`Joga Encyclobol comigo! Meu código de amigo é ${profile.friend_code} · encyclobol.com.br`)
+    navigator.clipboard?.writeText(`Joga Encyclobol comigo! Meu código de amigo é ${profile.friend_code} · ${siteLink('/ranking')}`)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }

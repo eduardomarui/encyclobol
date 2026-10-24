@@ -11,6 +11,8 @@ import {
 } from '../lib/timelineStats'
 import { confetti } from '../lib/juice'
 import { shareScoreImage } from '../lib/shareCard'
+import { siteLink } from '../lib/site'
+import { clearRun, loadRun, saveRun } from '../lib/runSave'
 
 const HELP_KEY = 'encyclobol:timeline:help'
 
@@ -40,20 +42,30 @@ function lowerBound(placed: Card[], year: number): number {
   return i
 }
 
-const today = loadTLToday()
 const DAILY_SEED = (dayNumber() + 1) * 40503
 
+type TLRun = { placed: string[]; cursor: number; lives: number; score: number; points: number; combo: number; bestCombo: number }
+
 export default function LinhaDoTempo() {
+  // Estado do dia lido a cada montagem + corrida salva a cada carta (F5 retoma).
+  const [today] = useState(loadTLToday)
+  const [saved] = useState(() => (today ? null : loadRun<TLRun>('timeline')))
   const [mode, setMode] = useState<'daily' | 'practice'>('daily')
   const [hard, setHard] = useState(false)
   const [deck, setDeck] = useState<Card[]>(() => buildDeck(DAILY_SEED))
-  const [placed, setPlaced] = useState<Card[]>(() => [buildDeck(DAILY_SEED)[0]])
-  const [cursor, setCursor] = useState(1)
-  const [lives, setLives] = useState(3)
-  const [score, setScore] = useState(today?.score ?? 0)
-  const [points, setPoints] = useState(today?.points ?? 0)
-  const [combo, setCombo] = useState(0)
-  const [bestCombo, setBestCombo] = useState(0)
+  const [placed, setPlaced] = useState<Card[]>(() => {
+    const d = buildDeck(DAILY_SEED)
+    if (!saved) return [d[0]]
+    const byAnswer = new Map(d.map((c) => [c.player.answer, c]))
+    const back = saved.placed.map((a) => byAnswer.get(a)).filter((c): c is Card => !!c)
+    return back.length ? back : [d[0]]
+  })
+  const [cursor, setCursor] = useState(saved?.cursor ?? 1)
+  const [lives, setLives] = useState(saved?.lives ?? 3)
+  const [score, setScore] = useState(today?.score ?? saved?.score ?? 0)
+  const [points, setPoints] = useState(today?.points ?? saved?.points ?? 0)
+  const [combo, setCombo] = useState(saved?.combo ?? 0)
+  const [bestCombo, setBestCombo] = useState(saved?.bestCombo ?? 0)
   const [status, setStatus] = useState<'playing' | 'over'>(today ? 'over' : 'playing')
   const [flash, setFlash] = useState('')
   const [flashOk, setFlashOk] = useState(true)
@@ -84,6 +96,13 @@ export default function LinhaDoTempo() {
     const el = document.getElementById(`tl-${lastPlaced}`)
     el?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
   }, [lastPlaced])
+
+  useEffect(() => {
+    if (!daily) return
+    if (over) clearRun('timeline')
+    else if (cursor > 1)
+      saveRun<TLRun>('timeline', { placed: placed.map((c) => c.player.answer), cursor, lives, score, points, combo, bestCombo })
+  }, [daily, over, placed, cursor, lives, score, points, combo, bestCombo])
 
   function finish(finalScore: number, finalPoints: number) {
     setStatus('over')
@@ -164,7 +183,7 @@ export default function LinhaDoTempo() {
       sub: newRecord ? 'novo recorde!' : 'pontos',
       lines: [`${score} cartas em sequência`, `Total ${career.total} pts`],
       edition: `Edição #${dayNumber()}`,
-      text: `Encyclobol · Linha do Tempo #${dayNumber()} — ${points} pts (${score} cartas) · encyclobol.com.br`,
+      text: `Encyclobol · Linha do Tempo #${dayNumber()} — ${points} pts (${score} cartas) · ${siteLink('/jogos/linha-do-tempo')}`,
     })
     if (r !== 'error') {
       setCopied(true)

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { intruso, type IntrusoCat } from '../data/intruso'
 import { dayNumber, seededShuffle } from '../lib/daily'
@@ -12,6 +12,8 @@ import { confetti } from '../lib/juice'
 import { shareScoreImage } from '../lib/shareCard'
 import { players } from '../data/players'
 import { GameHeader, GameTitle, HelpModal, Lives, StatGrid } from '../components/GameShell'
+import { siteLink } from '../lib/site'
+import { clearRun, loadRun, saveRun } from '../lib/runSave'
 
 const LIVES = 3
 const REASON_BONUS = 50
@@ -61,17 +63,20 @@ function practiceDeck(): Round[] {
   return makeRounds(order, s)
 }
 
-const today = loadIntrusoToday()
+type IntrRun = { index: number; lives: number; points: number; caught: number; combo: number; bestCombo: number }
 
 export default function Intruso() {
+  // Estado do dia lido a cada montagem + corrida salva a cada rodada (F5 retoma).
+  const [today] = useState(loadIntrusoToday)
+  const [saved] = useState(() => (today ? null : loadRun<IntrRun>('intruso')))
   const [mode, setMode] = useState<'daily' | 'practice'>('daily')
   const [rounds, setRounds] = useState<Round[]>(dailyDeck)
-  const [index, setIndex] = useState(0)
-  const [lives, setLives] = useState(LIVES)
-  const [points, setPoints] = useState(today?.points ?? 0)
-  const [caught, setCaught] = useState(today?.run ?? 0)
-  const [combo, setCombo] = useState(0)
-  const [bestCombo, setBestCombo] = useState(0)
+  const [index, setIndex] = useState(saved?.index ?? 0)
+  const [lives, setLives] = useState(saved?.lives ?? LIVES)
+  const [points, setPoints] = useState(today?.points ?? saved?.points ?? 0)
+  const [caught, setCaught] = useState(today?.run ?? saved?.caught ?? 0)
+  const [combo, setCombo] = useState(saved?.combo ?? 0)
+  const [bestCombo, setBestCombo] = useState(saved?.bestCombo ?? 0)
   const [step, setStep] = useState<'intruder' | 'reason' | 'revealed'>('intruder')
   const [selIntruder, setSelIntruder] = useState<number | null>(null)
   const [selReason, setSelReason] = useState<IntrusoCat | null>(null)
@@ -95,6 +100,19 @@ export default function Intruso() {
   const current = rounds[index]
   const beating = daily && points > prevBest && points > 0
   const newRecord = over && daily && points > prevBest && points > 0
+
+  // Rodada respondida = já conta: salva como se tivesse avançado.
+  useEffect(() => {
+    if (!daily) return
+    if (over) clearRun('intruso')
+    else if (step !== 'intruder') saveRun<IntrRun>('intruso', { index: index + 1, lives, points, caught, combo, bestCombo })
+  }, [daily, over, step, index, lives, points, caught, combo, bestCombo])
+
+  // Voltou com a corrida já sem vidas (fechou antes do "Ver resultado"): encerra e grava.
+  useEffect(() => {
+    if (saved && saved.lives <= 0) finish()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   function finish() {
     setStatus('over')
@@ -176,7 +194,7 @@ export default function Intruso() {
       sub: newRecord ? 'novo recorde!' : 'pontos',
       lines: [`${caught} intrusos caçados`, `Total ${career.total} pts`],
       edition: `Edição #${dayNumber()}`,
-      text: `Encyclobol · O Intruso #${dayNumber()} — ${points} pts · ${caught} caçados · encyclobol.com.br`,
+      text: `Encyclobol · O Intruso #${dayNumber()} — ${points} pts · ${caught} caçados · ${siteLink('/jogos/o-intruso')}`,
     })
     if (r !== 'error') {
       setCopied(true)

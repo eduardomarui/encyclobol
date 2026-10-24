@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { conexoes, type ConGroup, type GroupColor } from '../data/conexoes'
 import { dailyIndex, dayNumber, seededShuffle } from '../lib/daily'
@@ -11,6 +11,8 @@ import {
 import { confetti } from '../lib/juice'
 import { shareScoreImage, type Sq } from '../lib/shareCard'
 import { GameHeader, GameTitle, HelpModal, StatGrid } from '../components/GameShell'
+import { siteLink } from '../lib/site'
+import { clearRun, loadRun, saveRun } from '../lib/runSave'
 
 const MAX_MISTAKES = 4
 const SOLVE_PTS = 100
@@ -43,10 +45,15 @@ function computePoints(
   return pts
 }
 
-const today = loadConToday()
 const DAILY_INDEX = dailyIndex(conexoes.length)
 
+type ConRun = { solved: GroupColor[]; seq: GroupColor[]; mistakes: number; rows: string[][]; order: string[] }
+
 export default function Conexoes() {
+  // Lido a cada montagem (não no carregamento do módulo): voltar ao jogo pelo hub
+  // não reabre o dia já jogado.
+  const [today] = useState(loadConToday)
+  const [saved] = useState(() => (today ? null : loadRun<ConRun>('quarteto')))
   const [mode, setMode] = useState<'daily' | 'practice'>('daily')
   const [pIdx, setPIdx] = useState(DAILY_INDEX)
   const puzzle = conexoes[pIdx]
@@ -57,14 +64,16 @@ export default function Conexoes() {
     return map
   }, [puzzle])
 
-  const [order, setOrder] = useState<string[]>(() =>
-    seededShuffle(puzzle.groups.flatMap((g) => g.members), (dayNumber() + 1) * 7919),
+  const [order, setOrder] = useState<string[]>(
+    () => saved?.order ?? seededShuffle(puzzle.groups.flatMap((g) => g.members), (dayNumber() + 1) * 7919),
   )
   const [selected, setSelected] = useState<string[]>([])
-  const [solved, setSolved] = useState<ConGroup[]>(() => (today ? puzzle.groups : []))
-  const [solveSeq, setSolveSeq] = useState<GroupColor[]>([])
-  const [mistakes, setMistakes] = useState(today?.mistakes ?? 0)
-  const [rows, setRows] = useState<string[][]>(today?.rows ?? [])
+  const [solved, setSolved] = useState<ConGroup[]>(() =>
+    today ? puzzle.groups : (saved?.solved ?? []).map((c) => puzzle.groups.find((g) => g.color === c)!).filter(Boolean),
+  )
+  const [solveSeq, setSolveSeq] = useState<GroupColor[]>(saved?.seq ?? [])
+  const [mistakes, setMistakes] = useState(today?.mistakes ?? saved?.mistakes ?? 0)
+  const [rows, setRows] = useState<string[][]>(today?.rows ?? saved?.rows ?? [])
   const [status, setStatus] = useState<'playing' | 'won' | 'lost'>(
     today ? (today.won ? 'won' : 'lost') : 'playing',
   )
@@ -85,6 +94,13 @@ export default function Conexoes() {
   const over = status !== 'playing'
   const daily = mode === 'daily'
   const won = status === 'won'
+
+  // Salva a corrida do dia a cada jogada; some quando o dia é gravado.
+  useEffect(() => {
+    if (!daily) return
+    if (over) clearRun('quarteto')
+    else if (rows.length) saveRun<ConRun>('quarteto', { solved: solved.map((g) => g.color), seq: solveSeq, mistakes, rows, order })
+  }, [daily, over, solved, solveSeq, mistakes, rows, order])
   const perfect = won && mistakes === 0
   const ordered = won && solveSeq.length === 4 && solveSeq.every((c, i) => c === ORDER[i])
   const solvedNames = new Set(solved.flatMap((g) => g.members))
@@ -190,7 +206,7 @@ export default function Conexoes() {
       squares,
       lines: [`Total ${career.total} pts`],
       edition: `Edição #${dayNumber()}`,
-      text: `Encyclobol · Quarteto #${dayNumber()} — ${points} pts · encyclobol.com.br`,
+      text: `Encyclobol · Quarteto #${dayNumber()} — ${points} pts · ${siteLink('/jogos/conexoes')}`,
     })
     if (r !== 'error') {
       setCopied(true)

@@ -19,6 +19,7 @@ import { loadConCareer, loadConToday } from '../lib/conexoesStats'
 import { loadTLCareer, loadTLToday } from '../lib/timelineStats'
 import { loadIntrusoCareer, loadIntrusoToday } from '../lib/intrusoStats'
 import { loadMystCareer, loadMystToday } from '../lib/misteriosoStats'
+import { siteLink } from '../lib/site'
 
 type Result = { played: boolean; streak: number; detail: string; good: boolean }
 
@@ -151,7 +152,7 @@ export default function Jogos() {
       sub: fechou ? 'fechei o dia!' : 'jogos de hoje',
       squares,
       edition: `Edição #${dayNumber()}`,
-      text: `Encyclobol · ${fechou ? 'Fechei o dia!' : `${jogadosHoje}/${total} jogos`} #${dayNumber()} · encyclobol.com.br`,
+      text: `Encyclobol · ${fechou ? 'Fechei o dia!' : `${jogadosHoje}/${total} jogos`} #${dayNumber()} · ${siteLink('/jogos')}`,
     })
     if (r !== 'error') {
       setCopied(true)

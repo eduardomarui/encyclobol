@@ -30,12 +30,14 @@ export default function PlayerInput({
     if (nq.length < 1) return []
     const starts: Opt[] = []
     const incl: Opt[] = []
+    const exact: Opt[] = []
     for (const o of options) {
       const nd = norm(o.display)
-      if (nd.startsWith(nq)) starts.push(o)
+      if (nd === nq) exact.push(o)
+      else if (nd.startsWith(nq)) starts.push(o)
       else if (nd.includes(nq)) incl.push(o)
     }
-    return [...starts, ...incl].slice(0, 6)
+    return [...exact, ...starts, ...incl].slice(0, 6)
   }, [q, options])
 
   function choose(text: string) {
@@ -55,7 +57,11 @@ export default function PlayerInput({
       setHi((h) => Math.max(h - 1, 0))
     } else if (e.key === 'Enter') {
       e.preventDefault()
-      if (open && matches[hi]) choose(matches[hi].display)
+      // Nome digitado por inteiro tem prioridade sobre a sugestão destacada:
+      // "Didi" + Enter era enviado como "Didier Drogba" e gastava um chute.
+      const exact = options.find((o) => norm(o.display) === norm(q))
+      if (exact) choose(exact.display)
+      else if (open && matches[hi]) choose(matches[hi].display)
       else if (q.trim()) choose(q)
     } else if (e.key === 'Escape') {
       setOpen(false)
@@ -78,6 +84,10 @@ export default function PlayerInput({
           placeholder={placeholder}
           autoFocus
           autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="words"
+          spellCheck={false}
+          enterKeyHint="send"
           className="flex-1 border-2 border-white/20 bg-paper px-4 py-3 font-serif text-base text-ink-900 outline-none placeholder:text-ink-500 focus:bg-paper-100"
         />
         <button

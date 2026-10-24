@@ -1,4 +1,6 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { useEffect } from 'react'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { syncToday } from './lib/ranking'
 import Landing from './pages/Landing'
 import Jogos from './pages/Jogos'
 import QuemSouEle from './pages/QuemSouEle'
@@ -15,10 +17,28 @@ import Termos from './pages/Termos'
 import NaoEncontrado from './pages/NaoEncontrado'
 import Onboarding from './components/Onboarding'
 
+// Manda os pontos do dia pro ranking sempre que a pessoa muda de tela ou sai
+// do app — antes só ia quando ela abria /ranking, e muita pontuação se perdia.
+function ScoreSync() {
+  const { pathname } = useLocation()
+  useEffect(() => {
+    syncToday().catch(() => {})
+  }, [pathname])
+  useEffect(() => {
+    const onHide = () => {
+      if (document.visibilityState === 'hidden') syncToday().catch(() => {})
+    }
+    document.addEventListener('visibilitychange', onHide)
+    return () => document.removeEventListener('visibilitychange', onHide)
+  }, [])
+  return null
+}
+
 export default function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
       <Onboarding />
+      <ScoreSync />
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/jogos" element={<Jogos />} />
