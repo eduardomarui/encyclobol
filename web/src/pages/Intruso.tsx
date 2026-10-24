@@ -28,7 +28,6 @@ const ROUND_SEC = 15
 const ELO_SEC = 10
 const SPEED_MAX = 30
 const TIER_LABEL = { 1: 'fácil', 2: 'médio', 3: 'difícil' } as const
-const CATS: IntrusoCat[] = ['Posição', 'Nacionalidade', 'Clube', 'Era']
 const HELP_KEY = 'encyclobol:intruso:help'
 
 // `cats`: todos os elos verdadeiros dos outros três (qualquer um vale o bônus).
@@ -64,7 +63,7 @@ function makeRounds(picks: number[], seedBase: number): Round[] {
       rule: base.rule,
       cat: base.cat,
       cats: [base.cat, ...((base as { alsoCat?: IntrusoCat[] }).alsoCat ?? [])],
-      elo: buildElos(players, players.indexOf(base.intruder), base.rule, seedBase + qi * 31),
+      elo: buildElos(players, players.indexOf(base.intruder), base.rule, seedBase + qi * 31, base.cat),
       tier: tierOf(base.cat, base.players),
     }
   })
@@ -106,7 +105,6 @@ export default function Intruso() {
   const [bestCombo, setBestCombo] = useState(saved?.bestCombo ?? 0)
   const [step, setStep] = useState<'intruder' | 'reason' | 'revealed'>('intruder')
   const [selIntruder, setSelIntruder] = useState<number | null>(null)
-  const [selReason, setSelReason] = useState<IntrusoCat | null>(null)
   const [selElo, setSelElo] = useState<number | null>(null)
   const [timeLeft, setTimeLeft] = useState(ROUND_SEC)
   const [reasonGot, setReasonGot] = useState(false)
@@ -165,7 +163,6 @@ export default function Intruso() {
     setIndex((i) => i + 1)
     setStep('intruder')
     setSelIntruder(null)
-    setSelReason(null)
     setSelElo(null)
     setTimeLeft(ROUND_SEC)
   }
@@ -175,8 +172,7 @@ export default function Intruso() {
     if (over || showHelp || (step !== 'intruder' && step !== 'reason')) return
     if (timeLeft <= 0) {
       if (step === 'intruder') pickIntruder(-1)
-      else if (current?.elo) pickElo(-1)
-      else pickReason(null)
+      else pickElo(-1)
       return
     }
     if (timeLeft <= 3) sfx.tickHot()
@@ -186,7 +182,7 @@ export default function Intruso() {
   }, [timeLeft, step, over, showHelp])
 
   // Acerto passa rápido; erro fica mais, que é quando se aprende a regra.
-  const revealMs = selIntruder === current?.intruderIdx && (reasonGot || index < ELO_FROM) ? 1500 : 3400
+  const revealMs = selIntruder === current?.intruderIdx && (reasonGot || index < ELO_FROM || !current?.elo) ? 1500 : 3400
 
   // Depois da revelação o jogo segue sozinho (o botão só adianta).
   useEffect(() => {
@@ -208,7 +204,8 @@ export default function Intruso() {
       setCaught((c) => c + 1)
       setPoints((p) => p + gain)
       setLastGain(gain)
-      if (index < ELO_FROM) {
+      // Sem etapa do elo nas 3 primeiras e no tema Clube (ver buildElos).
+      if (index < ELO_FROM || !current.elo) {
         setReasonGot(false)
         setStep('revealed')
       } else {
@@ -239,18 +236,6 @@ export default function Intruso() {
     setStep('revealed')
   }
 
-  function pickReason(c: IntrusoCat | null) {
-    if (step !== 'reason' || !current) return
-    setSelReason(c)
-    const ok = !!c && current.cats.includes(c)
-    setReasonGot(ok)
-    if (ok) {
-      setPoints((p) => p + REASON_BONUS)
-      sfx.stamp()
-    } else sfx.nearMiss()
-    setStep('revealed')
-  }
-
   function jogarTreino() {
     setMode('practice')
     setRounds(practiceDeck())
@@ -262,7 +247,6 @@ export default function Intruso() {
     setBestCombo(0)
     setStep('intruder')
     setSelIntruder(null)
-    setSelReason(null)
     setSelElo(null)
     setTimeLeft(ROUND_SEC)
     setStatus('playing')
@@ -347,6 +331,13 @@ export default function Intruso() {
                 {step === 'reason' ? 'Agora: qual é o elo?' : 'Quem não pertence?'}
               </p>
             </div>
+            {/* O tema da rodada: o intruso é o que foge DESSE traço (títulos,
+                continente etc. não contam), então a resposta é uma só. */}
+            <p className="mt-1.5 text-center">
+              <span className="inline-block border border-corn-500/60 px-2 py-0.5 font-cond text-[11px] font-700 uppercase tracking-[0.18em] text-corn-400">
+                Tema: {current.cats[0]}
+              </span>
+            </p>
             {(step === 'intruder' || step === 'reason') && (
               <div className="mt-2 flex items-center gap-2">
                 <TimeBar left={timeLeft} total={step === 'intruder' ? ROUND_SEC : ELO_SEC} danger={3} />
@@ -412,33 +403,6 @@ export default function Intruso() {
                 </div>
               </div>
             )}
-            {(step === 'reason' || step === 'revealed') && !current.elo && (
-              <div className="mt-4">
-                <p className="text-center font-serif text-sm italic text-ink-600">
-                  {step === 'reason' ? `O que liga os outros três? (+${REASON_BONUS})` : 'O elo era:'}
-                </p>
-                <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  {CATS.map((c) => {
-                    let cls = 'border-ink-900/25 bg-paper hover:border-white/20 hover:bg-paper-100'
-                    if (step === 'revealed') {
-                      if (current.cats.includes(c)) cls = 'border-grass-700 bg-grass-600 text-ink-900'
-                      else if (c === selReason) cls = 'border-ochre-600 bg-ochre-500 text-ink-900'
-                      else cls = 'border-ink-900/15 bg-paper opacity-60'
-                    }
-                    return (
-                      <button
-                        key={c}
-                        onClick={() => pickReason(c)}
-                        disabled={step !== 'reason'}
-                        className={`border-2 px-2 py-2.5 text-center font-cond text-xs font-700 uppercase tracking-wide transition-colors ${cls}`}
-                      >
-                        {c}
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            )}
 
             {step === 'revealed' && (
               <div className="mt-4 text-center">
@@ -446,7 +410,7 @@ export default function Intruso() {
                   {selIntruder === current.intruderIdx ? (
                     <span className="text-grass-400">
                       Acertou! +{lastGain}
-                      {index < ELO_FROM ? '' : reasonGot ? ` +${REASON_BONUS} (elo certo)` : ' (elo errado)'} ·{' '}
+                      {index < ELO_FROM || !current.elo ? '' : reasonGot ? ` +${REASON_BONUS} (elo certo)` : ' (elo errado)'} ·{' '}
                     </span>
                   ) : (
                     <span className="text-ochre-400">
@@ -518,12 +482,13 @@ export default function Intruso() {
       {showHelp && (
         <HelpModal title="O Intruso" cta="Entendi, bora caçar" onClose={closeHelp}>
               <li>
-                São 4 craques: <strong>3 têm algo em comum</strong> e <strong>1 é o infiltrado</strong>.
+                São 4 craques: <strong>3 têm algo em comum</strong> e <strong>1 é o infiltrado</strong>. O{' '}
+                <strong>tema</strong> da rodada (clube, seleção, posição ou época) diz onde procurar.
                 Ache o intruso em até <strong>{ROUND_SEC} segundos</strong> — quanto mais rápido, mais pontos.
               </li>
               <li>
                 A partir da {ELO_FROM + 1}ª rodada, depois de achar o intruso, diga{' '}
-                <strong>o que liga os outros três</strong>, entre três opções (+{REASON_BONUS}). Só uma é verdadeira.
+                <strong>o que liga os outros três</strong>, entre três opções (+{REASON_BONUS}). Só uma é verdadeira. No tema clube, basta achar o intruso.
               </li>
               <li>
                 Acertos seguidos viram combo (até x{COMBO_CAP}). Errar ou deixar o tempo zerar{' '}

@@ -145,7 +145,15 @@ export type EloOptions = { options: string[]; correct: number }
 
 // Três opções: o elo certo + duas afirmações que os dados provam falsas.
 // Devolve null se algum nome não estiver na base (aí o jogo usa as categorias).
-export function buildElos(names: string[], intruderIdx: number, rule: string, seed: number): EloOptions | null {
+// O tema da rodada fica à mostra, então as iscas são do MESMO tipo do tema
+// (posição contra posição, seleção contra seleção, década contra década) —
+// senão a certa se entregava. Tema Clube não tem etapa do elo: o banco só
+// sabe um clube por jogador, e uma isca "jogaram no X" poderia ser verdade.
+const KIND_OF: Record<string, Kind | undefined> = { Posição: 'pos', Nacionalidade: 'nat', Era: 'dec' }
+
+export function buildElos(names: string[], intruderIdx: number, rule: string, seed: number, cat?: string): EloOptions | null {
+  const kind = cat ? KIND_OF[cat] : undefined
+  if (cat && !kind) return null
   const four = names.map(findPlayer)
   if (four.some((p) => !p)) return null
   const all = four as Player[]
@@ -153,8 +161,13 @@ export function buildElos(names: string[], intruderIdx: number, rule: string, se
   // "Eram meias" → "São meias": o tempo verbal não pode entregar a resposta.
   const right = eloFromRule(rule).replace(/^Eram /, 'São ')
   const facts = factsFor(trio, all)
+  if (kind) {
+    // Completa com afirmações do mesmo tipo que os dados provam falsas pros três.
+    if (kind === 'pos') for (const [pos, pl] of Object.entries(POS_PL)) facts.push({ text: `São ${pl}`, kind, hits: trio.filter((t) => t.pos === pos).length })
+    if (kind === 'nat') for (const [nat, pl] of Object.entries(NAT_PL)) facts.push({ text: `São ${pl}`, kind, hits: trio.filter((t) => t.nat === nat).length })
+  }
   const same = (a: string) => a.toLowerCase() === right.toLowerCase()
-  const falses = rankFalse(facts.filter((f) => f.hits < 3 && !same(f.text)), seed)
+  const falses = rankFalse(facts.filter((f) => f.hits < 3 && !same(f.text) && (!kind || f.kind === kind)), seed)
   const trues = facts.filter((f) => f.hits === 3)
   // Elo composto ("São pontas e jogaram no Chelsea"): as iscas também vêm
   // compostas — uma parte verdadeira + uma falsa, de tipos diferentes —, pra
