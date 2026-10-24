@@ -31,35 +31,42 @@ export const conexoes: Puzzle[] = [
       { color: 'ink', label: 'Argentinos', members: ['Maradona', 'Messi', 'Batistuta', 'Kempes'] },
     ],
   },
-  // 3 — armadilha clássica: 4 italianos, um em cada grupo de posição
+  // 3 — armadilha clássica: 4 italianos, um em cada grupo de posição.
+  // (Ramos, Puyol e Facchetti saíram: jogaram de lateral e de zagueiro e abriam
+  // uma 2ª solução; Van Dijk, Terry e Grosso só jogaram numa posição.)
   {
     groups: [
       { color: 'corn', label: 'Goleiros', members: ['Casillas', 'Neuer', 'Banks', 'Buffon'] },
-      { color: 'grass', label: 'Zagueiros', members: ['Cannavaro', 'Puyol', 'Ramos', 'Figueroa'] },
-      { color: 'ochre', label: 'Laterais', members: ['Cafu', 'Roberto Carlos', 'Zanetti', 'Facchetti'] },
+      { color: 'grass', label: 'Zagueiros', members: ['Cannavaro', 'Van Dijk', 'Terry', 'Figueroa'] },
+      { color: 'ochre', label: 'Laterais', members: ['Cafu', 'Roberto Carlos', 'Zanetti', 'Grosso'] },
       { color: 'ink', label: 'Atacantes', members: ['Eusébio', 'Forlán', 'Totti', 'Cristiano Ronaldo'] },
     ],
   },
-  // 4 — posições com seleções misturadas
+  // 4 — posições com seleções misturadas. (Goleiros trocados para não repetir o
+  // puzzle 3; Lahm saiu porque também foi volante e abria 2ª solução com Gerrard,
+  // que começou como lateral. Maicon é lateral puro.)
   {
     groups: [
-      { color: 'corn', label: 'Goleiros', members: ['Casillas', 'Taffarel', 'Banks', 'Neuer'] },
-      { color: 'grass', label: 'Laterais', members: ['Cafu', 'Roberto Carlos', 'Lahm', 'Zanetti'] },
+      { color: 'corn', label: 'Goleiros', members: ['Zoff', 'Schmeichel', 'Van der Sar', 'Chilavert'] },
+      { color: 'grass', label: 'Laterais', members: ['Cafu', 'Roberto Carlos', 'Maicon', 'Zanetti'] },
       { color: 'ochre', label: 'Maestros do meio', members: ['Zidane', 'Pirlo', 'Platini', 'Gerrard'] },
       { color: 'ink', label: 'Atacantes', members: ['Mbappé', 'Forlán', 'Eusébio', 'Bergkamp'] },
     ],
   },
-  // 5 — puro por seleção (mais fácil): cuidado com os atacantes espalhados
+  // 5 — puro por seleção (mais fácil): cuidado com os atacantes espalhados.
+  // armadilha: Jorginho nasceu em Imbituba-SC, mas defendeu a Itália; os
+  // Brasileiros já têm 4 e não abrem vaga.
   {
     groups: [
       { color: 'corn', label: 'Brasileiros', members: ['Pelé', 'Garrincha', 'Zico', 'Romário'] },
-      { color: 'grass', label: 'Italianos', members: ['Maldini', 'Buffon', 'Pirlo', 'Baresi'] },
+      { color: 'grass', label: 'Italianos', members: ['Maldini', 'Buffon', 'Jorginho', 'Baresi'] },
       { color: 'ochre', label: 'Argentinos', members: ['Maradona', 'Messi', 'Batistuta', 'Zanetti'] },
-      { color: 'ink', label: 'Holandeses', members: ['Cruyff', 'Bergkamp', 'Gullit', 'Robben'] },
+      { color: 'ink', label: 'Holandeses', members: ['Cruyff', 'Bergkamp', 'Seedorf', 'Van Persie'] },
     ],
   },
   // 6 — por CLUBE. Armadilhas de carreira: Figo (Barça→Real), Ronaldinho
-  // (Barça→Milan) e Robben (Real→Bayern) só fecham de um jeito.
+  // (Barça→Milan), Rivaldo (Barça→Milan) e Robben (Real→Bayern) só fecham de um
+  // jeito: o Milan já fecha com Maldini, Baresi, Nesta e Gullit, sem vaga.
   {
     groups: [
       { color: 'corn', label: 'Jogaram no Milan', members: ['Maldini', 'Baresi', 'Nesta', 'Gullit'] },
@@ -91,7 +98,7 @@ export const conexoes: Puzzle[] = [
       { color: 'ink', label: 'Jogaram no Manchester United', members: ['Rooney', 'Cantona', 'Van Nistelrooy', 'Beckham'] },
     ],
   },
-  // 9 — quatro seleções, incluindo um quarteto africano de continentes diferentes.
+  // 9 — quatro seleções, incluindo um quarteto africano de quatro países.
   {
     groups: [
       { color: 'corn', label: 'Africanos', members: ['Weah', 'Drogba', "Eto'o", 'Salah'] },
@@ -113,13 +120,16 @@ export const conexoes: Puzzle[] = [
       { color: 'ink', label: 'Jogaram no Barcelona', members: ['Xavi', 'Iniesta', 'Messi', 'Ronaldinho'] },
     ],
   },
-  // 11 — clubes + uma seleção. Robben/Beckham/Suárez têm muitos clubes,
-  // mas só fecham num grupo aqui.
+  // 11 — clubes + uma seleção. armadilha: Xabi Alonso jogou no Bayern
+  // (2014–17), Di María no United (2014–15) e Schweinsteiger no Bayern E no
+  // United. Liverpool e Argentinos têm exatamente 4 candidatos cada, então Xabi
+  // fecha no Liverpool e Di María nos Argentinos; a vaga do United só tem
+  // Schweinsteiger, e o Bayern fica com Lahm, Neuer, Lewandowski e Robben.
   {
     groups: [
-      { color: 'corn', label: 'Jogaram no Liverpool', members: ['Gerrard', 'Suárez', 'Xabi Alonso', 'Fernando Torres'] },
+      { color: 'corn', label: 'Jogaram no Liverpool', members: ['Gerrard', 'Salah', 'Van Dijk', 'Xabi Alonso'] },
       { color: 'grass', label: 'Jogaram no Bayern de Munique', members: ['Lahm', 'Neuer', 'Lewandowski', 'Robben'] },
-      { color: 'ochre', label: 'Jogaram no Manchester United', members: ['Rooney', 'Cantona', 'Van Nistelrooy', 'Beckham'] },
+      { color: 'ochre', label: 'Jogaram no Manchester United', members: ['Rooney', 'Cantona', 'Beckham', 'Schweinsteiger'] },
       { color: 'ink', label: 'Argentinos', members: ['Messi', 'Maradona', 'Agüero', 'Di María'] },
     ],
   },
@@ -134,16 +144,20 @@ export const conexoes: Puzzle[] = [
     ],
   },
   // 13 — quatro seleções de lendas (posições misturadas de propósito).
+  // armadilha: Camoranesi nasceu na Argentina, mas foi campeão do mundo pela
+  // Itália em 2006; não há grupo argentino.
   {
     groups: [
       { color: 'corn', label: 'Alemães', members: ['Matthäus', 'Ballack', 'Kahn', 'Klose'] },
-      { color: 'grass', label: 'Italianos', members: ['Baggio', 'Del Piero', 'Totti', 'Pirlo'] },
+      { color: 'grass', label: 'Italianos', members: ['Baggio', 'Camoranesi', 'Totti', 'Pirlo'] },
       { color: 'ochre', label: 'Franceses', members: ['Zidane', 'Henry', 'Vieira', 'Cantona'] },
       { color: 'ink', label: 'Brasileiros', members: ['Sócrates', 'Bebeto', 'Adriano', 'Coutinho'] },
     ],
   },
   // 14 — craques em atividade, por clube. Armadilha: Lewandowski (Bayern e
   // Barça) só fecha no Barça; os 4 espanhóis estão espalhados (City e Barça).
+  // Rodri está no Barcelona desde 18/08/2026, mas o City tem exatamente 4
+  // candidatos (Haaland, De Bruyne, Foden, Rodri), então ele fecha no City.
   {
     groups: [
       { color: 'corn', label: 'Jogaram no Real Madrid', members: ['Vinícius', 'Bellingham', 'Mbappé', 'Courtois'] },
@@ -152,12 +166,13 @@ export const conexoes: Puzzle[] = [
       { color: 'ink', label: 'Jogaram no Bayern de Munique', members: ['Musiala', 'Kimmich', 'Kane', 'Neuer'] },
     ],
   },
-  // 15 — craques em atividade, por seleção.
+  // 15 — craques em atividade, por seleção. armadilha: Matheus Nunes nasceu no
+  // Rio de Janeiro, mas defende Portugal; os Brasileiros já têm 4.
   {
     groups: [
       { color: 'corn', label: 'Brasileiros', members: ['Vinícius', 'Neymar', 'Raphinha', 'Endrick'] },
       { color: 'grass', label: 'Argentinos', members: ['Lautaro', 'Julián Álvarez', 'Enzo Fernández', 'Mac Allister'] },
-      { color: 'ochre', label: 'Portugueses', members: ['Bruno Fernandes', 'Bernardo Silva', 'Rafael Leão', 'Rúben Dias'] },
+      { color: 'ochre', label: 'Portugueses', members: ['Bruno Fernandes', 'Bernardo Silva', 'Rafael Leão', 'Matheus Nunes'] },
       { color: 'ink', label: 'Holandeses', members: ['Van Dijk', 'Frenkie de Jong', 'Gakpo', 'Depay'] },
     ],
   },
@@ -180,10 +195,12 @@ export const conexoes: Puzzle[] = [
       { color: 'ink', label: 'Zagueiros', members: ['Baresi', 'Cannavaro', 'Puyol', 'Terry'] },
     ],
   },
-  // 18 — por seleção (lendas). Goleiros espalhados servem de isca.
+  // 18 — por seleção (lendas). Goleiros espalhados servem de isca. armadilha:
+  // Diego Costa nasceu em Lagarto-SE e jogou 2 amistosos pelo Brasil (2013),
+  // mas os Brasileiros já têm 4, então ele fecha na Espanha.
   {
     groups: [
-      { color: 'corn', label: 'Espanhóis', members: ['Casillas', 'Puyol', 'Xavi', 'Fernando Torres'] },
+      { color: 'corn', label: 'Espanhóis', members: ['Casillas', 'Puyol', 'Xavi', 'Diego Costa'] },
       { color: 'grass', label: 'Alemães', members: ['Neuer', 'Lahm', 'Klose', 'Matthäus'] },
       { color: 'ochre', label: 'Brasileiros', members: ['Cafu', 'Ronaldo', 'Kaká', 'Roberto Carlos'] },
       { color: 'ink', label: 'Italianos', members: ['Buffon', 'Maldini', 'Pirlo', 'Totti'] },
@@ -194,34 +211,39 @@ export const conexoes: Puzzle[] = [
   // no Arsenal; Modrić tb no Tottenham — nenhum desses é grupo).
   {
     groups: [
-      { color: 'corn', label: 'Jogaram na Juventus', members: ['Pirlo', 'Pogba', 'Tevez', 'Buffon'] },
+      { color: 'corn', label: 'Jogaram na Juventus', members: ['Pirlo', 'Pogba', 'Tévez', 'Buffon'] },
       { color: 'grass', label: 'Jogaram no Bayern de Munique', members: ['Lahm', 'Ribéry', 'Müller', 'Neuer'] },
       { color: 'ochre', label: 'Jogaram no Chelsea', members: ['Drogba', 'Lampard', 'Terry', 'Čech'] },
       { color: 'ink', label: 'Jogaram no Real Madrid', members: ['Modrić', 'Benzema', 'Marcelo', 'Raúl'] },
     ],
   },
   // 20 — por seleção (estrelas atuais), posições misturadas de propósito.
+  // armadilha: Pepe nasceu em Maceió, mas defendeu Portugal; os Brasileiros
+  // já têm 4.
   {
     groups: [
       { color: 'corn', label: 'Brasileiros', members: ['Vinícius', 'Rodrygo', 'Raphinha', 'Endrick'] },
       { color: 'grass', label: 'Argentinos', members: ['Messi', 'Dybala', 'Lautaro', 'Julián Álvarez'] },
       { color: 'ochre', label: 'Franceses', members: ['Mbappé', 'Griezmann', 'Dembélé', 'Giroud'] },
-      { color: 'ink', label: 'Portugueses', members: ['Cristiano Ronaldo', 'Bruno Fernandes', 'Bernardo Silva', 'João Félix'] },
+      { color: 'ink', label: 'Portugueses', members: ['Cristiano Ronaldo', 'Bruno Fernandes', 'Bernardo Silva', 'Pepe'] },
     ],
   },
   // 21 — quatro clubes clássicos. Iscas: Salah (tb Chelsea), Robben (tb Real/
-  // Chelsea), Vieira (tb City/Inter) — nenhum desses é grupo aqui.
+  // Chelsea), Vieira (tb City/Inter/Milan), Flamini (tb Milan, 2008–13) e Torres
+  // (tb Milan). O Arsenal e o Liverpool têm exatamente 4 candidatos cada, então
+  // Vieira, Flamini e Torres fecham ali.
   {
     groups: [
       { color: 'corn', label: 'Jogaram no Milan', members: ['Maldini', 'Baresi', 'Gattuso', 'Pirlo'] },
       { color: 'grass', label: 'Jogaram no Liverpool', members: ['Gerrard', 'Salah', 'Suárez', 'Fernando Torres'] },
       { color: 'ochre', label: 'Jogaram no Bayern de Munique', members: ['Lahm', 'Gerd Müller', 'Robben', 'Ribéry'] },
-      { color: 'ink', label: 'Jogaram no Arsenal', members: ['Henry', 'Bergkamp', 'Vieira', 'Pirès'] },
+      { color: 'ink', label: 'Jogaram no Arsenal', members: ['Henry', 'Bergkamp', 'Vieira', 'Flamini'] },
     ],
   },
 
   // ===== Lote 2 (set/2026). `armadilha:` prova a partição única de cada puzzle =====
-  // 1 — armadilha: Sócrates também jogou no Flamengo e no Santos; Leonardo
+  // 1 — armadilha: Sócrates também jogou no Flamengo e no Santos; Dunga também
+  // jogou no Santos (1984–85), mas o Corinthians tem exatamente 4 candidatos; Leonardo
   // também jogou no Flamengo; Ganso também jogou no São Paulo. Nenhum troca de
   // grupo porque Zico/Júnior/Romário/Zagallo (Flamengo), Pelé/Neymar/Rodrygo
   // (Santos) e Kaká/Raí/Casemiro (São Paulo) nunca jogaram em outro dos quatro
@@ -230,7 +252,7 @@ export const conexoes: Puzzle[] = [
     groups: [
       { color: 'corn', label: 'Jogaram no Santos', members: ['Pelé', 'Neymar', 'Rodrygo', 'Ganso'] },
       { color: 'grass', label: 'Jogaram no São Paulo', members: ['Kaká', 'Raí', 'Leonardo', 'Casemiro'] },
-      { color: 'ochre', label: 'Jogaram no Corinthians', members: ['Sócrates', 'Rivelino', 'Tévez', 'Dunga'] },
+      { color: 'ochre', label: 'Jogaram no Corinthians', members: ['Sócrates', 'Rivellino', 'Tévez', 'Dunga'] },
       { color: 'ink', label: 'Jogaram no Flamengo', members: ['Zico', 'Júnior', 'Romário', 'Zagallo'] },
     ],
   },
@@ -282,9 +304,9 @@ export const conexoes: Puzzle[] = [
       { color: 'ink', label: 'Jogaram no River Plate', members: ['Crespo', 'Aimar', 'Ortega', 'Gallardo'] },
     ],
   },
-  // 6 — armadilha: Futre também jogou no Porto (campeão europeu em 1987), mas
-  // Falcao, Hulk, Casemiro e James nunca jogaram no Sporting, então o Porto
-  // não abre vaga.
+  // 6 — armadilha: Futre também jogou no Porto (campeão europeu em 1987) e no
+  // Benfica (1993), mas o Sporting tem exatamente 4 candidatos, e Falcao, Hulk,
+  // Casemiro e James nunca jogaram no Sporting, então o Porto não abre vaga.
   {
     groups: [
       { color: 'corn', label: 'Jogaram no Ajax', members: ['Cruyff', 'Van Basten', 'Bergkamp', 'Suárez'] },
@@ -311,7 +333,7 @@ export const conexoes: Puzzle[] = [
     groups: [
       { color: 'corn', label: 'Craques dos anos 2010', members: ['Messi', 'Cristiano Ronaldo', 'Neymar', 'Modrić'] },
       { color: 'grass', label: 'Craques dos anos 1990', members: ['Baggio', 'Stoichkov', 'Romário', 'Hagi'] },
-      { color: 'ochre', label: 'Craques dos anos 1970', members: ['Cruyff', 'Beckenbauer', 'Rivelino', 'Kempes'] },
+      { color: 'ochre', label: 'Craques dos anos 1970', members: ['Cruyff', 'Beckenbauer', 'Rivellino', 'Kempes'] },
       { color: 'ink', label: 'Craques dos anos 1950', members: ['Puskás', 'Di Stéfano', 'Didi', 'Gento'] },
     ],
   },
@@ -582,7 +604,7 @@ export const conexoes: Puzzle[] = [
     groups: [
       { color: 'corn', label: 'Apelido de realeza', members: ['Pelé', 'Beckenbauer', 'Adriano', 'Dalglish'] },
       { color: 'grass', label: 'Apelido de bicho', members: ['Messi', 'Lautaro', 'Julián Álvarez', 'Yashin'] },
-      { color: 'ochre', label: 'Apelido de guerra', members: ['Puskás', 'Gerd Müller', 'Suárez', 'Roberto Dinamite'] },
+      { color: 'ochre', label: 'Apelido bélico', members: ['Puskás', 'Gerd Müller', 'Suárez', 'Roberto Dinamite'] },
       { color: 'ink', label: 'Apelido de bruxo ou divino', members: ['Ronaldinho', 'Verón', 'Ademir da Guia', 'Baggio'] },
     ],
   },
@@ -900,6 +922,399 @@ export const conexoes: Puzzle[] = [
       { color: 'grass', label: 'Campeões da Champions pelo Ajax (1995)', members: ['Van der Sar', 'Kluivert', 'Litmanen', 'Overmars'] },
       { color: 'ochre', label: 'Campeões da Champions pelo Olympique de Marseille (1993)', members: ['Barthez', 'Desailly', 'Deschamps', 'Völler'] },
       { color: 'ink', label: 'Campeões da Champions pelo Borussia Dortmund (1997)', members: ['Sammer', 'Riedle', 'Ricken', 'Paulo Sousa'] },
+    ],
+  },
+
+  // ===== Lote 4 (out/2026): 30 puzzles, partição única provada em cada `armadilha:` =====
+  // 1 — armadilha: seis nascidos no Brasil (Diego Costa, Jorginho, Deco, Pepe,
+  // Liédson, Cacau) e três na Argentina (Camoranesi, Retegui, Sívori) puxam
+  // grupos "falsos" por país de nascimento — mas não há grupo Brasil nem
+  // Argentina, e cada um defendeu uma só destas seleções. Diego Costa jogou 2
+  // amistosos pelo Brasil (2013), que não é grupo.
+  {
+    groups: [
+      { color: 'corn', label: 'Nascidos fora: Alemanha', members: ['Klose', 'Podolski', 'Cacau', 'Gerald Asamoah'] },
+      { color: 'grass', label: 'Nascidos fora: Portugal', members: ['Pepe', 'Liédson', 'Nani', 'Deco'] },
+      { color: 'ochre', label: 'Nascidos fora: Itália', members: ['Camoranesi', 'Retegui', 'Sívori', 'Jorginho'] },
+      { color: 'ink', label: 'Nascidos fora: Espanha', members: ['Laporte', 'Le Normand', 'Thiago Alcântara', 'Diego Costa'] },
+    ],
+  },
+  // 2 — gols em finais de Copa. armadilha: Pelé marcou em 1958 E 1970; Vavá em 1958
+  // E 1962. A final de 1962 só tem quatro autores (Masopust, Amarildo, Zito, Vavá),
+  // então Vavá fecha em 62; sem ele, 1958 só fecha com Pelé (Liedholm, Simonsson,
+  // Zagallo, Pelé), e 1970 fica com Gérson, Jairzinho, Carlos Alberto e Boninsegna.
+  {
+    groups: [
+      { color: 'corn', label: 'Marcaram na final da Copa de 1966', members: ['Hurst', 'Peters', 'Haller', 'Weber'] },
+      { color: 'grass', label: 'Marcaram na final da Copa de 1970', members: ['Gérson', 'Jairzinho', 'Carlos Alberto', 'Boninsegna'] },
+      { color: 'ochre', label: 'Marcaram na final da Copa de 1958', members: ['Liedholm', 'Simonsson', 'Zagallo', 'Pelé'] },
+      { color: 'ink', label: 'Marcaram na final da Copa de 1962', members: ['Masopust', 'Amarildo', 'Zito', 'Vavá'] },
+    ],
+  },
+  // 3 — jogo de palavras com apelidos. armadilha: 'Ronaldinho Gaúcho' tem gentílico
+  // E diminutivo; 'Alemão' é gentílico mas termina em -ão. O diminutivo só tem quatro
+  // candidatos (Robinho, Zinho, Fernandinho, Ronaldinho Gaúcho), então Ronaldinho
+  // fecha ali; o gentílico fica com Alemão; o aumentativo (Fernando→Fernandão,
+  // Luiz→Luizão, Ronaldo→Ronaldão, Paulo→Paulão) não tem vaga para Alemão.
+  {
+    groups: [
+      { color: 'corn', label: 'Apelido é um bicho', members: ['Garrincha', 'Pato', 'Ganso', 'Formiga'] },
+      { color: 'grass', label: 'Apelido no aumentativo', members: ['Fernandão', 'Luizão', 'Ronaldão', 'Paulão'] },
+      { color: 'ochre', label: 'Apelido no diminutivo', members: ['Robinho', 'Zinho', 'Fernandinho', 'Ronaldinho Gaúcho'] },
+      { color: 'ink', label: 'Gentílico no apelido', members: ['Mineiro', 'Renato Gaúcho', 'Júnior Baiano', 'Alemão'] },
+    ],
+  },
+  // 4 — pares de clubes. armadilha: Ronaldo jogou em Barça, Real, Inter E Milan;
+  // Pirlo em Inter, Milan E Juventus. Real+Barça só tem quatro candidatos (Figo,
+  // Laudrup, Luis Enrique, Ronaldo), então Ronaldo fecha ali; sem ele, Milan+Inter só
+  // fecha com Pirlo (Crespo, Balotelli, Seedorf, Pirlo). Laudrup jogou na Juve, Figo
+  // na Inter, Seedorf no Real, Higuaín no Real, Zambrotta no Barça, Cannavaro no Real
+  // e Vidal no Barça — mas nenhum deles completa outro par.
+  {
+    groups: [
+      { color: 'corn', label: 'Real Madrid e Barcelona', members: ['Figo', 'Laudrup', 'Luis Enrique', 'Ronaldo'] },
+      { color: 'grass', label: 'Juventus e Inter', members: ['Cuadrado', 'Cannavaro', 'Vidal', 'Kwadwo Asamoah'] },
+      { color: 'ochre', label: 'Juventus e Milan', members: ['Inzaghi', 'Higuaín', 'Zambrotta', 'Mandžukić'] },
+      { color: 'ink', label: 'Milan e Inter', members: ['Crespo', 'Balotelli', 'Seedorf', 'Pirlo'] },
+    ],
+  },
+  // 5 — Bola de Ouro pelo clube em que jogavam. armadilha: Kaká foi depois para o
+  // Real, Ronaldinho e Rivaldo para o Milan, Baggio jogou no Milan e Modrić também
+  // (2025) — mas a Bola de Ouro de cada um veio pelo clube do grupo. (Figo 2000,
+  // Cannavaro 2006, Ronaldo e Weah ficaram fora: ganharam logo após trocar de clube.)
+  {
+    groups: [
+      { color: 'corn', label: 'Bola de Ouro jogando no Barcelona', members: ['Stoichkov', 'Rivaldo', 'Ronaldinho', 'Messi'] },
+      { color: 'grass', label: 'Bola de Ouro jogando no Milan', members: ['Gullit', 'Van Basten', 'Shevchenko', 'Kaká'] },
+      { color: 'ochre', label: 'Bola de Ouro jogando no Real Madrid', members: ['Di Stéfano', 'Kopa', 'Modrić', 'Benzema'] },
+      { color: 'ink', label: 'Bola de Ouro jogando na Juventus', members: ['Sívori', 'Platini', 'Baggio', 'Nedvěd'] },
+    ],
+  },
+  // 6 — recordes de gols. armadilha: Messi (Barça e Argentina), Cristiano (Real e
+  // Portugal), Kane (Tottenham e Inglaterra) e Riva (Cagliari e Itália) são recordistas
+  // de clube E de seleção. Mas os grupos de clube inglês, italiano e espanhol têm
+  // exatamente quatro candidatos cada, então os quatro fecham no clube; sobram Klose,
+  // Villa, Suárez e Ibrahimović para as seleções.
+  {
+    groups: [
+      { color: 'corn', label: 'Artilheiro máximo de clube inglês', members: ['Rooney', 'Henry', 'Lampard', 'Kane'] },
+      { color: 'grass', label: 'Artilheiro máximo de clube italiano', members: ['Totti', 'Del Piero', 'Meazza', 'Riva'] },
+      { color: 'ochre', label: 'Artilheiro máximo de clube espanhol', members: ['Griezmann', 'Zarra', 'Messi', 'Cristiano Ronaldo'] },
+      { color: 'ink', label: 'Artilheiro máximo de uma seleção', members: ['Klose', 'Villa', 'Suárez', 'Ibrahimović'] },
+    ],
+  },
+  // 7 — famílias. armadilha: Paolo Maldini é filho (de Cesare) E pai (de Daniel,
+  // estreou pela Itália em 2024); Thiago Alcântara é filho de Mazinho E irmão de
+  // Rafinha (2 jogos pelo Brasil); Giuliano Simeone é filho de Diego E irmão de
+  // Giovanni (seleção argentina). "Irmão em outra seleção" e "Pais" têm exatamente
+  // quatro candidatos cada, então Thiago e Maldini fecham ali; sem eles, "Filhos" só
+  // fecha com Giuliano.
+  {
+    groups: [
+      { color: 'corn', label: 'Irmão jogou pela mesma seleção', members: ['Bobby Charlton', 'Frank de Boer', 'Yaya Touré', 'Raí'] },
+      { color: 'grass', label: 'Irmão jogou por outra seleção', members: ['Jérôme Boateng', 'Nico Williams', 'Xhaka', 'Thiago Alcântara'] },
+      { color: 'ochre', label: 'Filhos de ex-jogadores de seleção', members: ['Chiesa', 'Haaland', 'Kasper Schmeichel', 'Giuliano Simeone'] },
+      { color: 'ink', label: 'Pais de jogadores de seleção', members: ['George Weah', 'Mazinho', 'Lilian Thuram', 'Maldini'] },
+    ],
+  },
+  // 8 — gols em finais de Champions. armadilha: Morata foi bicampeão europeu pelo
+  // Real (2014, 2016) mas só marcou em final pela Juve (2015); Mandžukić marcou em
+  // final pelo Bayern (2013) e pela Juve (2017), mas não há grupo do Bayern; Crespo
+  // é ídolo da Inter mas marcou duas vezes pelo Milan na final de 2005. Ninguém
+  // marcou em final por dois destes quatro clubes.
+  {
+    groups: [
+      { color: 'corn', label: 'Gol em final de Champions: Real', members: ['Sergio Ramos', 'Bale', 'Marcelo', 'Carvajal'] },
+      { color: 'grass', label: 'Gol em final de Champions: Barça', members: ['Messi', 'Pedro', 'David Villa', 'Belletti'] },
+      { color: 'ochre', label: 'Gol em final de Champions: Milan', members: ['Inzaghi', 'Maldini', 'Massaro', 'Crespo'] },
+      { color: 'ink', label: 'Gol em final de Champions: Juve', members: ['Ravanelli', 'Del Piero', 'Morata', 'Mandžukić'] },
+    ],
+  },
+  // 9 — prêmios de Copa. armadilha: Zoff foi goleiro E capitão campeão (1982);
+  // Maradona foi capitão campeão E melhor jogador (1986); Ronaldo foi artilheiro
+  // (2002) E melhor jogador (1998). Goleiros e artilheiros têm exatamente quatro
+  // candidatos cada, então Zoff e Ronaldo fecham ali; sem Ronaldo, o grupo do melhor
+  // jogador só fecha com Maradona, e os capitães ficam com Bellini, Moore, Matthäus
+  // e Deschamps. Kahn (melhor da Copa de 2002) é goleiro, mas não foi campeão.
+  // (Forlán ficou fora: dividiu a artilharia de 2010 e abriria uma 2ª solução.)
+  {
+    groups: [
+      { color: 'corn', label: 'Goleiros campeões mundiais', members: ['Banks', 'Taffarel', 'Neuer', 'Zoff'] },
+      { color: 'grass', label: 'Artilheiros de uma Copa', members: ['Lineker', 'Šuker', 'Klose', 'Ronaldo'] },
+      { color: 'ochre', label: 'Eleitos o melhor jogador de uma Copa', members: ['Romário', 'Modrić', 'Kahn', 'Maradona'] },
+      { color: 'ink', label: 'Capitães campeões mundiais', members: ['Bellini', 'Bobby Moore', 'Matthäus', 'Deschamps'] },
+    ],
+  },
+  // 10 — onde penduraram as chuteiras. armadilha: Xavi e Gerrard parecem "um clube
+  // só", mas pararam no Catar e nos EUA; Villa jogou nos EUA (NYCFC) mas parou no
+  // Japão (Vissel Kobe). Maldini, Giggs, Puyol e Totti nunca vestiram outra camisa
+  // profissional. (Iniesta ficou fora: jogou no Japão, mas parou nos Emirados.)
+  {
+    groups: [
+      { color: 'corn', label: 'Um clube só na carreira', members: ['Maldini', 'Giggs', 'Puyol', 'Totti'] },
+      { color: 'grass', label: 'Penduraram as chuteiras nos EUA', members: ['Gerrard', 'Pirlo', 'Kaká', 'Henry'] },
+      { color: 'ochre', label: 'Penduraram as chuteiras no Japão', members: ['Zico', 'Lineker', 'Fernando Torres', 'David Villa'] },
+      { color: 'ink', label: 'Penduraram as chuteiras no Catar', members: ['Xavi', 'Batistuta', 'Sneijder', "Eto'o"] },
+    ],
+  },
+  // 11 — títulos mundiais de clubes brasileiros (Intercontinental). armadilha:
+  // Renato Gaúcho foi ídolo do Flamengo, mas o título mundial dele foi pelo Grêmio
+  // (dois gols em 1983); Cafu e Zetti foram depois para o Palmeiras. Cada um só foi
+  // campeão do mundo por um destes clubes.
+  {
+    groups: [
+      { color: 'corn', label: 'Mundial pelo Santos (1962–63)', members: ['Pelé', 'Coutinho', 'Pepe', 'Zito'] },
+      { color: 'grass', label: 'Mundial pelo Flamengo (1981)', members: ['Zico', 'Nunes', 'Adílio', 'Leandro'] },
+      { color: 'ochre', label: 'Mundial pelo São Paulo (1992)', members: ['Raí', 'Zetti', 'Cafu', 'Palhinha'] },
+      { color: 'ink', label: 'Mundial pelo Grêmio (1983)', members: ['Renato Gaúcho', 'De León', 'Mazarópi', 'Tarciso'] },
+    ],
+  },
+  // 12 — pênaltis e prorrogações em finais de Copa. armadilha: Messi cabe em TRÊS
+  // grupos na final de 2022 — gol de pênalti no jogo (23'), gol na prorrogação (108')
+  // e pênalti convertido na disputa. Mas "pênalti no jogo" só tem quatro candidatos
+  // (Neeskens 74, Breitner 74, Brehme 90, Messi 2022), então ele fecha ali.
+  // Prorrogação: Hurst 66, Kempes 78, Iniesta 2010, Götze 2014. Disputa: Dunga 94,
+  // Del Piero e Grosso 2006, Montiel 2022.
+  {
+    groups: [
+      { color: 'corn', label: 'Erraram pênalti em disputa de final', members: ['Baresi', 'Massaro', 'Márcio Santos', 'Coman'] },
+      { color: 'grass', label: 'Gol na prorrogação de final de Copa', members: ['Hurst', 'Kempes', 'Iniesta', 'Götze'] },
+      { color: 'ochre', label: 'Converteram na disputa de uma final', members: ['Dunga', 'Del Piero', 'Grosso', 'Montiel'] },
+      { color: 'ink', label: 'Gol de pênalti no jogo de uma final', members: ['Neeskens', 'Breitner', 'Brehme', 'Messi'] },
+    ],
+  },
+  // 13 — nome de batismo. armadilha: ninguém usa o primeiro nome. Cafu = Marcos
+  // Evangelista; Marquinhos = Marcos Aoás; Acuña = Marcos Javier; Senna = Marcos
+  // Antônio. Dunga = Carlos Caetano; Casemiro = Carlos Henrique; Tévez e Valderrama =
+  // Carlos Alberto. Bebeto = José Roberto; Chilavert = José Luis Félix; Mourinho =
+  // José Mário; Callejón = José María. Kaká = Ricardo Izecson; Quaresma = Ricardo
+  // Andrade; Zamora = Ricardo Zamora; Bochini = Ricardo Enrique. Cada um tem um
+  // primeiro nome só. ('Giménez' saiu: hoje remete a Santiago Giménez.)
+  {
+    groups: [
+      { color: 'corn', label: 'Primeiro nome é Marcos', members: ['Cafu', 'Marquinhos', 'Acuña', 'Senna'] },
+      { color: 'grass', label: 'Primeiro nome é Carlos', members: ['Dunga', 'Casemiro', 'Tévez', 'Valderrama'] },
+      { color: 'ochre', label: 'Primeiro nome é José', members: ['Bebeto', 'Chilavert', 'Mourinho', 'Callejón'] },
+      { color: 'ink', label: 'Primeiro nome é Ricardo', members: ['Kaká', 'Quaresma', 'Zamora', 'Bochini'] },
+    ],
+  },
+  // 14 — títulos marcantes da Premier League. armadilha: Kolo Touré foi campeão
+  // invicto com o Arsenal (2003–04) E estava no City campeão de 2011–12 (onde jogava
+  // o irmão, Yaya). O Arsenal só tem quatro candidatos, então Kolo fecha ali. Kanté e
+  // Huth também foram campeões pelo Chelsea, que não é grupo.
+  {
+    groups: [
+      { color: 'corn', label: 'Campeões pelo Leicester (2015–16)', members: ['Vardy', 'Mahrez', 'Kanté', 'Huth'] },
+      { color: 'grass', label: 'Campeões pelo City (2011–12)', members: ['Kompany', 'Yaya Touré', 'Agüero', 'Zabaleta'] },
+      { color: 'ochre', label: 'Campeões pelo Blackburn (1994–95)', members: ['Shearer', 'Sutton', 'Flowers', 'Le Saux'] },
+      { color: 'ink', label: 'Invictos pelo Arsenal (2003–04)', members: ['Lehmann', 'Gilberto Silva', 'Ljungberg', 'Kolo Touré'] },
+    ],
+  },
+  // 15 — goleiros. armadilha: Van der Sar (pênalti pelo Ajax em 1998), Alisson
+  // (cabeçada em 2021) e Schmeichel (pelo Aston Villa) fizeram gol; Rogério Ceni
+  // foi campeão da Copa de 2002 (3º goleiro); Schmeichel ganhou a Champions de 1999;
+  // Donnarumma também ganhou a Champions (PSG 2025); Zoff também ganhou a Copa.
+  // Mas a Copa fecha com Taffarel, Marcos, Banks e Dibu, que só cabem ali; Chilavert,
+  // Higuita e Campos só cabem nos goleiros-artilheiros e puxam Ceni para lá; a
+  // Champions fecha com Dudek, Čech, Van der Sar e Alisson; Rui Patrício e Zoff
+  // puxam Donnarumma e Schmeichel para a Euro.
+  {
+    groups: [
+      { color: 'corn', label: 'Goleiros que fizeram gols', members: ['Rogério Ceni', 'Chilavert', 'Higuita', 'Jorge Campos'] },
+      { color: 'grass', label: 'Goleiros campeões da Copa do Mundo', members: ['Taffarel', 'Marcos', 'Banks', 'Dibu Martínez'] },
+      { color: 'ochre', label: 'Goleiros campeões da Champions', members: ['Dudek', 'Čech', 'Van der Sar', 'Alisson'] },
+      { color: 'ink', label: 'Goleiros campeões da Eurocopa', members: ['Rui Patrício', 'Donnarumma', 'Schmeichel', 'Zoff'] },
+    ],
+  },
+  // 16 — pares de clubes ingleses. armadilha: Sterling jogou em Liverpool, City,
+  // Chelsea E Arsenal (empréstimo 2024–25), então cabe em três pares. Mas
+  // Liverpool+Arsenal só tem quatro candidatos (Oxlade-Chamberlain, Kolo Touré,
+  // Pennant, Sterling), então ele fecha ali. Andy Cole também passou pelo Arsenal e
+  // Sturridge pelo City, mas sem completar outro par.
+  {
+    groups: [
+      { color: 'corn', label: 'Manchester United e City', members: ['Tévez', 'Peter Schmeichel', 'Hargreaves', 'Denis Law'] },
+      { color: 'grass', label: 'Chelsea e Arsenal', members: ['Ashley Cole', 'Fàbregas', 'Giroud', 'David Luiz'] },
+      { color: 'ochre', label: 'Liverpool e Chelsea', members: ['Fernando Torres', 'Joe Cole', 'Sturridge', 'Salah'] },
+      { color: 'ink', label: 'Liverpool e Arsenal', members: ['Oxlade-Chamberlain', 'Kolo Touré', 'Pennant', 'Sterling'] },
+    ],
+  },
+  // 17 — o ano perfeito. armadilha: Varane é campeão de 2018, Roberto Carlos de 2002 e
+  // Khedira de 2014 — parecem dos grupos de seleção. Mas os quatro do Real (Karembeu
+  // 1998, Roberto Carlos 2002, Khedira 2014, Varane 2018) são os únicos que ganharam
+  // Champions e Copa no MESMO ano, e esse grupo só tem esses quatro candidatos.
+  {
+    groups: [
+      { color: 'corn', label: 'Brasil campeão do mundo em 2002', members: ['Ronaldo', 'Rivaldo', 'Marcos', 'Kléberson'] },
+      { color: 'grass', label: 'Alemanha campeã do mundo em 2014', members: ['Neuer', 'Lahm', 'Götze', 'Klose'] },
+      { color: 'ochre', label: 'França campeã do mundo em 2018', members: ['Griezmann', 'Kanté', 'Pogba', 'Lloris'] },
+      { color: 'ink', label: 'Champions e Copa no mesmo ano', members: ['Karembeu', 'Roberto Carlos', 'Khedira', 'Varane'] },
+    ],
+  },
+  // 18 — brasileiros na Espanha. armadilha: Bebeto jogou no Deportivo E no Sevilla
+  // (1996–97); Filipe Luís no Deportivo (2006–10) E no Atlético. Atlético (Filipe,
+  // Miranda, Diego Costa, Matheus Cunha) só tem esses quatro candidatos, então Filipe
+  // fecha ali; sem ele, o Deportivo só fecha com Bebeto.
+  {
+    groups: [
+      { color: 'corn', label: 'Brasileiros do Sevilla', members: ['Dani Alves', 'Luís Fabiano', 'Renato', 'Júlio Baptista'] },
+      { color: 'grass', label: 'Brasileiros do Valencia', members: ['Romário', 'Leonardo', 'Edu', 'Fábio Aurélio'] },
+      { color: 'ochre', label: 'Brasileiros do Atlético de Madrid', members: ['Miranda', 'Diego Costa', 'Matheus Cunha', 'Filipe Luís'] },
+      { color: 'ink', label: 'Brasileiros do Deportivo', members: ['Mauro Silva', 'Djalminha', 'Rivaldo', 'Bebeto'] },
+    ],
+  },
+  // 19 — brasileiros na Itália. armadilha: Adriano (2010–11) e Maicon (2013–16)
+  // também jogaram na Roma; Lúcio também na Juventus (2012). A Inter só tem esses
+  // quatro candidatos (Adriano, Maicon, Júlio César, Lúcio), então os três fecham ali.
+  // Falcão jogou no Inter de Porto Alegre — não na Inter de Milão.
+  {
+    groups: [
+      { color: 'corn', label: 'Brasileiros do Napoli', members: ['Careca', 'Alemão', 'Allan', 'David Neres'] },
+      { color: 'grass', label: 'Brasileiros da Juventus', members: ['Danilo', 'Alex Sandro', 'Douglas Costa', 'Bremer'] },
+      { color: 'ochre', label: 'Brasileiros da Roma', members: ['Falcão', 'Aldair', 'Toninho Cerezo', 'Alisson'] },
+      { color: 'ink', label: 'Brasileiros da Inter de Milão', members: ['Adriano', 'Maicon', 'Júlio César', 'Lúcio'] },
+    ],
+  },
+  // 20 — argentinos na Itália. armadilha: Higuaín jogou no Napoli E na Juve;
+  // Batistuta na Roma E na Inter (2003); Dybala na Juve E na Roma. Napoli e Inter têm
+  // quatro membros que só cabem ali, então Higuaín fecha na Juve e Batistuta na Roma;
+  // a Juve fica com exatamente quatro candidatos e Dybala fecha nela.
+  {
+    groups: [
+      { color: 'corn', label: 'Argentinos da Inter de Milão', members: ['Zanetti', 'Cambiasso', 'Milito', 'Lautaro'] },
+      { color: 'grass', label: 'Argentinos do Napoli', members: ['Maradona', 'Lavezzi', 'Ayala', 'Giovanni Simeone'] },
+      { color: 'ochre', label: 'Argentinos da Roma', members: ['Pastore', 'Lamela', 'Perotti', 'Batistuta'] },
+      { color: 'ink', label: 'Argentinos da Juventus', members: ['Tévez', 'Di María', 'Higuaín', 'Dybala'] },
+    ],
+  },
+  // 21 — Olimpíadas. armadilha: Lauren cresceu na Espanha mas é camaronês; Kanu e
+  // Lauren foram juntos para o Arsenal; Romário e Bebeto, tetracampeões, ganharam só
+  // a prata em Seul. Cada um tem uma medalha só entre estas. (Ricardo Gomes era o
+  // capitão da prata de 1988; 'Jorginho' ficou fora para não confundir com o
+  // ítalo-brasileiro dos puzzles 5 e L4-1.)
+  {
+    groups: [
+      { color: 'corn', label: 'Prata olímpica com o Brasil (1988)', members: ['Romário', 'Bebeto', 'Taffarel', 'Ricardo Gomes'] },
+      { color: 'grass', label: 'Ouro olímpico com a Espanha (1992)', members: ['Guardiola', 'Luis Enrique', 'Kiko', 'Abelardo'] },
+      { color: 'ochre', label: 'Ouro olímpico com a Nigéria (1996)', members: ['Kanu', 'Okocha', 'Amokachi', 'Babayaro'] },
+      { color: 'ink', label: 'Ouro olímpico com Camarões (2000)', members: ["Eto'o", 'Mboma', 'Lauren', 'Geremi'] },
+    ],
+  },
+  // 22 — MLS. armadilha: sete ex-Barcelona (Messi, Suárez, Busquets, Jordi Alba,
+  // Henry, Ibrahimović, Rafa Márquez) puxam um falso grupo "Barça"; mas cada um jogou
+  // em um só destes clubes da MLS. Juninho Pernambucano jogou no Red Bulls em 2013.
+  {
+    groups: [
+      { color: 'corn', label: 'Jogaram no Inter Miami', members: ['Messi', 'Suárez', 'Busquets', 'Jordi Alba'] },
+      { color: 'grass', label: 'Jogaram no LA Galaxy', members: ['Beckham', 'Gerrard', 'Ibrahimović', 'Robbie Keane'] },
+      { color: 'ochre', label: 'Jogaram no Toronto FC', members: ['Giovinco', 'Insigne', 'Bernardeschi', 'Defoe'] },
+      { color: 'ink', label: 'Jogaram no New York Red Bulls', members: ['Henry', 'Rafa Márquez', 'Tim Cahill', 'Juninho Pernambucano'] },
+    ],
+  },
+  // 23 — depois de pendurar as chuteiras. armadilha: Gary Neville é comentarista
+  // (Sky) E dono do Salford City junto com Beckham; Lineker pôs dinheiro no Leicester
+  // na recuperação judicial de 2002 e pode ser lido como "dono". Comentaristas só tem
+  // esses quatro candidatos (Lineker, Casagrande, Júnior, Neville), então os dois
+  // fecham ali; donos fica com Beckham (Inter Miami/Salford), Piqué (Andorra),
+  // Ronaldo (Valladolid e Cruzeiro) e Ibrahimović (Hammarby).
+  {
+    groups: [
+      { color: 'corn', label: 'Viraram políticos', members: ['George Weah', 'Kaladze', 'Bebeto', 'Danrlei'] },
+      { color: 'grass', label: 'Viraram donos de clube', members: ['Beckham', 'Piqué', 'Ronaldo', 'Ibrahimović'] },
+      { color: 'ochre', label: 'Técnicos campeões da Champions', members: ['Zidane', 'Guardiola', 'Luis Enrique', 'Ancelotti'] },
+      { color: 'ink', label: 'Viraram comentaristas de TV', members: ['Lineker', 'Casagrande', 'Júnior', 'Gary Neville'] },
+    ],
+  },
+  // 24 — jogos históricos de Copa (Brasil 3 x 2 Holanda em 1994; Itália 4 x 3
+  // Alemanha em 1970). armadilha: Oscar é brasileiro no meio dos alemães do 7 a 1;
+  // Bergkamp é holandês no 3 x 2 do Brasil; Schnellinger (que jogava no Milan) marcou
+  // pela Alemanha no "Jogo do Século"; Puskás e Czibor perderam o "Milagre de Berna".
+  // Cada um marcou em um só destes jogos.
+  {
+    groups: [
+      { color: 'corn', label: 'Marcaram no 7 a 1 (2014)', members: ['Klose', 'Khedira', 'Schürrle', 'Oscar'] },
+      { color: 'grass', label: 'Marcaram em Brasil 3 x 2 Holanda', members: ['Romário', 'Bebeto', 'Branco', 'Bergkamp'] },
+      { color: 'ochre', label: 'Marcaram na final de 1954', members: ['Puskás', 'Czibor', 'Morlock', 'Rahn'] },
+      { color: 'ink', label: 'Marcaram em Itália 4 x 3 Alemanha', members: ['Riva', 'Rivera', 'Burgnich', 'Schnellinger'] },
+    ],
+  },
+  // 25 — técnicos no Brasil. armadilha: Tite comandou o Brasil em Copa (2018 e 2022)
+  // E ganhou a Libertadores (2012); Dorival (2022) e Diniz (2023) ganharam a
+  // Libertadores E treinaram a Seleção; Jorge Jesus ganhou a Libertadores E é
+  // português. Portugueses (Vítor Pereira, Paulo Sousa, Luís Castro, Jorge Jesus) e
+  // "Seleção sem Copa" (Mano, Luxemburgo, Dorival, Diniz) têm exatamente quatro
+  // candidatos cada; sem eles, a Libertadores só fecha com Tite, e a Copa fica com
+  // Lazaroni, Zagallo, Parreira e Ancelotti (2026).
+  {
+    groups: [
+      { color: 'corn', label: 'Comandaram o Brasil numa Copa', members: ['Lazaroni', 'Zagallo', 'Parreira', 'Ancelotti'] },
+      { color: 'grass', label: 'Técnicos portugueses no Brasil', members: ['Vítor Pereira', 'Paulo Sousa', 'Luís Castro', 'Jorge Jesus'] },
+      { color: 'ochre', label: 'Treinaram a Seleção, sem Copa', members: ['Mano Menezes', 'Luxemburgo', 'Dorival', 'Diniz'] },
+      { color: 'ink', label: 'Técnicos campeões da Libertadores', members: ['Muricy', 'Cuca', 'Renato Gaúcho', 'Tite'] },
+    ],
+  },
+  // 26 — clubes espanhóis. armadilha: Villa jogou no Valencia E no Atlético; Forlán
+  // no Villarreal E no Atlético; Simeone (jogador) no Sevilla E no Atlético. Valencia,
+  // Villarreal e Sevilla têm exatamente quatro candidatos cada, então os três fecham
+  // fora do Atlético, que só se completa com Griezmann, Koke, Oblak e Torres.
+  {
+    groups: [
+      { color: 'corn', label: 'Jogaram no Atlético de Madrid', members: ['Griezmann', 'Koke', 'Oblak', 'Fernando Torres'] },
+      { color: 'grass', label: 'Jogaram no Villarreal', members: ['Riquelme', 'Marcos Senna', 'Cazorla', 'Forlán'] },
+      { color: 'ochre', label: 'Jogaram no Valencia', members: ['Mata', 'David Silva', 'Mendieta', 'David Villa'] },
+      { color: 'ink', label: 'Jogaram no Sevilla', members: ['Kanouté', 'Rakitić', 'Jesús Navas', 'Simeone'] },
+    ],
+  },
+  // 27 — técnicos de dois gigantes. armadilha: Trapattoni treinou Juve, Inter E
+  // Milan; Zaccheroni treinou Milan, Inter E Juve (2010). Juve+Inter já tem quatro que
+  // só cabem ali (Lippi, Conte, Ranieri, Spalletti — Juve desde out/2025), então os
+  // dois fecham em Milan+Inter com Leonardo e Pioli. Mourinho e Benítez também
+  // treinaram a Inter, e Ancelotti o Milan e a Juve, mas nenhum fecha outro par.
+  {
+    groups: [
+      { color: 'corn', label: 'Treinaram o Real Madrid e o Chelsea', members: ['Hiddink', 'Benítez', 'Mourinho', 'Ancelotti'] },
+      { color: 'grass', label: 'Treinaram o Barcelona e o Bayern', members: ['Guardiola', 'Van Gaal', 'Flick', 'Lattek'] },
+      { color: 'ochre', label: 'Treinaram a Juventus e a Inter', members: ['Lippi', 'Conte', 'Ranieri', 'Spalletti'] },
+      { color: 'ink', label: 'Treinaram o Milan e a Inter', members: ['Leonardo', 'Pioli', 'Zaccheroni', 'Trapattoni'] },
+    ],
+  },
+  // 28 — Bola de Ouro x seleção. armadilha: Messi é campeão mundial (2022) E vice
+  // (2014); Rummenigge é vice (82, 86) E campeão da Euro (1980). "Vices" só tem quatro
+  // candidatos (Cruyff, Rummenigge, Modrić, Messi), então os dois fecham ali. Cruyff e
+  // Modrić nunca ganharam título pela seleção, mas o grupo dos vices precisa deles.
+  {
+    groups: [
+      { color: 'corn', label: 'Bola de Ouro e campeão mundial', members: ['Kaká', 'Cannavaro', 'Ronaldinho', 'Rossi'] },
+      { color: 'grass', label: 'Bola de Ouro e campeão da Euro', members: ['Platini', 'Van Basten', 'Yashin', 'Cristiano Ronaldo'] },
+      { color: 'ochre', label: 'Bola de Ouro sem título pela seleção', members: ['Shevchenko', 'Owen', 'Weah', 'Nedvěd'] },
+      { color: 'ink', label: 'Bola de Ouro e vice mundial', members: ['Cruyff', 'Rummenigge', 'Modrić', 'Messi'] },
+    ],
+  },
+  // 29 — o Penta pelo clube de 2002. armadilha: Kaká e Gilberto Silva logo foram
+  // para a Europa, mas na Copa jogavam no Brasil; Lúcio estava no Leverkusen (não na
+  // Inter); Roberto Carlos já tinha jogado no Palmeiras. Os labels estão presos a
+  // 2002 (clubes da convocação de 06/05/2002): na leitura "já jogaram", vários
+  // trocariam de grupo. (Juninho Paulista ficou fora: as fontes divergem entre
+  // Flamengo e Middlesbrough.)
+  {
+    groups: [
+      { color: 'corn', label: 'Em 2002, jogava na Itália', members: ['Ronaldo', 'Cafu', 'Roque Júnior', 'Júnior'] },
+      { color: 'grass', label: 'Em 2002, jogava em clube de SP', members: ['Marcos', 'Kaká', 'Rogério Ceni', 'Vampeta'] },
+      { color: 'ochre', label: 'Em 2002, jogava em outro país europeu', members: ['Rivaldo', 'Roberto Carlos', 'Lúcio', 'Edmílson'] },
+      { color: 'ink', label: 'Em 2002, jogava no Brasil fora de SP', members: ['Gilberto Silva', 'Kléberson', 'Edílson', 'Luizão'] },
+    ],
+  },
+  // 30 — esquadrões europeus. armadilha: Rijkaard foi campeão pelo Milan (89, 90) E
+  // pelo Ajax (95). O Milan só tem esses quatro candidatos (Gullit, Van Basten, Baresi,
+  // Rijkaard), então ele fecha ali. Seedorf foi campeão também por Real (1998) e Milan
+  // (2003, 2007), mas não nos anos destes grupos; Laudrup e Figo jogaram no Real e no
+  // Barça.
+  {
+    groups: [
+      { color: 'corn', label: 'Europeus pelo Real (2002)', members: ['Zidane', 'Figo', 'Raúl', 'Roberto Carlos'] },
+      { color: 'grass', label: 'Europeus pelo Barça (1992)', members: ['Koeman', 'Stoichkov', 'Guardiola', 'Laudrup'] },
+      { color: 'ochre', label: 'Europeus pelo Ajax (1995)', members: ['Kluivert', 'Litmanen', 'Seedorf', 'Davids'] },
+      { color: 'ink', label: 'Europeus pelo Milan (1989 e 1990)', members: ['Gullit', 'Van Basten', 'Baresi', 'Rijkaard'] },
     ],
   },
 ]
