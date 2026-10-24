@@ -3,7 +3,7 @@
 // papéis invertidos). Divisões de campeonato e temporada mensal.
 import { supabase } from './supabase'
 
-export const ROUNDS = 10 // 5 cobranças pra cada lado
+export const ROUNDS = 6 // 3 cobranças pra cada lado (igual à Copa)
 
 // Temporada = mês corrente ("2026-10").
 export function currentSeason(d = new Date()): string {

@@ -428,7 +428,7 @@ export default function Ranqueada() {
                 <p className="font-display text-2xl leading-none text-ink-900">{my}</p>
               </div>
               <p className="font-cond text-[11px] font-600 uppercase tracking-wider text-ink-700">
-                Cobrança {Math.floor(round / 2) + 1}/5
+                Cobrança {Math.floor(round / 2) + 1}/{ROUNDS / 2}
               </p>
               <div className="text-right">
                 <p className="truncate font-cond text-[10px] font-700 uppercase tracking-wider text-ochre-400">{ghost.nick} · {ghost.rating}</p>

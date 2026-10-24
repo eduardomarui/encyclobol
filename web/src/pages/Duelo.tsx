@@ -211,7 +211,7 @@ export default function Duelo() {
       await ensureSession()
       setMe(await myId())
       saveTheme(theme)
-      const m = await createMatch(5, theme)
+      const m = await createMatch(3, theme)
       setMatch(m)
       setMoves([])
       setShown(0)
@@ -613,7 +613,7 @@ export default function Duelo() {
                 Os dois respondem <strong>ao mesmo tempo</strong>. O lance (a animação) só acontece{' '}
                 <strong>quando os dois respondem</strong>.
               </li>
-              <li>É melhor de 5 cobranças — empatou, vai pra <strong>morte súbita</strong>.</li>
+              <li>É melhor de 3 cobranças — empatou, vai pra <strong>morte súbita</strong>.</li>
         </HelpModal>
       )}
     </div>

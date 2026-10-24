@@ -28,7 +28,7 @@ create table if not exists public.ranked_runs (
   season text not null,
   seed int not null,
   kicks_even boolean not null,       -- true: bateu nas rodadas pares (0,2,4…)
-  answers jsonb not null,            -- [{ "r":0, "c":true, "ms":4200 }, …] 10 rodadas
+  answers jsonb not null,            -- [{ "r":0, "c":true, "ms":4200 }, …] 6 rodadas (3 cobranças cada)
   rating_at int not null,            -- nota de quem jogou, no momento
   created_at timestamptz default now()
 );
@@ -93,7 +93,7 @@ declare uid uuid := auth.uid(); me public.ranked_profiles; opp int; k int; exp n
 begin
   if uid is null then raise exception 'nao autenticado'; end if;
   if p_result not in (0, 0.5, 1) then raise exception 'resultado invalido'; end if;
-  if jsonb_array_length(p_answers) <> 10 then raise exception 'partida incompleta'; end if;
+  if jsonb_array_length(p_answers) <> 6 then raise exception 'partida incompleta'; end if;
   select * into me from public.ranked_me(p_season);
   if p_opp_run is not null then
     select rating_at into opp from public.ranked_runs where ranked_runs.id = p_opp_run;
@@ -199,7 +199,7 @@ begin
       exit when not exists (select 1 from public.matches where code = v_code);
     end loop;
     insert into public.matches(code, host_id, guest_id, host_nick, guest_nick, seed, rounds, status, ranked)
-    values (v_code, opp.user_id, uid, coalesce(oppn, 'Jogador'), myn, (floor(random() * 1000000000))::int, 5, 'playing', true)
+    values (v_code, opp.user_id, uid, coalesce(oppn, 'Jogador'), myn, (floor(random() * 1000000000))::int, 3, 'playing', true)
     returning id into mid;
     update public.ranked_queue set match_id = mid where user_id = opp.user_id;
     delete from public.ranked_queue where user_id = uid;
