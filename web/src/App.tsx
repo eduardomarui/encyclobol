@@ -11,6 +11,7 @@ import Intruso from './pages/Intruso'
 import Misterioso from './pages/Misterioso'
 import Ranking from './pages/Ranking'
 import Duelo from './pages/Duelo'
+import Ranqueada from './pages/Ranqueada'
 import Perfil from './pages/Perfil'
 import Privacidade from './pages/Privacidade'
 import Termos from './pages/Termos'
@@ -50,6 +51,7 @@ export default function App() {
         <Route path="/jogos/quem-sou-ele" element={<QuemSouEle />} />
         <Route path="/jogos/penaltis" element={<Penaltis />} />
         <Route path="/jogos/penaltis/online" element={<Duelo />} />
+        <Route path="/jogos/penaltis/ranqueada" element={<Ranqueada />} />
         <Route path="/jogos/conexoes" element={<Conexoes />} />
         <Route path="/jogos/linha-do-tempo" element={<LinhaDoTempo />} />
         <Route path="/jogos/o-intruso" element={<Intruso />} />

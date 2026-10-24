@@ -12,3 +12,26 @@ services:
     environment:
       - CHOKIDAR_USEPOLLING=true
     command: npm run dev -- --host 0.0.0.0
+
+  # Postgres local com o schema do projeto (calço do Supabase em supabase/local).
+  db:
+    image: postgres:16-alpine
+    container_name: encyclobol-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: encyclobol
+      POSTGRES_PASSWORD: encyclobol
+      POSTGRES_DB: encyclobol
+    volumes:
+      - encyclobol-pg:/var/lib/postgresql/data
+      - ./supabase/local/00-supabase-shim.sql:/docker-entrypoint-initdb.d/00-supabase-shim.sql:ro
+      - ./supabase/schema.sql:/docker-entrypoint-initdb.d/10-schema.sql:ro
+      - ./supabase/ranked.sql:/docker-entrypoint-initdb.d/20-ranked.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U encyclobol -d encyclobol"]
+      interval: 5s
+      retries: 10
+
+volumes:
+  encyclobol-pg:

@@ -395,10 +395,10 @@ export default function Penaltis() {
         onHelp={() => setShowHelp(true)}
         extra={
           <Link
-            to="/jogos/penaltis/online"
+            to="/jogos/penaltis/ranqueada"
             className="border border-corn-500/60 px-2 py-1 font-cond text-[11px] font-700 uppercase tracking-wider text-corn-500 hover:bg-corn-500 hover:text-paper"
           >
-            1×1 online
+            Ranqueada
           </Link>
         }
       />
@@ -422,6 +422,14 @@ export default function Penaltis() {
             <button onClick={comecar} className="btn-stamp mt-4 w-full bg-grass-600 px-6 py-3 text-ink-900 hover:bg-grass-700">
               {copaMode ? 'Começar a Copa →' : 'Começar o treino →'}
             </button>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <Link to="/jogos/penaltis/ranqueada" className="btn-stamp border-2 border-corn-500/70 px-3 text-xs text-corn-500 hover:bg-corn-500 hover:text-paper">
+                Ranqueada
+              </Link>
+              <Link to="/jogos/penaltis/online" className="btn-stamp border-2 border-white/20 px-3 text-xs text-ink-900 hover:bg-grass-700">
+                Duelo com amigo
+              </Link>
+            </div>
           </div>
         )}
 
@@ -604,6 +612,14 @@ export default function Penaltis() {
             >
               Treinar (sem pontos)
             </button>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <Link to="/jogos/penaltis/ranqueada" className="btn-stamp bg-corn-500 px-3 text-xs text-paper hover:bg-corn-400">
+                Ranqueada
+              </Link>
+              <Link to="/jogos/penaltis/online" className="btn-stamp border-2 border-white/20 px-3 text-xs text-ink-900 hover:bg-grass-700">
+                Duelo com amigo
+              </Link>
+            </div>
             <NextUp current="copa" />
           </div>
         )}
