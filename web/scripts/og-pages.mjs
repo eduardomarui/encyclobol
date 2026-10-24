@@ -6,8 +6,9 @@ import { dirname, join } from 'node:path'
 
 const DIST = new URL('../dist/', import.meta.url).pathname
 const BASE = (process.env.VITE_BASE ?? '/').replace(/\/$/, '')
-const ORIGIN = process.env.VITE_SITE_ORIGIN ?? 'https://eduardomarui.github.io'
-const SITE = `${ORIGIN}${BASE}`
+// Endereço público: VITE_SITE_URL (Cloudflare/domínio) ou GitHub Pages + base.
+const SITE = (process.env.VITE_SITE_URL || `https://eduardomarui.github.io${BASE}`).replace(/\/$/, '')
+const OLD = 'https://eduardomarui.github.io/encyclobol'
 
 const PAGES = [
   ['', 'default', 'Encyclobol — o almanaque jogável do futebol', 'Seis desafios diários de futebol. Sem chute, sem Google. Dispute com os amigos e com a sua torcida.'],
@@ -50,5 +51,14 @@ for (const [route, slug, title, desc] of PAGES) {
   const out = route ? join(DIST, route, 'index.html') : join(DIST, 'index.html')
   mkdirSync(dirname(out), { recursive: true })
   writeFileSync(out, withMeta(html, route, slug, title, desc))
+}
+// robots.txt e sitemap.xml também apontam pro endereço do build.
+for (const f of ['robots.txt', 'sitemap.xml']) {
+  try {
+    const path = join(DIST, f)
+    writeFileSync(path, readFileSync(path, 'utf8').split(OLD).join(SITE))
+  } catch {
+    /* arquivo ausente: segue */
+  }
 }
 console.log(`og-pages: ${PAGES.length} páginas com prévia (${SITE})`)
