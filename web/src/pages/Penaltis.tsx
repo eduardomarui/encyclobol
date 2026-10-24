@@ -8,7 +8,7 @@ import {
   recordCopa,
   type CopaStats,
 } from '../lib/penaltisStats'
-import { PenaltyScene, ZONES, poseFor, type Zone, type Shot } from '../components/PenaltyScene'
+import { PenaltyScene, makeShot, type Outcome, type Shot } from '../components/PenaltyScene'
 import { confetti } from '../lib/juice'
 import { shareScoreImage } from '../lib/shareCard'
 import { GameHeader, HelpModal, StatGrid, ThemePicker, TimeBar, NextUp } from '../components/GameShell'
@@ -303,56 +303,22 @@ export default function Penaltis() {
     setMy(myG)
     setOpp(oppG)
 
-    const ballZone = ZONES[Math.floor(Math.random() * ZONES.length)]
-    const isGoal = (attacking && correct) || (!attacking && !correct)
-    let keeperZone: Zone
-    if (isGoal) {
-      const others = ZONES.filter((z) => z !== ballZone)
-      keeperZone = others[Math.floor(Math.random() * others.length)]
-    } else {
-      keeperZone = ballZone
-    }
-
-    let label = ''
-    let good = false
+    // O lance: certo e rápido vai na gaveta; erro varia entre defesa, trave,
+    // pra fora e por cima; sem responder sai uma bola fraca.
+    const seed = Math.floor(Math.random() * 1e9)
+    const fast = timeLeft / secsFor(round, index) >= 0.5
+    let o: Outcome
+    let label: string | undefined
     if (attacking) {
-      if (correct) { label = 'GOOOL!'; good = true }
-      else label = choice === -1 ? 'PERDEU A HORA!' : 'DEFENDEU!'
+      if (correct) o = 'goal'
+      else if (choice === -1) o = 'weak'
+      else o = (['save', 'save', 'post', 'wide', 'over'] as Outcome[])[seed % 5]
     } else {
-      if (correct) { label = 'VOCÊ PEGOU!'; good = true }
-      else label = 'TOMOU GOL'
+      o = correct ? 'save' : 'goal'
+      label = correct ? (fast ? 'ESPALMOU!' : 'VOCÊ PEGOU!') : 'TOMOU GOL'
     }
-
-    // Som do lance: chute na hora; rede/luva quando a bola chega (~600 ms).
-    sfx.kick()
-    setTimeout(() => {
-      if (isGoal && attacking) {
-        sfx.net()
-        sfx.crowd()
-        buzz.goal()
-      } else if (isGoal) {
-        sfx.net()
-        sfx.groan()
-        buzz.err()
-      } else if (!attacking) {
-        sfx.glove()
-        buzz.save()
-      } else {
-        sfx.glove()
-        sfx.groan()
-      }
-    }, 600)
-
-    setShot({
-      // Na defesa a bola para no goleiro (antes ia pro canto e o goleiro ficava longe).
-      bx: isGoal ? ballZone.x : Math.min(70, Math.max(30, ballZone.x)),
-      by: isGoal ? ballZone.y : 44,
-      kx: Math.min(66, Math.max(34, keeperZone.x)),
-      pose: poseFor(keeperZone),
-      label,
-      good,
-      net: isGoal,
-    })
+    const good = correct // acertar é bom pra você nos dois papéis
+    setShot(makeShot(o, { seed, fast, good, label }))
     setPhase('shoot')
 
     // Decisão antecipada (como na disputa real): se a vantagem já não pode
@@ -372,7 +338,7 @@ export default function Penaltis() {
         setPrepared((pp) => [...pp, ...extraPair(theme, copaMode, round, pp.length / 2)])
         goAsk(i)
       }
-    }, 1800)
+    }, 2100)
   }
 
   // Escolheu o campeonato: começa a Copa do dia (ou o treino).

@@ -43,7 +43,7 @@ export const clubHint: Record<string, string> = {
   TAFFAREL: 'Galatasaray',
   CASILLAS: 'Real Madrid',
   NEUER: 'Bayern de Munique',
-  CARLOS: 'Real Madrid',
+  ROBERTOCARLOS: 'Real Madrid',
   MAICON: 'Inter de Milão',
   LAHM: 'Bayern de Munique',
   ZANETTI: 'Inter de Milão',

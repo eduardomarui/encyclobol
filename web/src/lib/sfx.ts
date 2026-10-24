@@ -128,6 +128,11 @@ export const sfx = {
     hiss('bandpass', 1500, 1, 0.04, 0.25)
     tone('sine', 220, 110, 0.12, 0.2)
   },
+  // Bola na trave: "plim" metálico com dois parciais.
+  post: () => {
+    tone('triangle', 1480, 1400, 0.35, 0.16)
+    tone('sine', 2220, 2150, 0.25, 0.08)
+  },
   groan: () => hiss('lowpass', 500, 0.7, 0.7, 0.12, 0, 0.08),
   whistle: () => {
     tone('sine', 2900, 2900, 0.18, 0.1)

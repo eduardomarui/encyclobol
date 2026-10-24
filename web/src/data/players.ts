@@ -11,12 +11,12 @@ export type Player = {
 }
 
 export const players: Player[] = [
-  { answer: 'PELE', display: 'Pelé', nat: 'Brasil', pos: 'Atacante', era: '1957–1977' },
+  { answer: 'PELE', display: 'Pelé', nat: 'Brasil', pos: 'Atacante', era: '1956–1977' },
   { answer: 'ZICO', display: 'Zico', nat: 'Brasil', pos: 'Meia', era: '1971–1994' },
   { answer: 'CAFU', display: 'Cafu', nat: 'Brasil', pos: 'Lateral', era: '1989–2008' },
   { answer: 'KAKA', display: 'Kaká', nat: 'Brasil', pos: 'Meia', era: '2001–2017' },
   { answer: 'FIGO', display: 'Luís Figo', nat: 'Portugal', pos: 'Ponta', era: '1990–2009' },
-  { answer: 'MESSI', display: 'Lionel Messi', nat: 'Argentina', pos: 'Atacante', era: '2005–presente' },
+  { answer: 'MESSI', display: 'Lionel Messi', nat: 'Argentina', pos: 'Atacante', era: '2004–presente' },
   { answer: 'TOTTI', display: 'Francesco Totti', nat: 'Itália', pos: 'Atacante', era: '1993–2017' },
   { answer: 'PIRLO', display: 'Andrea Pirlo', nat: 'Itália', pos: 'Meia', era: '1995–2017' },
   { answer: 'HENRY', display: 'Thierry Henry', nat: 'França', pos: 'Atacante', era: '1994–2012' },
@@ -56,7 +56,7 @@ export const players: Player[] = [
   { answer: 'NEUER', display: 'Manuel Neuer', nat: 'Alemanha', pos: 'Goleiro', era: '2006–presente' },
 
   // Laterais
-  { answer: 'CARLOS', display: 'Roberto Carlos', nat: 'Brasil', pos: 'Lateral', era: '1992–2015' },
+  { answer: 'ROBERTOCARLOS', display: 'Roberto Carlos', nat: 'Brasil', pos: 'Lateral', era: '1992–2015' },
   { answer: 'MAICON', display: 'Maicon', nat: 'Brasil', pos: 'Lateral', era: '2001–2018' },
   { answer: 'LAHM', display: 'Philipp Lahm', nat: 'Alemanha', pos: 'Lateral', era: '2002–2017' },
   { answer: 'ZANETTI', display: 'Javier Zanetti', nat: 'Argentina', pos: 'Lateral', era: '1992–2014' },
@@ -77,7 +77,7 @@ export const players: Player[] = [
   { answer: 'BEBETO', display: 'Bebeto', nat: 'Brasil', pos: 'Atacante', era: '1983–2002' },
   { answer: 'ADRIANO', display: 'Adriano', nat: 'Brasil', pos: 'Atacante', era: '2000–2016' },
   { answer: 'DIDA', display: 'Dida', nat: 'Brasil', pos: 'Goleiro', era: '1992–2015' },
-  { answer: 'ALISSON', display: 'Alisson', nat: 'Brasil', pos: 'Goleiro', era: '2011–presente' },
+  { answer: 'ALISSON', display: 'Alisson', nat: 'Brasil', pos: 'Goleiro', era: '2013–presente' },
   { answer: 'COUTINHO', display: 'Philippe Coutinho', nat: 'Brasil', pos: 'Meia', era: '2009–presente' },
 
   // Argentina
@@ -273,7 +273,7 @@ export const players: Player[] = [
   { answer: 'AIMAR', display: 'Pablo Aimar', nat: 'Argentina', pos: 'Meia', era: '1996–2015' },
   { answer: 'SAVIOLA', display: 'Javier Saviola', nat: 'Argentina', pos: 'Atacante', era: '1998–2015' },
   { answer: 'HIGUAIN', display: 'Gonzalo Higuaín', nat: 'Argentina', pos: 'Atacante', era: '2004–2021' },
-  { answer: 'MASCHERANO', display: 'Javier Mascherano', nat: 'Argentina', pos: 'Meia', era: '2001–2020' },
+  { answer: 'MASCHERANO', display: 'Javier Mascherano', nat: 'Argentina', pos: 'Meia', era: '2003–2020' },
 
   // Uruguai
   { answer: 'RECOBA', display: 'Álvaro Recoba', nat: 'Uruguai', pos: 'Meia', era: '1994–2015' },
@@ -398,7 +398,7 @@ export const players: Player[] = [
   { answer: 'DYBALA', display: 'Paulo Dybala', nat: 'Argentina', pos: 'Atacante', era: '2011–presente' },
 
   // Uruguai / Chile / Colômbia / Peru / México
-  { answer: 'BRAVO', display: 'Claudio Bravo', nat: 'Chile', pos: 'Goleiro', era: '2002–presente' },
+  { answer: 'BRAVO', display: 'Claudio Bravo', nat: 'Chile', pos: 'Goleiro', era: '2002–2024' },
   { answer: 'CUADRADO', display: 'Juan Cuadrado', nat: 'Colômbia', pos: 'Ponta', era: '2008–presente' },
   { answer: 'GUERRERO', display: 'Paolo Guerrero', nat: 'Peru', pos: 'Atacante', era: '2002–presente' },
   { answer: 'BLANCO', display: 'Cuauhtémoc Blanco', nat: 'México', pos: 'Atacante', era: '1992–2016' },
@@ -438,7 +438,7 @@ export const players: Player[] = [
   { answer: 'BIERHOFF', display: 'Oliver Bierhoff', nat: 'Alemanha', pos: 'Atacante', era: '1986–2003' },
   { answer: 'GOTZE', display: 'Mario Götze', nat: 'Alemanha', pos: 'Meia', era: '2009–presente' },
   { answer: 'REUS', display: 'Marco Reus', nat: 'Alemanha', pos: 'Meia', era: '2006–presente' },
-  { answer: 'HUMMELS', display: 'Mats Hummels', nat: 'Alemanha', pos: 'Zagueiro', era: '2006–presente' },
+  { answer: 'HUMMELS', display: 'Mats Hummels', nat: 'Alemanha', pos: 'Zagueiro', era: '2006–2025' },
   { answer: 'GUNDOGAN', display: 'İlkay Gündoğan', nat: 'Alemanha', pos: 'Meia', era: '2009–presente' },
   { answer: 'SANE', display: 'Leroy Sané', nat: 'Alemanha', pos: 'Ponta', era: '2013–presente' },
 
@@ -459,7 +459,7 @@ export const players: Player[] = [
   { answer: 'LUISENRIQUE', display: 'Luis Enrique', nat: 'Espanha', pos: 'Meia', era: '1989–2004' },
   { answer: 'VALDES', display: 'Víctor Valdés', nat: 'Espanha', pos: 'Goleiro', era: '2002–2017' },
   { answer: 'PIQUE', display: 'Gerard Piqué', nat: 'Espanha', pos: 'Zagueiro', era: '2004–2022' },
-  { answer: 'JORDIALBA', display: 'Jordi Alba', nat: 'Espanha', pos: 'Lateral', era: '2007–presente' },
+  { answer: 'JORDIALBA', display: 'Jordi Alba', nat: 'Espanha', pos: 'Lateral', era: '2007–2025' },
   { answer: 'ISCO', display: 'Isco', nat: 'Espanha', pos: 'Meia', era: '2010–presente' },
   { answer: 'MORATA', display: 'Álvaro Morata', nat: 'Espanha', pos: 'Atacante', era: '2010–presente' },
 
@@ -685,7 +685,7 @@ export const players: Player[] = [
   { answer: 'POBORSKY', display: 'Karel Poborský', nat: 'Rep. Tcheca', pos: 'Ponta', era: '1991–2007' },
   { answer: 'KOLLER', display: 'Jan Koller', nat: 'Rep. Tcheca', pos: 'Atacante', era: '1994–2011' },
   { answer: 'BAROS', display: 'Milan Baroš', nat: 'Rep. Tcheca', pos: 'Atacante', era: '1998–2020' },
-  { answer: 'PETKOVIC', display: 'Petkovic', nat: 'Iugoslávia', pos: 'Meia', era: '1988–2011' },
+  { answer: 'PETKOVIC', display: 'Dejan Petković', nat: 'Iugoslávia', pos: 'Meia', era: '1988–2011' },
   { answer: 'MITROVIC', display: 'Aleksandar Mitrović', nat: 'Sérvia', pos: 'Atacante', era: '2011–presente' },
   { answer: 'TADIC', display: 'Dušan Tadić', nat: 'Sérvia', pos: 'Meia', era: '2006–presente' },
   { answer: 'SRNA', display: 'Darijo Srna', nat: 'Croácia', pos: 'Lateral', era: '1999–2019' },
