@@ -4,4 +4,6 @@ export const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://encyclobol.co
 export const SITE_LABEL = SITE_URL.replace(/^https?:\/\//, '')
 
 // Link direto de uma página (ex.: '/jogos/conexoes').
-export const siteLink = (path = '') => `${SITE_URL}${path}`
+// Rotas de página levam a barra final (é o endereço que o servidor serve sem redirecionar).
+const slash = (path: string) => (/^\/[^?#.]*[^/?#.]$/.test(path.split(/[?#]/)[0]) ? path.replace(/^([^?#]*)/, '$1/') : path)
+export const siteLink = (path = '') => `${SITE_URL}${slash(path)}`

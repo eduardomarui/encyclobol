@@ -1,7 +1,7 @@
 /* Encyclobol — service worker: app shell offline + cache de assets.
    Navegações: rede primeiro, cai pro cache (e pro index) se estiver offline.
    Assets do mesmo domínio: cache primeiro. Nada de terceiros (Supabase, fontes). */
-const CACHE = 'encyclobol-v2'
+const CACHE = 'encyclobol-v3'
 
 self.addEventListener('install', () => {
   self.skipWaiting()
@@ -29,6 +29,10 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(req.url, { cache: 'no-cache', credentials: 'same-origin' })
         .then((res) => {
+          // Endereço que redireciona (ex.: sem a barra final): o navegador recusa
+          // a resposta já redirecionada numa navegação e a página ficava em
+          // branco até o reload. Manda ele mesmo seguir pro endereço final.
+          if (res.redirected) return Response.redirect(res.url, 302)
           const copy = res.clone()
           caches.open(CACHE).then((c) => c.put(req, copy))
           return res
