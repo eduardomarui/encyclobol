@@ -7,7 +7,7 @@ const slides = [
   {
     kicker: 'Bem-vindo',
     title: 'Encyclobol',
-    body: 'O almanaque jogável do futebol. Seis desafios diários sobre toda a história do futebol mundial.',
+    body: 'O almanaque jogável do futebol. Sete desafios diários sobre toda a história do futebol mundial.',
     logo: true,
   },
   {

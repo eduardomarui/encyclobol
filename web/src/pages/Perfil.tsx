@@ -41,7 +41,7 @@ export default function Perfil() {
           {[
             ['Pontos no total', total.toLocaleString('pt-BR')],
             ['Conquistas', `${unlocked}/${achievements.length}`],
-            ['Jogos hoje', `${playedToday}/6`],
+            ['Jogos hoje', `${playedToday}/${games.length}`],
           ].map(([k, v]) => (
             <div key={k} className="bg-paper-100 px-2 py-4 text-center">
               <div className="font-display text-3xl text-ink-900 sm:text-4xl">{v}</div>

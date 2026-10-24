@@ -7,6 +7,7 @@ import {
   TimelineIcon,
   IntruderIcon,
   MysteryIcon,
+  LineupIcon,
 } from './Icons'
 
 type Status = 'Edição de hoje' | 'No ar' | 'Em breve'
@@ -76,6 +77,15 @@ const games: Game[] = [
     status: 'Edição de hoje',
     to: '/jogos/craque-misterioso',
   },
+  {
+    n: '07',
+    Icon: LineupIcon,
+    category: 'Memória',
+    title: 'Escalação',
+    desc: 'A foto oficial de um time histórico, sem os nomes. Escale os 11 titulares de memória em 3 minutos. Quem sabe todos é mago.',
+    status: 'Edição de hoje',
+    to: '/jogos/escalacao',
+  },
 ]
 
 function StatusTag({ status }: { status: Status }) {
@@ -104,7 +114,7 @@ export default function Games() {
             </h2>
           </div>
           <p className="max-w-sm font-serif text-base italic text-ink-600">
-            Seis modos pra matar a saudade do futebol e provar que você é mesmo um
+            Sete modos pra matar a saudade do futebol e provar que você é mesmo um
             almanaque ambulante.
           </p>
         </header>

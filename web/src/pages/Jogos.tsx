@@ -9,6 +9,7 @@ import {
   TimelineIcon,
   IntruderIcon,
   MysteryIcon,
+  LineupIcon,
 } from '../components/landing/Icons'
 import { dayNumber } from '../lib/daily'
 import { shareScoreImage, type Sq } from '../lib/shareCard'
@@ -19,6 +20,7 @@ import { loadConCareer, loadConToday } from '../lib/conexoesStats'
 import { loadTLCareer, loadTLToday } from '../lib/timelineStats'
 import { loadIntrusoCareer, loadIntrusoToday } from '../lib/intrusoStats'
 import { loadMystCareer, loadMystToday } from '../lib/misteriosoStats'
+import { loadEscCareer, loadEscToday } from '../lib/escalacaoStats'
 import { siteLink } from '../lib/site'
 import { Camisa } from '../components/Camisa'
 import { TimePicker, useMyTeam } from '../components/TimePicker'
@@ -136,6 +138,23 @@ const games: GameInfo[] = [
       }
     },
   },
+  {
+    n: '07',
+    title: 'Escalação',
+    category: 'Memória',
+    route: '/jogos/escalacao',
+    Icon: LineupIcon,
+    result: () => {
+      const t = loadEscToday()
+      const c = loadEscCareer()
+      return {
+        played: !!t,
+        streak: c.streak,
+        detail: t ? `${t.found}/11 · ${t.points} pts` : '—',
+        good: !!t && t.found >= 8,
+      }
+    },
+  },
 ]
 
 function TeamStrip() {
@@ -229,15 +248,6 @@ export default function Jogos() {
         {/* Time do coração: convite até escolher */}
         <TeamStrip />
 
-        {/* Jogo novo em teste */}
-        <Link
-          to="/jogos/escalacao"
-          className="mt-3 flex items-center gap-3 border-2 border-dashed border-corn-500/60 px-4 py-2.5 hover:bg-corn-500/10"
-        >
-          <span className="font-cond text-[10px] font-700 uppercase tracking-wider text-corn-400">Novo · beta</span>
-          <span className="flex-1 font-cond text-sm font-700 uppercase tracking-wider text-ink-900">Escalação: quem sabe todos é mago</span>
-          <span className="font-cond text-xs font-600 uppercase tracking-wider text-corn-500">Jogar →</span>
-        </Link>
 
         {/* Resumo do dia */}
         <section className="mt-3 border-2 border-white/20 bg-paper-100 p-5 sm:p-6">

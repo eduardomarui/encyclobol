@@ -150,3 +150,12 @@ export function BallMark({ className }: IconProps) {
     </svg>
   )
 }
+
+export function LineupIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className} aria-hidden>
+      <path d="M10 6 L13 4 H19 L22 6 L27 10 L24 14 L22 12 V27 H10 V12 L8 14 L5 10 Z" />
+      <path d="M13 4 Q16 7 19 4" />
+    </svg>
+  )
+}

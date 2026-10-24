@@ -75,7 +75,7 @@ export default function Hero() {
           </h1>
 
           <p className="mt-6 max-w-xl font-serif text-lg leading-relaxed text-[#bdd2c9] sm:text-xl">
-            Seis desafios curtos por dia sobre a história do futebol — do escrete de 70 ao
+            Sete desafios curtos por dia sobre a história do futebol — do escrete de 70 ao
             elenco de 2026. Uma base de <strong className="text-[#eef5f1]">{players.length} craques</strong>{' '}
             de <strong className="text-[#eef5f1]">{nacoes} seleções</strong>,{' '}
             <strong className="text-[#eef5f1]">{quiz.length} perguntas</strong> e{' '}

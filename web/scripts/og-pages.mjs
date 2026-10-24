@@ -10,8 +10,8 @@ const DOMAIN = 'https://encyclobol.com.br'
 const SITE = (process.env.VITE_SITE_URL || DOMAIN).replace(/\/$/, '')
 
 const PAGES = [
-  ['', 'default', 'Encyclobol — o almanaque jogável do futebol', 'Seis desafios diários de futebol. Sem chute, sem Google. Dispute com os amigos e com a sua torcida.'],
-  ['jogos', 'jogos', 'Os jogos de hoje · Encyclobol', 'Seis desafios novos todo dia: Tira-Teima, Copa de Pênaltis, Quarteto, Linha do Tempo, O Intruso e Craque Misterioso.'],
+  ['', 'default', 'Encyclobol — o almanaque jogável do futebol', 'Sete desafios diários de futebol. Sem chute, sem Google. Dispute com os amigos e com a sua torcida.'],
+  ['jogos', 'jogos', 'Os jogos de hoje · Encyclobol', 'Sete desafios novos todo dia: Tira-Teima, Copa de Pênaltis, Quarteto, Linha do Tempo, O Intruso, Craque Misterioso e Escalação.'],
   ['jogos/quem-sou-ele', 'quem-sou-ele', 'Tira-Teima · Encyclobol', 'Adivinhe o craque letra por letra, contra o relógio. Até onde vai a sua carreira hoje?'],
   ['jogos/penaltis', 'penaltis', 'Copa de Pênaltis · Encyclobol', 'Acertou a pergunta, é gol. Mata-mata em quatro fases: levante a taça.'],
   ['jogos/penaltis/online', 'penaltis-online', 'Duelo de Pênaltis · Encyclobol', 'Te desafiei: um bate, o outro defende, ao vivo. Entra na sala.'],
@@ -31,7 +31,7 @@ function withMeta(src, route, slug, title, desc) {
   // Barra no fim: é o endereço final (sem ela o Cloudflare responde 308).
   const url = `${SITE}/${route}${route ? '/' : ''}`
   // ?v=: o WhatsApp guarda a prévia em cache; mudou a imagem, sobe a versão.
-  const img = `${SITE}/og/${slug}.png?v=2`
+  const img = `${SITE}/og/${slug}.png?v=3`
   const set = (re, tag) => (re.test(src) ? (src = src.replace(re, tag)) : (src = src.replace('</head>', `    ${tag}\n  </head>`)))
   set(/<title>.*?<\/title>/s, `<title>${esc(title)}</title>`)
   set(/<meta\s+name="description"[^>]*>/s, `<meta name="description" content="${esc(desc)}" />`)

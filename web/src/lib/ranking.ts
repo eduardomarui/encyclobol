@@ -20,6 +20,8 @@ const TODAY_KEYS: { game: string; key: string; field: string; full: number }[] =
   { game: 'Linha do Tempo', key: 'encyclobol:timeline:today', field: 'points', full: 330 },
   { game: 'O Intruso', key: 'encyclobol:intruso:today', field: 'points', full: 2000 },
   { game: 'Craque Misterioso', key: 'encyclobol:misterioso:today', field: 'points', full: 800 },
+  // 11 × 100 + segundos que sobraram nos 11: uma escalação completa rápida.
+  { game: 'Escalação', key: 'encyclobol:escalacao:today', field: 'points', full: 1200 },
 ]
 
 // Nota de 0 a 1.000 que vai pro ranking.
@@ -99,6 +101,7 @@ export const GAMES = [
   'Linha do Tempo',
   'O Intruso',
   'Craque Misterioso',
+  'Escalação',
 ] as const
 
 // Converte o período no "dia mínimo" (usa a mesma contagem de dias do app).

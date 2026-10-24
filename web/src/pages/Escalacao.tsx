@@ -1,8 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ESCALACOES, type Escalacao as Esc, type Jogador } from '../data/escalacoes'
-import { GameHeader, HelpModal, TimeBar } from '../components/GameShell'
+import { GameHeader, GameTitle, HelpModal, NextUp, TimeBar } from '../components/GameShell'
 import { Bandeira } from '../components/Bandeira'
 import { siteLink } from '../lib/site'
+import { dailyPick, dayNumber } from '../lib/daily'
+import { clearRun, loadRun, saveRun } from '../lib/runSave'
+import { loadEscToday, recordEscalacao } from '../lib/escalacaoStats'
 import { confetti } from '../lib/juice'
 import { buzz, sfx } from '../lib/sfx'
 
@@ -11,6 +14,13 @@ import { buzz, sfx } from '../lib/sfx'
 const TEMPO = 180
 const HELP_KEY = 'encyclobol:escalacao:help'
 const BEST_KEY = 'encyclobol:escalacao:best'
+// Elenco do dia: igual pra todos, por permutação fixa da lista.
+const DAILY_IDX = dailyPick(ESCALACOES.length, 7711, -1)
+// Pontos: 100 por jogador, −30 por dica; os 11 somam os segundos que sobraram.
+const pontosDe = (found: number, total: number, dicas: number, left: number) =>
+  Math.max(0, found * 100 - dicas * 30 + (found === total ? left : 0))
+
+type EscRun = { id: string; achados: number[]; dicas: number[]; left: number }
 
 const norm = (s: string) =>
   s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim()
@@ -104,18 +114,35 @@ function Figura({ p, esc, achou, revelar, agachado, dica, onDica }: {
 }
 
 export default function Escalacao() {
-  // ?e=<id> abre direto no elenco do desafio recebido.
-  const [idx, setIdx] = useState(() => {
+  // Elenco do dia (uma tentativa, vale ranking) ou treino com os outros.
+  // ?e=<id> de outro elenco abre no treino, direto no elenco do desafio.
+  const [today] = useState(loadEscToday)
+  const [run] = useState(() => (today ? null : loadRun<EscRun>('escalacao')))
+  const [modo, setModo] = useState<'dia' | 'treino'>(() => {
     const id = new URLSearchParams(window.location.search).get('e')
-    return Math.max(0, ESCALACOES.findIndex((x) => x.id === id))
+    return id && id !== ESCALACOES[DAILY_IDX].id && ESCALACOES.some((x) => x.id === id) ? 'treino' : 'dia'
+  })
+  const [idx, setIdx] = useState(() => {
+    if (modo === 'treino') {
+      const id = new URLSearchParams(window.location.search).get('e')
+      return Math.max(0, ESCALACOES.findIndex((x) => x.id === id))
+    }
+    const id = today?.id ?? run?.id
+    const i = ESCALACOES.findIndex((x) => x.id === id)
+    return i >= 0 ? i : DAILY_IDX
   })
   const esc = ESCALACOES[idx]
   const todos = useMemo(() => [...esc.atras, ...esc.frente], [esc])
-  const [fase, setFase] = useState<'pronto' | 'jogando' | 'fim'>('pronto')
-  const [achados, setAchados] = useState<number[]>([])
-  const [dicas, setDicas] = useState<number[]>([])
+  const dia = modo === 'dia'
+  const [fase, setFase] = useState<'pronto' | 'jogando' | 'fim'>(() => (dia && today ? 'fim' : dia && run ? 'jogando' : 'pronto'))
+  const [achados, setAchados] = useState<number[]>(() =>
+    dia && today ? today.marks.flatMap((m, k) => (m ? [k] : [])) : dia && run ? run.achados : [],
+  )
+  const [dicas, setDicas] = useState<number[]>(() => (dia && run ? run.dicas : []))
   const [txt, setTxt] = useState('')
-  const [left, setLeft] = useState(TEMPO)
+  const [left, setLeft] = useState(() => (dia && run ? run.left : TEMPO))
+  const [pontos, setPontos] = useState(today?.points ?? 0)
+  const [recorded, setRecorded] = useState(!!today)
   const [flash, setFlash] = useState('')
   const [best, setBest] = useState(loadBest)
   const [copied, setCopied] = useState(false)
@@ -131,6 +158,12 @@ export default function Escalacao() {
   const total = todos.length
   const mago = achados.length === total
 
+  // Partida do dia salva a cada acerto/segundo: F5 volta de onde parou.
+  useEffect(() => {
+    if (!dia || recorded || fase !== 'jogando') return
+    saveRun<EscRun>('escalacao', { id: esc.id, achados, dicas, left })
+  }, [dia, recorded, fase, esc.id, achados, dicas, left])
+
   // Relógio único da partida.
   useEffect(() => {
     if (fase !== 'jogando' || showHelp) return
@@ -145,6 +178,7 @@ export default function Escalacao() {
   }, [left, fase, showHelp])
 
   function escolher(i: number) {
+    setModo('treino')
     setIdx(i)
     setFase('pronto')
     setAchados([])
@@ -166,6 +200,13 @@ export default function Escalacao() {
   function encerrar(found = achados) {
     setFase('fim')
     const n = found.length
+    const pts = pontosDe(n, total, dicas.length, left)
+    setPontos(pts)
+    if (dia && !recorded) {
+      recordEscalacao(esc.id, pts, todos.map((_, k) => found.includes(k)))
+      setRecorded(true)
+      clearRun('escalacao')
+    }
     if (n > (best[esc.id] ?? -1)) {
       const nb = { ...best, [esc.id]: n }
       setBest(nb)
@@ -222,7 +263,7 @@ export default function Escalacao() {
 
   async function compartilhar() {
     const linha = (arr: Jogador[], off: number) => arr.map((_, k) => (achados.includes(k + off) ? '✅' : '⬜')).join('')
-    const text = `Encyclobol · Escalação\n${esc.jogo} (${esc.quando})\n${linha(esc.atras, 0)}\n ${linha(esc.frente, esc.atras.length)}\n${mago ? 'MAGO 🧙 11/11' : `${achados.length}/${total}`} · quem sabe todos é mago\nE você? ${siteLink(`/jogos/escalacao?e=${esc.id}`)}`
+    const text = `Encyclobol · Escalação\n${esc.jogo} (${esc.quando})\n${linha(esc.atras, 0)}\n ${linha(esc.frente, esc.atras.length)}\n${mago ? 'MAGO 🧙 11/11' : `${achados.length}/${total}`}${dia ? ` · ${pontos} pts · Escalação #${dayNumber()}` : ''} · quem sabe todos é mago\nE você? ${siteLink(`/jogos/escalacao?e=${esc.id}`)}`
     try {
       if (navigator.share) await navigator.share({ text })
       else await navigator.clipboard.writeText(text)
@@ -246,14 +287,11 @@ export default function Escalacao() {
 
   return (
     <div className="flex min-h-screen flex-col bg-paper">
-      <GameHeader label="Escalação · beta" onHelp={() => setShowHelp(true)} />
+      <GameHeader label={dia ? 'Escalação do dia' : 'Escalação · treino'} onHelp={() => setShowHelp(true)} />
       <main className="container-page flex flex-1 flex-col items-center py-3 sm:py-5">
-        <p className="kicker">Escalação · beta</p>
-        <h1 className="mt-1 text-center font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900 sm:text-5xl">
-          Quem sabe todos é mago
-        </h1>
+        <GameTitle kicker={dia ? `Memória · jogo 07 · #${dayNumber()}` : 'Escalação · treino'} title="Quem sabe todos é mago" />
 
-        {fase === 'pronto' && (
+        {!dia && fase === 'pronto' && (
           <div className="mt-3 flex flex-wrap justify-center gap-1.5" role="radiogroup" aria-label="Elenco">
             {ESCALACOES.map((e, i) => (
               <button
@@ -305,6 +343,7 @@ export default function Escalacao() {
         {fase === 'pronto' && (
           <div className="mt-4 w-full max-w-md text-center">
             <p className="font-serif text-sm italic text-ink-600">
+              {dia ? 'A escalação de hoje é igual pra todo mundo. ' : 'Treino: não vale pontos. '}
               11 titulares, 3 minutos. Número, posição e seleção de cada um já estão na foto.
               {best[esc.id] !== undefined && <> Seu recorde aqui: {best[esc.id]}/{total}.</>}
             </p>
@@ -362,18 +401,28 @@ export default function Escalacao() {
               <span className="text-ink-500">/{total}</span>
             </p>
             <p className="mt-1 font-cond text-[11px] font-600 uppercase tracking-wider text-ink-500">
+              {dia ? `${pontos} pts · ` : 'treino · '}
               {dicas.length ? `${dicas.length} dica${dicas.length > 1 ? 's' : ''} · ` : ''}
               {esc.esquema}
             </p>
             <button onClick={compartilhar} className="btn-stamp mt-4 w-full bg-corn-500 px-6 py-3 text-paper hover:bg-corn-400">
               {copied ? 'Copiado!' : 'Desafiar no grupo'}
             </button>
-            <button onClick={comecar} className="btn-stamp mt-2 w-full border-2 border-white/20 px-6 py-2.5 text-ink-900 hover:bg-grass-700">
-              Tentar de novo
-            </button>
-            <button onClick={() => escolher((idx + 1) % ESCALACOES.length)} className="mt-2 w-full font-cond text-xs font-600 uppercase tracking-wider text-ink-500 hover:text-corn-500">
-              Outro elenco →
-            </button>
+            {dia ? (
+              <button onClick={() => escolher((idx + 1) % ESCALACOES.length)} className="btn-stamp mt-2 w-full border-2 border-white/20 px-6 py-2.5 text-ink-900 hover:bg-grass-700">
+                Treinar outros elencos
+              </button>
+            ) : (
+              <>
+                <button onClick={comecar} className="btn-stamp mt-2 w-full border-2 border-white/20 px-6 py-2.5 text-ink-900 hover:bg-grass-700">
+                  Tentar de novo
+                </button>
+                <button onClick={() => escolher((idx + 1) % ESCALACOES.length)} className="mt-2 w-full font-cond text-xs font-600 uppercase tracking-wider text-ink-500 hover:text-corn-500">
+                  Outro elenco →
+                </button>
+              </>
+            )}
+            <NextUp current="escalacao" />
           </div>
         )}
       </main>

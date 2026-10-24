@@ -21,8 +21,8 @@ CORN = (230, 183, 62)
 INK2 = (155, 182, 171)
 
 GAMES = {
-    'default': ('O almanaque jogável do futebol', 'ENCYCLOBOL', 'Seis desafios por dia. Sem chute, sem Google.'),
-    'jogos': ('Os jogos de hoje', 'ENCYCLOBOL · EDIÇÃO DO DIA', 'Seis desafios novos todo dia. Quantos você fecha?'),
+    'default': ('O almanaque jogável do futebol', 'ENCYCLOBOL', 'Sete desafios por dia. Sem chute, sem Google.'),
+    'jogos': ('Os jogos de hoje', 'ENCYCLOBOL · EDIÇÃO DO DIA', 'Sete desafios novos todo dia. Quantos você fecha?'),
     'quem-sou-ele': ('Tira-Teima', 'JOGO 01 · CARREIRA', 'Adivinhe o craque letra por letra, contra o relógio.'),
     'penaltis': ('Copa de Pênaltis', 'JOGO 02 · MATA-MATA', 'Acertou a pergunta, é gol. Levante a taça.'),
     'penaltis-online': ('Duelo de Pênaltis', 'AO VIVO · 1 CONTRA 1', 'Um bate, o outro defende. Te desafiei.'),
@@ -32,7 +32,7 @@ GAMES = {
     'o-intruso': ('O Intruso', 'JOGO 05 · DEDUÇÃO', 'Três têm algo em comum. Um é o infiltrado.'),
     'craque-misterioso': ('Craque Misterioso', 'JOGO 06 · DETETIVE', 'Seleção, posição, época: descubra quem é.'),
     'ranking': ('Ranking', 'GLOBAL · AMIGOS · TORCIDAS', 'Sua torcida contra a do seu amigo. Toda semana.'),
-    'escalacao': ('Quem sabe todos é mago', 'ESCALAÇÃO · BETA', 'Escale os 11 titulares de memória em 3 minutos.'),
+    'escalacao': ('Quem sabe todos é mago', 'JOGO 07 · MEMÓRIA', 'Escale os 11 titulares de memória em 3 minutos.'),
 }
 
 

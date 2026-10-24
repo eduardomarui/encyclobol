@@ -17,6 +17,7 @@ const CAREER = [
   'encyclobol:intruso:career',
   'encyclobol:misterioso:career',
   'encyclobol:timeline:career',
+  'encyclobol:escalacao:career',
 ]
 // Resultado e partida do dia: fica a do dia mais recente (empate: a daqui).
 const DAILY = [
@@ -27,6 +28,7 @@ const DAILY = [
   'encyclobol:timeline:today',
   'encyclobol:intruso:today',
   'encyclobol:misterioso:today',
+  'encyclobol:escalacao:today',
 ]
 const isDaily = (k: string) => DAILY.includes(k) || k.startsWith('encyclobol:run:')
 // "Já vi o tutorial": basta ter visto em um aparelho.

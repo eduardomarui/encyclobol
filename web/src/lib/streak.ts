@@ -14,6 +14,7 @@ const TODAY_KEYS = [
   'encyclobol:timeline:today',
   'encyclobol:intruso:today',
   'encyclobol:misterioso:today',
+  'encyclobol:escalacao:today',
 ]
 
 type State = {

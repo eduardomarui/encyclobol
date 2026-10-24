@@ -9,7 +9,7 @@ import { challengeLink, readChallenge } from '../lib/challenge'
 import { confetti } from '../lib/juice'
 import { dayNumber } from '../lib/daily'
 
-// Peças compartilhadas pelas seis páginas de jogo: cabeçalho fixo, modal
+// Peças compartilhadas pelas páginas de jogo: cabeçalho fixo, modal
 // "Como jogar" e a grade de números do fim de rodada.
 
 export function GameHeader({
@@ -249,7 +249,7 @@ export function NextUp({ current }: { current: string }) {
   )
 }
 
-// Fechou os 6 do dia: festa uma vez por dia (a primeira tela que mostrar).
+// Fechou todos os jogos do dia: festa uma vez por dia (a primeira tela que mostrar).
 const CLOSED_KEY = 'encyclobol:closed-day'
 function DayClosed() {
   useEffect(() => {
@@ -266,7 +266,7 @@ function DayClosed() {
   return (
     <div className="mt-3 animate-pop border-2 border-corn-500 bg-corn-500/15 px-4 py-3 text-center">
       <p className="font-display text-2xl uppercase leading-none tracking-tight text-corn-400">Caderno fechado!</p>
-      <p className="mt-1 font-cond text-[11px] font-600 uppercase tracking-wider text-ink-700">Os 6 jogos de hoje, completos</p>
+      <p className="mt-1 font-cond text-[11px] font-600 uppercase tracking-wider text-ink-700">Todos os jogos de hoje, completos</p>
     </div>
   )
 }
