@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { conexoes, type ConGroup, type GroupColor } from '../data/conexoes'
-import { dailyIndex, dayNumber, seededShuffle } from '../lib/daily'
+import { dailyPick, dayNumber, seededShuffle } from '../lib/daily'
 import {
   loadConCareer,
   loadConToday,
@@ -45,7 +45,10 @@ function computePoints(
   return pts
 }
 
-const DAILY_INDEX = dailyIndex(conexoes.length)
+// Puzzle do dia: até 24/10/2026 a regra antiga (37 puzzles em ordem); depois,
+// permutação fixa sobre a base inteira (a ordem do arquivo não vaza).
+const LEGACY_LEN = 37
+const DAILY_INDEX = dayNumber() <= 296 ? dayNumber() % LEGACY_LEN : dailyPick(conexoes.length, 4242, -1)
 
 type ConRun = { solved: GroupColor[]; seq: GroupColor[]; mistakes: number; rows: string[][]; order: string[] }
 
