@@ -20,6 +20,7 @@ const PAGES = [
   ['jogos/linha-do-tempo', 'linha-do-tempo', 'Linha do Tempo · Encyclobol', 'Coloque os craques na ordem da história, pelo ano de estreia.'],
   ['jogos/o-intruso', 'o-intruso', 'O Intruso · Encyclobol', 'Três craques têm algo em comum. Um é o infiltrado. Ache e diga o porquê.'],
   ['jogos/craque-misterioso', 'craque-misterioso', 'Craque Misterioso · Encyclobol', 'Seleção, posição, época: descubra o craque do dia em 8 chutes.'],
+  ['jogos/escalacao', 'escalacao', 'Escalação · Encyclobol', 'Quem sabe todos é mago: escale de memória os 11 titulares de jogos marcantes.'],
   ['ranking', 'ranking', 'Ranking · Encyclobol', 'Ranking global, dos amigos e torcida contra torcida, toda semana.'],
 ]
 
@@ -29,7 +30,8 @@ const html = readFileSync(join(DIST, 'index.html'), 'utf8')
 function withMeta(src, route, slug, title, desc) {
   // Barra no fim: é o endereço final (sem ela o Cloudflare responde 308).
   const url = `${SITE}/${route}${route ? '/' : ''}`
-  const img = `${SITE}/og/${slug}.png`
+  // ?v=: o WhatsApp guarda a prévia em cache; mudou a imagem, sobe a versão.
+  const img = `${SITE}/og/${slug}.png?v=2`
   const set = (re, tag) => (re.test(src) ? (src = src.replace(re, tag)) : (src = src.replace('</head>', `    ${tag}\n  </head>`)))
   set(/<title>.*?<\/title>/s, `<title>${esc(title)}</title>`)
   set(/<meta\s+name="description"[^>]*>/s, `<meta name="description" content="${esc(desc)}" />`)

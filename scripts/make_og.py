@@ -32,6 +32,7 @@ GAMES = {
     'o-intruso': ('O Intruso', 'JOGO 05 · DEDUÇÃO', 'Três têm algo em comum. Um é o infiltrado.'),
     'craque-misterioso': ('Craque Misterioso', 'JOGO 06 · DETETIVE', 'Seleção, posição, época: descubra quem é.'),
     'ranking': ('Ranking', 'GLOBAL · AMIGOS · TORCIDAS', 'Sua torcida contra a do seu amigo. Toda semana.'),
+    'escalacao': ('Quem sabe todos é mago', 'ESCALAÇÃO · BETA', 'Escale os 11 titulares de memória em 3 minutos.'),
 }
 
 
@@ -60,22 +61,30 @@ def card(title: str, kicker: str, sub: str) -> Image.Image:
         img.paste(lg, (W - lg.width - 90, (H - lh) // 2), lg)
     x = 90
     d.text((x, 150), kicker, font=KICK, fill=CORN)
-    # título (quebra em 2 linhas se precisar)
-    words, lines, cur = title.upper().split(), [], ''
-    for w in words:
-        t = (cur + ' ' + w).strip()
-        if d.textlength(t, font=HEAD) > 760 and cur:
-            lines.append(cur)
-            cur = w
-        else:
-            cur = t
-    lines.append(cur)
+    # título: quebra em linhas e diminui a fonte até caber acima do rodapé
+    # (antes o título de 3 linhas invadia o rodapé e a frase de baixo).
+    foot_y = H - 95
+    for size in range(118, 59, -6):
+        head = ImageFont.truetype(F + 'Impact.ttf', size)
+        words, lines, cur = title.upper().split(), [], ''
+        for w in words:
+            t = (cur + ' ' + w).strip()
+            if d.textlength(t, font=head) > 740 and cur:
+                lines.append(cur)
+                cur = w
+            else:
+                cur = t
+        lines.append(cur)
+        lh = int(size * 1.05)
+        bottom = 205 + lh * len(lines) + 12 + 50
+        if bottom <= foot_y - 14 and all(d.textlength(ln, font=head) <= 760 for ln in lines):
+            break
     y = 205
     for ln in lines:
-        d.text((x, y), ln, font=HEAD, fill=CHALK)
-        y += 124
-    d.text((x, y + 10), sub, font=SUB, fill=INK2)
-    d.text((x, H - 95), 'ENCYCLOBOL · O ALMANAQUE JOGÁVEL DO FUTEBOL', font=FOOT, fill=CORN)
+        d.text((x, y), ln, font=head, fill=CHALK)
+        y += lh
+    d.text((x, y + 12), sub, font=SUB, fill=INK2)
+    d.text((x, foot_y), 'ENCYCLOBOL · O ALMANAQUE JOGÁVEL DO FUTEBOL', font=FOOT, fill=CORN)
     return img
 
 

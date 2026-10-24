@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { ESCALACOES, type Escalacao as Esc, type Jogador } from '../data/escalacoes'
 import { GameHeader, HelpModal, TimeBar } from '../components/GameShell'
 import { Bandeira } from '../components/Bandeira'
+import { siteLink } from '../lib/site'
 import { confetti } from '../lib/juice'
 import { buzz, sfx } from '../lib/sfx'
 
@@ -103,7 +104,11 @@ function Figura({ p, esc, achou, revelar, agachado, dica, onDica }: {
 }
 
 export default function Escalacao() {
-  const [idx, setIdx] = useState(0)
+  // ?e=<id> abre direto no elenco do desafio recebido.
+  const [idx, setIdx] = useState(() => {
+    const id = new URLSearchParams(window.location.search).get('e')
+    return Math.max(0, ESCALACOES.findIndex((x) => x.id === id))
+  })
   const esc = ESCALACOES[idx]
   const todos = useMemo(() => [...esc.atras, ...esc.frente], [esc])
   const [fase, setFase] = useState<'pronto' | 'jogando' | 'fim'>('pronto')
@@ -217,7 +222,7 @@ export default function Escalacao() {
 
   async function compartilhar() {
     const linha = (arr: Jogador[], off: number) => arr.map((_, k) => (achados.includes(k + off) ? '✅' : '⬜')).join('')
-    const text = `Encyclobol · Escalação\n${esc.jogo} (${esc.quando})\n${linha(esc.atras, 0)}\n ${linha(esc.frente, esc.atras.length)}\n${mago ? 'MAGO 🧙 11/11' : `${achados.length}/${total}`} · quem sabe todos é mago`
+    const text = `Encyclobol · Escalação\n${esc.jogo} (${esc.quando})\n${linha(esc.atras, 0)}\n ${linha(esc.frente, esc.atras.length)}\n${mago ? 'MAGO 🧙 11/11' : `${achados.length}/${total}`} · quem sabe todos é mago\nE você? ${siteLink(`/jogos/escalacao?e=${esc.id}`)}`
     try {
       if (navigator.share) await navigator.share({ text })
       else await navigator.clipboard.writeText(text)
