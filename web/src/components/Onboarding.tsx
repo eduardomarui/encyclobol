@@ -67,7 +67,7 @@ export default function Onboarding() {
           />
         ) : (
           <div className="mb-6 flex h-40 items-center justify-center">
-            <span className="font-display text-7xl text-grass-600/30">0{i + 1}</span>
+            <span className="font-display text-7xl text-grass-400/30">0{i + 1}</span>
           </div>
         )}
         <p className="kicker">{s.kicker}</p>

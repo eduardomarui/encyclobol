@@ -247,7 +247,7 @@ export default function Conexoes() {
               {solved.map((g) => (
                 <div
                   key={g.color}
-                  className={`animate-rise rounded-sm px-3 py-2 text-center text-ink-900 ${solvedBg[g.color]}`}
+                  className={`animate-rise rounded-sm px-3 py-2 text-center ${solvedBg[g.color]} ${g.color === 'corn' ? 'text-paper' : 'text-ink-900'}`}
                 >
                   <div className="font-cond text-xs font-700 uppercase tracking-wider">{g.label}</div>
                   <div className="font-serif text-sm">{g.members.join(' · ')}</div>
@@ -288,28 +288,29 @@ export default function Conexoes() {
                   />
                 ))}
               </div>
-              <span className="font-cond text-xs font-600 uppercase tracking-wider text-ochre-600">{message}</span>
+              <span className="font-cond text-xs font-600 uppercase tracking-wider text-ochre-400">{message}</span>
             </div>
           )}
 
           {!over && (
-            <div className="mt-4 flex flex-wrap justify-center gap-2">
+            <div className="mt-4 flex gap-2">
+              {/* Numa linha só em 375px: Embaralhar e Limpar estreitos, Enviar ocupa o resto */}
               <button
                 onClick={() => setOrder((o) => seededShuffle(o, Math.floor(Math.random() * 1e9) + 1))}
-                className="btn-stamp border-2 border-white/20 px-5 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
+                className="btn-stamp border-2 border-white/20 px-3 py-2.5 text-xs text-ink-900 hover:bg-grass-700 hover:text-ink-900 sm:px-5 sm:text-sm"
               >
                 Embaralhar
               </button>
               <button
                 onClick={() => setSelected([])}
-                className="btn-stamp border-2 border-white/20 px-5 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
+                className="btn-stamp border-2 border-white/20 px-3 py-2.5 text-xs text-ink-900 hover:bg-grass-700 hover:text-ink-900 sm:px-5 sm:text-sm"
               >
                 Limpar
               </button>
               <button
                 onClick={enviar}
                 disabled={selected.length !== 4}
-                className="btn-stamp bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700 disabled:cursor-not-allowed disabled:opacity-40"
+                className="btn-stamp flex-1 bg-grass-600 px-4 py-2.5 text-ink-900 hover:bg-grass-700 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Enviar {selected.length}/4
               </button>

@@ -71,7 +71,7 @@ export default function Privacidade() {
                 href="https://github.com/eduardomarui/encyclobol"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-grass-600 underline"
+                className="text-grass-400 underline"
               >
                 projeto no GitHub
               </a>

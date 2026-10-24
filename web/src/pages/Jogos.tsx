@@ -228,7 +228,7 @@ export default function Jogos() {
             >
               <div className="flex items-start justify-between">
                 <span className="font-display text-3xl text-ink-900/20">{g.n}</span>
-                <g.Icon className="h-9 w-9 text-grass-600" />
+                <g.Icon className="h-9 w-9 text-grass-400" />
               </div>
 
               <p className="mt-5 kicker text-ink-500">{g.category}</p>

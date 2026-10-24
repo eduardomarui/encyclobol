@@ -358,7 +358,7 @@ export default function Misterioso() {
   }, [rows])
 
   const cellOk = 'bg-grass-600 text-ink-900 border-grass-700'
-  const cellClose = 'bg-paper text-ochre-700 border-ochre-500'
+  const cellClose = 'bg-corn-500/15 text-corn-400 border-corn-500'
   const cellNo = 'bg-paper text-ink-700 border-ink-900/20'
   const col = 'w-[3.4rem] sm:w-16'
 
@@ -425,45 +425,10 @@ export default function Misterioso() {
           </div>
         )}
 
-        <div className="mt-6 w-full max-w-xl">
-          {/* Cabeçalho da tabela */}
-          {rows.length > 0 && (
-            <div className="flex gap-1 px-1 pb-1 font-cond text-[10px] font-600 uppercase tracking-wide text-ink-500">
-              <span className="flex-1">Craque</span>
-              <span className={`${col} text-center`}>Seleção</span>
-              <span className={`${col} text-center`}>Cont.</span>
-              <span className={`${col} text-center`}>Posição</span>
-              <span className={`${col} text-center`}>Época</span>
-            </div>
-          )}
-
-          {/* Linhas de palpite */}
-          <div className="space-y-1.5">
-            {rows.map((r, i) => (
-              <div key={i} className="animate-rise flex gap-1">
-                <div className="flex flex-1 items-center border-2 border-ink-900/20 bg-paper px-2 font-cond text-xs font-600 uppercase text-ink-900 sm:text-sm">
-                  {r.player.display}
-                </div>
-                <div className={`flex ${col} items-center justify-center border-2 px-0.5 py-2 text-center font-cond text-[10px] font-600 uppercase leading-tight ${r.natOk ? cellOk : cellNo}`}>
-                  {r.player.nat}
-                </div>
-                <div className={`flex ${col} items-center justify-center border-2 px-0.5 py-2 text-center font-cond text-[10px] font-600 uppercase leading-tight ${r.contOk ? cellOk : cellNo}`}>
-                  {contShort(continentOf(r.player.nat))}
-                </div>
-                <div className={`flex ${col} items-center justify-center border-2 px-0.5 py-2 text-center font-cond text-[10px] font-600 uppercase leading-tight ${r.posOk ? cellOk : cellNo}`}>
-                  {r.player.pos}
-                </div>
-                <div className={`flex ${col} items-center justify-center gap-0.5 border-2 px-0.5 py-2 text-center font-cond text-[11px] font-600 uppercase ${r.decadeOk ? cellOk : r.close ? cellClose : cellNo}`}>
-                  {decadeTag(startYear(r.player.era))}
-                  {!r.decadeOk && <span>{r.dir === 'up' ? '↑' : '↓'}</span>}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Entrada */}
+        <div className="mt-4 w-full max-w-xl">
+          {/* Entrada no alto: com o teclado do celular aberto, campo e último chute ficam à vista */}
           {!over && (
-            <div className="mt-4">
+            <div className="mb-4">
               <PlayerInput options={players} onGuess={tryGuess} placeholder="Digite o nome de um craque…" />
               <div className="mt-2 flex items-center justify-between gap-2">
                 {note ? (
@@ -484,11 +449,46 @@ export default function Misterioso() {
             </div>
           )}
 
+          {/* Cabeçalho da tabela */}
+          {rows.length > 0 && (
+            <div className="flex gap-1 px-1 pb-1 font-cond text-[10px] font-600 uppercase tracking-wide text-ink-500">
+              <span className="flex-1">Craque</span>
+              <span className={`${col} text-center`}>Seleção</span>
+              <span className={`${col} text-center`}>Cont.</span>
+              <span className={`${col} text-center`}>Posição</span>
+              <span className={`${col} text-center`}>Época</span>
+            </div>
+          )}
+
+          {/* Linhas de palpite */}
+          <div className="space-y-1.5">
+            {[...rows].reverse().map((r) => (
+              <div key={r.player.answer} className="animate-rise flex gap-1">
+                <div className="flex flex-1 items-center border-2 border-ink-900/20 bg-paper px-2 font-cond text-xs font-600 uppercase text-ink-900 sm:text-sm">
+                  {r.player.display}
+                </div>
+                <div className={`flex ${col} items-center justify-center border-2 px-0.5 py-2 text-center font-cond text-[10px] font-600 uppercase leading-tight ${r.natOk ? cellOk : cellNo}`}>
+                  {r.player.nat}
+                </div>
+                <div className={`flex ${col} items-center justify-center border-2 px-0.5 py-2 text-center font-cond text-[10px] font-600 uppercase leading-tight ${r.contOk ? cellOk : cellNo}`}>
+                  {contShort(continentOf(r.player.nat))}
+                </div>
+                <div className={`flex ${col} items-center justify-center border-2 px-0.5 py-2 text-center font-cond text-[10px] font-600 uppercase leading-tight ${r.posOk ? cellOk : cellNo}`}>
+                  {r.player.pos}
+                </div>
+                <div className={`flex ${col} items-center justify-center gap-0.5 border-2 px-0.5 py-2 text-center font-cond text-[11px] font-600 uppercase ${r.decadeOk ? cellOk : r.close ? cellClose : cellNo}`}>
+                  {decadeTag(startYear(r.player.era))}
+                  {!r.decadeOk && <span>{r.dir === 'up' ? '↑' : '↓'}</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+
           {/* Fim de jogo */}
           {over && (
             <div className="mt-5 border-2 border-white/20 bg-paper-100 p-6 text-center">
               {newRecord && (
-                <p className="animate-pop font-display text-xl uppercase tracking-tight text-grass-600">Novo recorde!</p>
+                <p className="animate-pop font-display text-xl uppercase tracking-tight text-grass-400">Novo recorde!</p>
               )}
               <p className="kicker mt-1">{won ? 'Desvendado!' : 'O mistério venceu'}</p>
               <p className="mt-1 font-display text-3xl uppercase leading-[1.05] tracking-tight text-ink-900">
@@ -543,8 +543,8 @@ export default function Misterioso() {
               </li>
               <li>
                 <span className="inline-block h-3 w-3 translate-y-0.5 bg-grass-600" /> verde acertou. Na
-                época, <span className="inline-block h-3 w-3 translate-y-0.5 bg-paper border border-ochre-500" />{' '}
-                <span className="text-ochre-700">amarelo</span> é quente (perto), e a seta diz se o
+                época, <span className="inline-block h-3 w-3 translate-y-0.5 border border-corn-500 bg-corn-500/15" />{' '}
+                <span className="text-corn-400">dourado</span> é quente (perto), e a seta diz se o
                 secreto é mais <strong>antigo (↓)</strong> ou <strong>recente (↑)</strong>.
               </li>
               <li>

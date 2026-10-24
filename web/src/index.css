@@ -16,6 +16,11 @@
     padding-top: env(safe-area-inset-top);
   }
   /* Seleção de texto com cara de marca-texto */
+  /* Foco visível em dourado pra quem navega pelo teclado */
+  :focus-visible {
+    outline: 2px solid #e6b73e;
+    outline-offset: 2px;
+  }
   ::selection {
     background-color: #2c6e49;
     color: #f2eee2;
@@ -51,7 +56,7 @@
 
   /* Botão "carimbo" editorial */
   .btn-stamp {
-    @apply inline-flex items-center justify-center font-cond text-sm font-600 uppercase tracking-wider transition-all active:scale-[0.97];
+    @apply inline-flex min-h-[44px] items-center justify-center font-cond text-sm font-600 uppercase tracking-wider transition-all active:scale-[0.97];
   }
 }
 
@@ -100,5 +105,7 @@
 .animate-rise { animation: riseIn 0.3s ease-out both; }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-pop, .animate-shake, .animate-rise { animation: none; }
+  html { scroll-behavior: auto; }
+  .animate-pop, .animate-shake, .animate-rise, .animate-pulse, .animate-bob,
+  .animate-netshake, .animate-crowdflash { animation: none; }
 }

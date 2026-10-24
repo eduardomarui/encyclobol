@@ -49,12 +49,12 @@ function evaluate(guess: string, answer: string): Cell[] {
 
 const cellClass: Record<Cell, string> = {
   correct: 'bg-grass-600 text-ink-900 border-grass-700',
-  present: 'bg-corn-500 text-ink-900 border-corn-600',
+  present: 'bg-corn-500 text-paper border-corn-600',
   absent: 'bg-[#3b4a44] text-ink-800 border-[#4a5a53]',
 }
 const keyClass: Record<Cell | 'idle', string> = {
   correct: 'bg-grass-600 text-ink-900',
-  present: 'bg-corn-500 text-ink-900',
+  present: 'bg-corn-500 text-paper',
   absent: 'bg-[#3b4a44] text-ink-700',
   idle: 'bg-paper-200 text-ink-900 hover:bg-paper-300',
 }

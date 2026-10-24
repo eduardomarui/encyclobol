@@ -159,7 +159,7 @@ export function PenaltyScene({
   return (
     <div
       ref={sceneRef}
-      className={`relative ${compact ? 'h-52 sm:h-60' : 'h-64'} w-full max-w-sm overflow-hidden rounded-sm border-2 border-white/20 ${shot?.net ? 'animate-shake' : ''}`}
+      className={`relative ${compact ? 'h-44 sm:h-60' : 'h-64'} w-full max-w-sm overflow-hidden rounded-sm border-2 border-white/20 ${shot?.net ? 'animate-shake' : ''}`}
     >
       <div className="absolute inset-0 bg-gradient-to-b from-[#9ec7d8] via-[#86b98f] to-grass-700" />
       <div className="absolute inset-0" style={{ background: 'radial-gradient(120% 55% at 50% 0%, rgba(255,255,255,0.22), transparent 60%)' }} />
@@ -170,7 +170,7 @@ export function PenaltyScene({
       <div className="absolute left-1/2 top-[64%] h-10 w-28 -translate-x-1/2 rounded-[100%] border-2 border-b-0 border-white/25" />
 
       <div className={`absolute left-[11%] top-[16%] w-[78%] ${shot?.net ? 'animate-netshake' : ''}`}>
-        <svg viewBox="0 0 100 44" preserveAspectRatio="none" className="h-28 w-full">
+        <svg viewBox="0 0 100 44" preserveAspectRatio="none" className={`${compact ? 'h-24 sm:h-28' : 'h-28'} w-full`}>
           <g stroke="#f2eee2" strokeWidth="0.4" opacity="0.5">
             {Array.from({ length: 11 }).map((_, i) => (
               <line key={`v${i}`} x1={4 + i * 9.2} y1="4" x2={4 + i * 9.2} y2="42" />
@@ -185,7 +185,7 @@ export function PenaltyScene({
 
       <div className="absolute z-10 -translate-x-1/2 -translate-y-1/2" style={{ left: `${kx}%`, top: '44%', transition: 'left .4s cubic-bezier(.3,1.4,.5,1)' }}>
         <div className={!shot ? 'animate-bob' : ''}>
-          <LottieBox path={LOTTIE_KEEPER} className="h-24 w-24" fallback={<Keeper pose={pose} />} />
+          <LottieBox path={LOTTIE_KEEPER} className={compact ? 'h-20 w-20 sm:h-24 sm:w-24' : 'h-24 w-24'} fallback={<Keeper pose={pose} />} />
         </div>
       </div>
 

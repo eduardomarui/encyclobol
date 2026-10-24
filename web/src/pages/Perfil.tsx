@@ -78,7 +78,7 @@ export default function Perfil() {
                 <div className="font-cond text-sm font-700 uppercase tracking-wide text-ink-900">{a.title}</div>
                 <div className="font-serif text-[13px] italic text-ink-600">{a.desc}</div>
               </div>
-              {a.unlocked && <span className="ml-auto font-cond text-[10px] font-700 uppercase tracking-wide text-grass-600">✓</span>}
+              {a.unlocked && <span className="ml-auto font-cond text-[10px] font-700 uppercase tracking-wide text-grass-400">✓</span>}
             </div>
           ))}
         </div>
@@ -94,7 +94,7 @@ export default function Perfil() {
             >
               <div className="flex items-center justify-between">
                 <span className="font-cond text-sm font-700 uppercase tracking-wide text-ink-900">{g.name}</span>
-                {g.playedToday && <span className="font-cond text-[10px] font-700 uppercase tracking-wide text-grass-600">hoje ✓</span>}
+                {g.playedToday && <span className="font-cond text-[10px] font-700 uppercase tracking-wide text-grass-400">hoje ✓</span>}
               </div>
               <div className="mt-3 grid grid-cols-3 gap-2 text-center">
                 {[

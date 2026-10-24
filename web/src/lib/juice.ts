@@ -1,6 +1,7 @@
 // Efeitos de "juice" sem dependências: confete e vibração.
 
-const COLORS = ['#2c6e49', '#c9a227', '#c8472b', '#16130d', '#3e8c61']
+// Paleta do estádio: dourado, verde e giz (sem preto, que sumia no fundo escuro).
+const COLORS = ['#e6b73e', '#d8a72e', '#54b97b', '#389a5f', '#eef5f1']
 
 export function confetti(amount = 70) {
   if (typeof document === 'undefined') return

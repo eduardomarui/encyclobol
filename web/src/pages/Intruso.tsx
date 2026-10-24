@@ -315,7 +315,7 @@ export default function Intruso() {
                       {reasonGot ? ' +50 (elo certo)' : ' (elo errado)'} ·{' '}
                     </span>
                   ) : (
-                    <span className="text-ochre-600">
+                    <span className="text-ochre-400">
                       Era <strong>{current.players[current.intruderIdx]}</strong> · perdeu uma vida ·{' '}
                     </span>
                   )}
@@ -337,7 +337,7 @@ export default function Intruso() {
           <div className="mt-8 w-full max-w-md border-2 border-white/20 bg-paper-100 p-6 text-center">
             <p className="kicker">Fim da caçada{mode === 'practice' && ' · treino'}</p>
             {newRecord && (
-              <p className="mt-2 animate-pop font-display text-2xl uppercase tracking-tight text-grass-600">
+              <p className="mt-2 animate-pop font-display text-2xl uppercase tracking-tight text-grass-400">
                 Novo recorde!
               </p>
             )}

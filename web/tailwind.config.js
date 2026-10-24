@@ -34,6 +34,7 @@ export default {
         ochre: {
           600: '#b03a2a',
           500: '#d24a3a',
+          400: '#e8796b', // texto de erro sobre o fundo escuro (~5,5:1)
         },
         // Dourado da taça — acento de marca
         corn: {

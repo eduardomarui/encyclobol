@@ -245,7 +245,7 @@ export default function LinhaDoTempo() {
               </p>
             )}
             {flash && (
-              <p className={`mt-2 font-serif text-sm italic ${flashOk ? 'text-grass-700' : 'text-ochre-600'}`}>
+              <p className={`mt-2 font-serif text-sm italic ${flashOk ? 'text-grass-400' : 'text-ochre-400'}`}>
                 {flash}
               </p>
             )}
@@ -302,7 +302,7 @@ export default function LinhaDoTempo() {
           <div className="mt-2 w-full max-w-md border-2 border-white/20 bg-paper-100 p-6 text-center">
             <p className="kicker">Fim de jogo{mode === 'practice' && (hard ? ' · difícil' : ' · treino')}</p>
             {newRecord && (
-              <p className="mt-2 animate-pop font-display text-2xl uppercase tracking-tight text-grass-600">
+              <p className="mt-2 animate-pop font-display text-2xl uppercase tracking-tight text-grass-400">
                 Novo recorde!
               </p>
             )}

@@ -388,7 +388,7 @@ export default function Duelo() {
                 Salvar
               </button>
             </div>
-            {msg && <p className="mt-2 font-cond text-xs uppercase tracking-wider text-ochre-600">{msg}</p>}
+            {msg && <p className="mt-2 font-cond text-xs uppercase tracking-wider text-ochre-400">{msg}</p>}
           </div>
         )}
 
@@ -417,7 +417,7 @@ export default function Duelo() {
                 </button>
               </div>
             </div>
-            {msg && <p className="font-cond text-xs uppercase tracking-wider text-ochre-600">{msg}</p>}
+            {msg && <p className="font-cond text-xs uppercase tracking-wider text-ochre-400">{msg}</p>}
           </div>
         )}
 
@@ -443,7 +443,7 @@ export default function Duelo() {
               ].map((p, idx) => (
                 <div key={idx} className={`border-2 px-3 py-1.5 text-center ${p.mine ? 'border-grass-700 bg-grass-600/10' : 'border-white/20 bg-paper-100'}`}>
                   <div className="truncate font-cond text-[11px] font-700 uppercase tracking-wide text-ink-800">
-                    {p.nm ?? '—'} {p.mine && <span className="text-grass-600">(você)</span>}
+                    {p.nm ?? '—'} {p.mine && <span className="text-grass-400">(você)</span>}
                   </div>
                   <div className="font-display text-3xl text-ink-900">{p.sc}</div>
                 </div>
@@ -452,7 +452,7 @@ export default function Duelo() {
 
             <p className="mt-2 text-center font-cond text-xs font-600 uppercase tracking-[0.16em] text-ink-500">
               {shown >= match.rounds * 2 ? 'Morte súbita' : `Cobrança ${pairNo}/${match.rounds}`} ·{' '}
-              <span className={amKicker ? 'text-grass-600' : 'text-ochre-600'}>{amKicker ? 'Você bate' : 'Você defende'}</span>
+              <span className={amKicker ? 'text-grass-400' : 'text-ochre-400'}>{amKicker ? 'Você bate' : 'Você defende'}</span>
             </p>
 
             {/* Campo sempre visível: goleiro parado enquanto espera, anima quando os dois respondem */}
@@ -503,7 +503,7 @@ export default function Duelo() {
             <button onClick={pedirRevanche} className="btn-stamp mt-5 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700">
               Revanche
             </button>
-            {msg && <p className="mt-2 font-cond text-xs uppercase tracking-wider text-ochre-600">{msg}</p>}
+            {msg && <p className="mt-2 font-cond text-xs uppercase tracking-wider text-ochre-400">{msg}</p>}
             <button onClick={resetToLobby} className="btn-stamp mt-2 w-full border-2 border-white/20 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900">
               Sair da sala
             </button>
@@ -527,11 +527,11 @@ export default function Duelo() {
                 <strong>alterna</strong> a cada rodada.
               </li>
               <li>
-                <span className="text-grass-700">Quem bate:</span> acertou a pergunta = <strong>vai no gol</strong>;
+                <span className="text-grass-400">Quem bate:</span> acertou a pergunta = <strong>vai no gol</strong>;
                 errou = chuta <strong>pra fora</strong>.
               </li>
               <li>
-                <span className="text-ochre-600">Quem defende:</span> acertou = <strong>defendeu</strong>; errou ={' '}
+                <span className="text-ochre-400">Quem defende:</span> acertou = <strong>defendeu</strong>; errou ={' '}
                 <strong>gol</strong> do adversário. (A defesa tem <strong>menos tempo</strong> e perguntas mais difíceis.)
               </li>
               <li>

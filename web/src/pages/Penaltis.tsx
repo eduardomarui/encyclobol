@@ -90,11 +90,11 @@ function extraPair(theme: string, daily: boolean, round: number, pair: number): 
 }
 
 function Pip({ mark, team }: { mark?: Mark; team: 'me' | 'op' }) {
-  if (!mark) return <span className="h-3.5 w-3.5 rounded-full border border-paper/30" />
+  if (!mark) return <span className="h-3.5 w-3.5 rounded-full border border-ink-900/40" />
   if (mark === 'goal')
     return <span className={`h-3.5 w-3.5 rounded-full ${team === 'me' ? 'bg-grass-400' : 'bg-ochre-500'}`} />
   return (
-    <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full border border-paper/40 text-[9px] text-ink-900/50">
+    <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full border border-ink-900/40 text-[9px] text-ink-900/60">
       ✕
     </span>
   )
@@ -106,7 +106,7 @@ function Trophy({ on }: { on: boolean }) {
       <path
         d="M7 4h10v3a5 5 0 0 1-10 0V4Zm0 1H4v1a3 3 0 0 0 3 3m10-4h3v1a3 3 0 0 1-3 3M9 12.5h6M12 12v3m-3 4h6l-.5-2h-5L9 19Z"
         fill="none"
-        stroke={on ? '#caa83a' : 'rgba(22,19,13,0.3)'}
+        stroke={on ? '#e6b73e' : 'rgba(238,245,241,0.35)'}
         strokeWidth="1.5"
         strokeLinejoin="round"
         strokeLinecap="round"
@@ -410,7 +410,7 @@ export default function Penaltis() {
         }
       />
 
-      <main className="container-page flex flex-1 flex-col items-center py-5">
+      <main className="container-page flex flex-1 flex-col items-center py-3 sm:py-5">
         {/* Escolha do campeonato (antes de começar) */}
         {!started && !copaDone && (
           <div className="mt-2 w-full max-w-sm border-2 border-white/20 bg-paper-100 p-5">
@@ -487,7 +487,7 @@ export default function Penaltis() {
         {showGame && (
           <p className="mt-2 font-cond text-xs font-600 uppercase tracking-[0.16em] text-ink-500">
             {pair <= 5 ? `Cobrança ${pair}/5` : 'Morte súbita'} ·{' '}
-            <span className={attacking ? 'text-grass-600' : 'text-ochre-600'}>
+            <span className={attacking ? 'text-grass-400' : 'text-ochre-400'}>
               {attacking ? `Você cobra · ${secsFor(round, index)}s` : `Você defende · difícil · ${secsFor(round, index)}s`}
             </span>
           </p>
@@ -510,8 +510,8 @@ export default function Penaltis() {
               </span>
             </div>
             <p className="kicker text-ink-500">{current.cat}</p>
-            <h2 className="mt-1 font-serif text-xl leading-snug text-ink-900 sm:text-2xl">{current.q}</h2>
-            <div className="mt-3 grid gap-2">
+            <h2 className="mt-1 font-serif text-lg leading-snug text-ink-900 sm:text-2xl">{current.q}</h2>
+            <div className="mt-3 grid grid-cols-2 gap-2">
               {current.options.map((opt, i) => {
                 let cls = 'border-ink-900/25 bg-paper hover:border-white/20 hover:bg-paper-100'
                 if (phase === 'shoot') {
@@ -524,9 +524,9 @@ export default function Penaltis() {
                     key={i}
                     onClick={() => resolve(i)}
                     disabled={phase === 'shoot'}
-                    className={`flex items-center gap-3 border-2 px-4 py-2.5 text-left font-serif text-base transition-colors ${cls}`}
+                    className={`flex min-h-[56px] items-center gap-2 border-2 px-3 py-2 text-left font-serif text-[15px] leading-snug transition-colors ${cls}`}
                   >
-                    <span className="font-cond text-xs font-700">{String.fromCharCode(65 + i)}</span>
+                    <span className="font-cond text-xs font-700 text-ink-500">{String.fromCharCode(65 + i)}</span>
                     {opt}
                   </button>
                 )

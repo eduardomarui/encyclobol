@@ -174,7 +174,7 @@ export default function Ranking() {
                 {saving ? '…' : 'Entrar'}
               </button>
             </div>
-            {msg && <p className="mt-2 font-cond text-xs uppercase tracking-wider text-ochre-600">{msg}</p>}
+            {msg && <p className="mt-2 font-cond text-xs uppercase tracking-wider text-ochre-400">{msg}</p>}
           </div>
         )}
 
@@ -187,7 +187,7 @@ export default function Ranking() {
                 <p className="kicker text-ink-500">Você</p>
                 <p className="font-display text-2xl uppercase tracking-tight text-ink-900">{profile.nick}</p>
                 <p className="mt-0.5 font-cond text-xs font-600 uppercase tracking-wider text-ink-600">
-                  Código: <span className="text-grass-600">{profile.friend_code}</span>
+                  Código: <span className="text-grass-400">{profile.friend_code}</span>
                 </p>
               </div>
               <button
@@ -213,7 +213,7 @@ export default function Ranking() {
                 Adicionar
               </button>
             </div>
-            {msg && <p className="mt-2 font-cond text-xs uppercase tracking-wider text-ochre-600">{msg}</p>}
+            {msg && <p className="mt-2 font-cond text-xs uppercase tracking-wider text-ochre-400">{msg}</p>}
 
             {/* Filtros: período */}
             <div className="mt-6 flex flex-wrap gap-1.5">
@@ -287,7 +287,7 @@ export default function Ranking() {
                   <span className="w-8 font-display text-xl text-ink-900/40">{r.rank}</span>
                   <span className="flex-1 font-cond text-base font-600 uppercase tracking-wide text-ink-900">
                     {r.nick}
-                    {r.is_me && <span className="ml-2 text-xs text-grass-600">(você)</span>}
+                    {r.is_me && <span className="ml-2 text-xs text-grass-400">(você)</span>}
                   </span>
                   <span className="font-display text-xl text-ink-900">{r.total}</span>
                   <span className="font-cond text-[10px] font-500 uppercase tracking-wide text-ink-500">pts</span>
