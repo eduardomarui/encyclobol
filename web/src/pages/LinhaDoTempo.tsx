@@ -12,6 +12,7 @@ import { confetti } from '../lib/juice'
 import { shareScoreImage } from '../lib/shareCard'
 import { siteLink } from '../lib/site'
 import { clearRun, loadRun, saveRun } from '../lib/runSave'
+import { buzz, sfx } from '../lib/sfx'
 
 const HELP_KEY = 'encyclobol:timeline:help'
 
@@ -105,7 +106,11 @@ export default function LinhaDoTempo() {
 
   function finish(finalScore: number, finalPoints: number) {
     setStatus('over')
-    if (daily && finalPoints > prevBest && finalPoints > 0) confetti()
+    if (daily && finalPoints > prevBest && finalPoints > 0) {
+      confetti()
+      sfx.fanfare()
+      buzz.win()
+    }
     else if (finalPoints >= 100) confetti()
     if (daily && !recorded) {
       setCareer(recordTLCareer(finalPoints, finalScore))
@@ -133,11 +138,15 @@ export default function LinhaDoTempo() {
       setPoints(newPoints)
       setCombo(c)
       setBestCombo((b) => Math.max(b, c))
+      sfx.ok(c)
+      buzz.ok()
       setFlashOk(true)
       setFlash(`Na mosca! +${gain}${c >= 2 ? ` (x${c})` : ''} · ${current.year}`)
     } else {
       newLives = lives - 1
       setLives(newLives)
+      sfx.lifeLost()
+      buzz.life()
       setCombo(0)
       setFlashOk(false)
       setFlash(`Fora de época — ${current.player.display} surgiu em ${current.year} (${decadeOf(current.year)})`)
@@ -178,6 +187,7 @@ export default function LinhaDoTempo() {
   async function compartilhar() {
     const r = await shareScoreImage({
       game: 'Linha do Tempo',
+      stamp: newRecord ? 'Recorde' : undefined,
       headline: String(points),
       sub: newRecord ? 'novo recorde!' : 'pontos',
       lines: [`${score} cartas em sequência`, `Total ${career.total} pts`],

@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react'
+import { useSyncExternalStore, type ReactNode } from 'react'
+import { setSoundOn, soundOn, subscribeSound, sfx } from '../lib/sfx'
 import { Link } from 'react-router-dom'
 import { availableThemes, themeSize } from '../lib/themes'
 import { gatherGames } from '../lib/profile'
@@ -33,16 +34,47 @@ export function GameHeader({
           <span className="hidden font-cond text-xs font-500 uppercase tracking-[0.16em] text-ink-600 sm:inline">
             {label}
           </span>
+          <SoundToggle />
           <button
             onClick={onHelp}
             aria-label="Como jogar"
-            className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white/20 font-cond text-sm font-700 text-ink-900 hover:bg-grass-700"
+            className="-m-2 flex h-11 w-11 items-center justify-center"
           >
-            ?
+            <span className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white/20 font-cond text-sm font-700 text-ink-900 hover:bg-grass-700">
+              ?
+            </span>
           </button>
         </div>
       </div>
     </header>
+  )
+}
+
+// Liga/desliga som e vibração (vale pra todas as páginas ao mesmo tempo).
+export function SoundToggle() {
+  const on = useSyncExternalStore(subscribeSound, soundOn, () => true)
+  return (
+    <button
+      onClick={() => {
+        setSoundOn(!on)
+        if (!on) setTimeout(() => sfx.tap(), 0)
+      }}
+      aria-pressed={on}
+      aria-label="Som e vibração"
+      title={on ? 'Som e vibração: ligados' : 'Som e vibração: desligados'}
+      className="-m-2 flex h-11 w-11 items-center justify-center"
+    >
+      <span className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white/20 hover:bg-grass-700">
+        <svg viewBox="0 0 24 24" className={`h-3.5 w-3.5 ${on ? 'text-ink-900' : 'text-ink-500'}`} aria-hidden>
+          <path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor" />
+          {on ? (
+            <path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          ) : (
+            <path d="M16 9l5 6M21 9l-5 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          )}
+        </svg>
+      </span>
+    </button>
   )
 }
 

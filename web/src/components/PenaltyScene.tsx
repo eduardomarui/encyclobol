@@ -159,7 +159,7 @@ export function PenaltyScene({
   return (
     <div
       ref={sceneRef}
-      className={`relative ${compact ? 'h-44 sm:h-60' : 'h-64'} w-full max-w-sm overflow-hidden rounded-sm border-2 border-white/20 ${shot?.net ? 'animate-shake' : ''}`}
+      className={`relative ${compact ? 'h-44 sm:h-60' : 'h-64'} w-full max-w-sm overflow-hidden rounded-sm border-2 border-white/20 ${shot?.net && shot.good ? 'animate-shake' : ''}`}
     >
       <div className="absolute inset-0 bg-gradient-to-b from-[#9ec7d8] via-[#86b98f] to-grass-700" />
       <div className="absolute inset-0" style={{ background: 'radial-gradient(120% 55% at 50% 0%, rgba(255,255,255,0.22), transparent 60%)' }} />
@@ -199,7 +199,11 @@ export function PenaltyScene({
         </div>
       )}
 
-      {shot?.net && <div key={`flash${animKey}`} className="pointer-events-none absolute inset-0 z-20 animate-crowdflash bg-white" />}
+      {/* Gol a favor: brilho dourado de comemoração. Gol sofrido: vinheta escura, sem festa. */}
+      {shot?.net && shot.good && <div key={`flash${animKey}`} className="pointer-events-none absolute inset-0 z-20 animate-crowdflash bg-corn-400/60" />}
+      {shot?.net && !shot.good && (
+        <div key={`dim${animKey}`} className="pointer-events-none absolute inset-0 z-20 animate-crowdflash" style={{ background: 'radial-gradient(closest-side, transparent 55%, rgba(0,0,0,0.65))' }} />
+      )}
 
       <div ref={ballRef} className="absolute z-20" style={{ left: '50%', top: '82%', transform: 'translate(-50%,-50%)' }}>
         <div className="drop-shadow-[0_3px_4px_rgba(0,0,0,0.4)]" style={{ animation: shot ? 'ballspin 0.4s linear infinite' : 'none' }}>

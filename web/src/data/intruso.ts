@@ -2,6 +2,9 @@
 // Cada puzzle tem resposta ÚNICA: só um traço divide 3-contra-1, e os
 // demais traços nunca isolam um jogador diferente (no máximo reforçam).
 // `cat` é o tipo do elo que liga os outros três (usado na 2ª etapa).
+// `alsoCat` lista outros elos IGUALMENTE verdadeiros para os mesmos três
+// (ex.: Maldini/Baresi/Nesta são italianos E do Milan); a 2ª etapa aceita
+// qualquer um deles. Nunca isolam outro jogador: o intruso é sempre o mesmo.
 
 export type IntrusoCat = 'Posição' | 'Nacionalidade' | 'Clube' | 'Era'
 
@@ -10,17 +13,18 @@ export type IntrusoPuzzle = {
   intruder: string
   cat: IntrusoCat
   rule: string
+  alsoCat?: IntrusoCat[]
 }
 
 export const intruso: IntrusoPuzzle[] = [
   {
-    players: ['Cafu', 'Roberto Carlos', 'Lahm', 'Maldini'],
-    intruder: 'Maldini',
+    players: ['Cafu', 'Roberto Carlos', 'Lahm', 'Nesta'],
+    intruder: 'Nesta',
     cat: 'Posição',
-    rule: 'Os outros são laterais; Maldini é zagueiro.',
+    rule: 'Os outros são laterais; Nesta é zagueiro.',
   },
   {
-    players: ['Buffon', 'Casillas', 'Neuer', 'Cannavaro'],
+    players: ['Buffon', 'Casillas', 'Čech', 'Cannavaro'],
     intruder: 'Cannavaro',
     cat: 'Posição',
     rule: 'Os outros são goleiros; Cannavaro é zagueiro.',
@@ -29,7 +33,8 @@ export const intruso: IntrusoPuzzle[] = [
     players: ['Maldini', 'Baresi', 'Nesta', 'Puyol'],
     intruder: 'Puyol',
     cat: 'Nacionalidade',
-    rule: 'Os outros são zagueiros italianos; Puyol é espanhol.',
+    rule: 'Os outros são zagueiros italianos e jogaram no Milan; Puyol não.',
+    alsoCat: ['Clube'],
   },
   {
     players: ['Messi', 'Kempes', 'Batistuta', 'Cruyff'],
@@ -41,7 +46,8 @@ export const intruso: IntrusoPuzzle[] = [
     players: ['Mbappé', 'Neymar', 'Messi', 'Pelé'],
     intruder: 'Pelé',
     cat: 'Era',
-    rule: 'Os outros surgiram no século 21; Pelé é dos anos 1950.',
+    rule: 'Os outros surgiram no século 21 e jogaram no PSG; Pelé é dos anos 1950 e nunca jogou lá.',
+    alsoCat: ['Clube'],
   },
   {
     players: ['Cruyff', 'Bergkamp', 'Robben', 'Figo'],
@@ -59,13 +65,15 @@ export const intruso: IntrusoPuzzle[] = [
     players: ['Ronaldo', 'Henry', 'Klose', 'Maldini'],
     intruder: 'Maldini',
     cat: 'Posição',
-    rule: 'Os outros são atacantes; Maldini é zagueiro.',
+    rule: 'Os outros são atacantes que estrearam nos anos 1990; Maldini é zagueiro e estreou em 1985.',
+    alsoCat: ['Era'],
   },
   {
     players: ['Zico', 'Platini', 'Maradona', 'Buffon'],
     intruder: 'Buffon',
     cat: 'Posição',
-    rule: 'Os outros eram meias; Buffon é goleiro.',
+    rule: 'Os outros eram meias e estrearam nos anos 1970; Buffon é goleiro e estreou em 1995.',
+    alsoCat: ['Era'],
   },
   {
     players: ['Pelé', 'Cruyff', 'Eusébio', 'Mbappé'],
@@ -83,13 +91,15 @@ export const intruso: IntrusoPuzzle[] = [
     players: ['Mbappé', 'Neymar', 'Cristiano Ronaldo', 'Maradona'],
     intruder: 'Maradona',
     cat: 'Era',
-    rule: 'Os outros brilharam no século 21; Maradona é dos anos 1980.',
+    rule: 'Os outros são atacantes que brilharam no século 21; Maradona é meia dos anos 1980.',
+    alsoCat: ['Posição'],
   },
   {
     players: ['Drogba', "Eto'o", 'Weah', 'Maldini'],
     intruder: 'Maldini',
     cat: 'Posição',
-    rule: 'Os outros são atacantes africanos; Maldini é zagueiro.',
+    rule: 'Os outros são atacantes africanos que jogaram no Chelsea; Maldini é zagueiro italiano.',
+    alsoCat: ['Nacionalidade', 'Clube'],
   },
   {
     players: ['Xavi', 'Iniesta', 'Xabi Alonso', 'Pirlo'],
@@ -101,28 +111,31 @@ export const intruso: IntrusoPuzzle[] = [
     players: ['Cavani', 'Suárez', 'Forlán', 'Salah'],
     intruder: 'Salah',
     cat: 'Nacionalidade',
-    rule: 'Os outros são uruguaios; Salah é egípcio.',
+    rule: 'Os outros são centroavantes uruguaios; Salah é ponta egípcio.',
+    alsoCat: ['Posição'],
   },
   {
     players: ['Lewandowski', 'Lahm', 'Neuer', 'Drogba'],
     intruder: 'Drogba',
     cat: 'Clube',
-    rule: 'Os outros jogaram no Bayern de Munique; Drogba nunca.',
+    rule: 'Os outros jogaram no Bayern de Munique e estrearam nos anos 2000; Drogba nunca jogou lá e estreou ainda nos anos 1990.',
+    alsoCat: ['Era'],
   },
   {
-    players: ['Salah', 'Mané', 'Robben', 'Lewandowski'],
+    players: ['Salah', 'Sterling', 'Robben', 'Lewandowski'],
     intruder: 'Lewandowski',
     cat: 'Posição',
-    rule: 'Os outros são pontas; Lewandowski é centroavante.',
+    rule: 'Os outros são pontas e jogaram no Chelsea; Lewandowski é centroavante e nunca jogou lá.',
+    alsoCat: ['Clube'],
   },
   {
-    players: ['Pirlo', 'Xavi', 'Iniesta', 'Cannavaro'],
+    players: ['Pirlo', 'Xavi', 'Guardiola', 'Cannavaro'],
     intruder: 'Cannavaro',
     cat: 'Posição',
     rule: 'Os outros eram meias; Cannavaro é zagueiro.',
   },
   {
-    players: ['Messi', 'Agüero', 'Batistuta', 'Suárez'],
+    players: ['Messi', 'Crespo', 'Batistuta', 'Suárez'],
     intruder: 'Suárez',
     cat: 'Nacionalidade',
     rule: 'Os outros são argentinos; Suárez é uruguaio.',
@@ -142,20 +155,20 @@ export const intruso: IntrusoPuzzle[] = [
 
   // ===== Expansão =====
   { players: ['Buffon', 'Casillas', 'Neuer', 'Cafu'], intruder: 'Cafu', cat: 'Posição', rule: 'Os outros são goleiros; Cafu é lateral.' },
-  { players: ['Ronaldo', 'Romário', 'Bebeto', 'Figo'], intruder: 'Figo', cat: 'Nacionalidade', rule: 'Os outros são atacantes brasileiros; Figo é português.' },
-  { players: ['Crespo', 'Batistuta', 'Kempes', 'Forlán'], intruder: 'Forlán', cat: 'Nacionalidade', rule: 'Os outros são argentinos; Forlán é uruguaio.' },
-  { players: ['Pirlo', 'Iniesta', 'Xavi', 'Buffon'], intruder: 'Buffon', cat: 'Posição', rule: 'Os outros eram meias; Buffon é goleiro.' },
-  { players: ['Lewandowski', 'Haaland', 'Kane', 'Van Dijk'], intruder: 'Van Dijk', cat: 'Posição', rule: 'Os outros são centroavantes; Van Dijk é zagueiro.' },
-  { players: ['Zidane', 'Henry', 'Platini', 'Maldini'], intruder: 'Maldini', cat: 'Nacionalidade', rule: 'Os outros são franceses; Maldini é italiano.' },
+  { players: ['Ronaldo', 'Careca', 'Bebeto', 'Figo'], intruder: 'Figo', cat: 'Nacionalidade', rule: 'Os outros são atacantes brasileiros; Figo é ponta português.', alsoCat: ['Posição'] },
+  { players: ['Crespo', 'Batistuta', 'Lautaro', 'Forlán'], intruder: 'Forlán', cat: 'Nacionalidade', rule: 'Os outros são argentinos; Forlán é uruguaio.' },
+  { players: ['Pirlo', 'Riquelme', 'Xavi', 'Buffon'], intruder: 'Buffon', cat: 'Posição', rule: 'Os outros eram meias; Buffon é goleiro.' },
+  { players: ['Osimhen', 'Haaland', 'Kane', 'Van Dijk'], intruder: 'Van Dijk', cat: 'Posição', rule: 'Os outros são centroavantes; Van Dijk é zagueiro.' },
+  { players: ['Zidane', 'Henry', 'Platini', 'Maldini'], intruder: 'Maldini', cat: 'Nacionalidade', rule: 'Os outros são franceses e jogaram na Juventus; Maldini não.', alsoCat: ['Clube'] },
   { players: ['Yashin', 'Banks', 'Zoff', 'Beckenbauer'], intruder: 'Beckenbauer', cat: 'Posição', rule: 'Os outros são goleiros; Beckenbauer é zagueiro.' },
-  { players: ['Vinícius', 'Rodrygo', 'Raphinha', 'Messi'], intruder: 'Messi', cat: 'Nacionalidade', rule: 'Os outros são brasileiros; Messi é argentino.' },
-  { players: ['Robben', 'Figo', 'Bale', 'Shearer'], intruder: 'Shearer', cat: 'Posição', rule: 'Os outros são pontas; Shearer é centroavante.' },
-  { players: ['Totti', 'Del Piero', 'Baggio', 'Raúl'], intruder: 'Raúl', cat: 'Nacionalidade', rule: 'Os outros são italianos; Raúl é espanhol.' },
+  { players: ['Vinícius', 'Rodrygo', 'Raphinha', 'Messi'], intruder: 'Messi', cat: 'Nacionalidade', rule: 'Os outros são brasileiros que estrearam no fim dos anos 2010; Messi é argentino e estreou em 2004.', alsoCat: ['Era'] },
+  { players: ['Robben', 'Figo', 'Bale', 'Shearer'], intruder: 'Shearer', cat: 'Posição', rule: 'Os outros são pontas e jogaram no Real Madrid; Shearer não.', alsoCat: ['Clube'] },
+  { players: ['Totti', 'Del Piero', 'Toni', 'Raúl'], intruder: 'Raúl', cat: 'Nacionalidade', rule: 'Os outros são italianos; Raúl é espanhol.' },
   { players: ['Klose', 'Völler', 'Bierhoff', 'Cruyff'], intruder: 'Cruyff', cat: 'Nacionalidade', rule: 'Os outros são alemães; Cruyff é holandês.' },
-  { players: ['Cafu', 'Roberto Carlos', 'Maicon', 'Pirlo'], intruder: 'Pirlo', cat: 'Posição', rule: 'Os outros são laterais; Pirlo é meia.' },
+  { players: ['Cafu', 'Roberto Carlos', 'Maicon', 'Gattuso'], intruder: 'Gattuso', cat: 'Posição', rule: 'Os outros são laterais brasileiros; Gattuso é volante italiano.', alsoCat: ['Nacionalidade'] },
   { players: ['Pedri', 'Gavi', 'Modrić', 'Haaland'], intruder: 'Haaland', cat: 'Posição', rule: 'Os outros são meias; Haaland é atacante.' },
   { players: ['Neuer', 'Courtois', 'Ochoa', 'Vinícius'], intruder: 'Vinícius', cat: 'Posição', rule: 'Os outros são goleiros; Vinícius é atacante.' },
-  { players: ['Xavi', 'Iniesta', 'Casillas', 'Cannavaro'], intruder: 'Cannavaro', cat: 'Nacionalidade', rule: 'Os outros são espanhóis; Cannavaro é italiano.' },
+  { players: ['Xavi', 'Puyol', 'Casillas', 'Cannavaro'], intruder: 'Cannavaro', cat: 'Nacionalidade', rule: 'Os outros são espanhóis; Cannavaro é italiano.' },
 
   // ===== Lote 2 (set/2026). `check:` prova a resposta única de cada puzzle =====
   // ===== Posição =====
@@ -232,20 +245,21 @@ export const intruso: IntrusoPuzzle[] = [
   // Todos atacantes; Inter 2-2; River 2-2; décadas 80/90/2000/80; sem Copa.
   { players: ['Zamorano', 'Salas', 'Alexis', 'Asprilla'], intruder: 'Asprilla', cat: 'Nacionalidade', rule: 'Os outros são chilenos; Asprilla é colombiano.' },
 
-  // check: Rui Costa MEI POR (Benfica, Fiorentina, Milan; 1990) | Deco MEI POR (Porto, Barça, Chelsea; 1997) |
+  // check: Rui Costa MEI POR (Benfica, Fiorentina, Milan; 1990) | Bruno Fernandes MEI POR (Novara, Udinese, Sampdoria, Sporting, Man Utd; 2012) |
   // Moutinho MEI POR (Sporting, Porto, Monaco; 2004) | Kaká MEI BRA (São Paulo, Milan, Real; 2001).
-  // Todos meias; Milan 2-2; Porto 2-2; décadas 90/90/2000/2000; Copa só Kaká (reforça).
-  { players: ['Rui Costa', 'Deco', 'Moutinho', 'Kaká'], intruder: 'Kaká', cat: 'Nacionalidade', rule: 'Os outros são portugueses; Kaká é brasileiro.' },
+  // Todos meias; Milan 2-2; Sporting 2-2; décadas 90/2010/2000/2000. (Deco saiu: nasceu em
+  // São Bernardo do Campo, e o torcedor contaria dois brasileiros.)
+  { players: ['Rui Costa', 'Bruno Fernandes', 'Moutinho', 'Kaká'], intruder: 'Kaká', cat: 'Nacionalidade', rule: 'Os outros são portugueses; Kaká é brasileiro.' },
 
   // check: Hugo Sánchez ATA MEX (Atlético, Real; 1976) | Blanco ATA MEX (América, Valladolid; 1992) |
   // Chicharito ATA MEX (Guadalajara, Man Utd, Real, Leverkusen; 2006) | Salas ATA CHI (River, Lazio, Juve; 1993).
   // Todos atacantes; Real 2-2; décadas 70/90/2000/90; sem Copa.
-  { players: ['Hugo Sánchez', 'Blanco', 'Chicharito', 'Salas'], intruder: 'Salas', cat: 'Nacionalidade', rule: 'Os outros são mexicanos; Salas é chileno.' },
+  { players: ['Hugo Sánchez', 'Cuauhtémoc Blanco', 'Chicharito', 'Salas'], intruder: 'Salas', cat: 'Nacionalidade', rule: 'Os outros são mexicanos; Salas é chileno.' },
 
   // check: Kompany ZAG BEL (Hamburgo, Man City; 2003) | Hazard PONTA BEL (Lille, Chelsea, Real; 2007) |
   // De Bruyne MEI BEL (Chelsea, Man City; 2008) | Van Dijk ZAG HOL (Celtic, Southampton, Liverpool; 2011).
   // Zagueiros 2-2; City 2-2; Chelsea 2-2; década isola só Van Dijk (reforça); sem Copa.
-  { players: ['Kompany', 'Hazard', 'De Bruyne', 'Van Dijk'], intruder: 'Van Dijk', cat: 'Nacionalidade', rule: 'Os outros são belgas; Van Dijk é holandês.' },
+  { players: ['Kompany', 'Hazard', 'De Bruyne', 'Van Dijk'], intruder: 'Van Dijk', cat: 'Nacionalidade', rule: 'Os outros são belgas que estrearam nos anos 2000; Van Dijk é holandês e estreou em 2011.', alsoCat: ['Era'] },
 
   // check: Lewandowski ATA POL (Dortmund, Bayern, Barça; 2006) | Boniek MEI POL (Widzew, Juve, Roma; 1975) |
   // Lato PONTA POL (Stal Mielec; 1971) | Hagi MEI ROM (Steaua, Real, Brescia, Barça, Galatasaray; 1982).
@@ -282,12 +296,12 @@ export const intruso: IntrusoPuzzle[] = [
   // check: Rivaldo MEI BRA (Palmeiras, Deportivo, Barça, Milan; 1991) | Marcos GK BRA (Palmeiras; 1992) |
   // Zé Roberto MEI BRA (Real, Flamengo, Leverkusen, Bayern, Palmeiras; 1991) | Careca ATA BRA (Guarani, São Paulo, Napoli; 1978).
   // Posições 2-1-1; Copa: Rivaldo e Marcos 2002 (2-2); todos os 3 dos anos 1990 x Careca (reforça); sem clube com 3.
-  { players: ['Rivaldo', 'Marcos', 'Zé Roberto', 'Careca'], intruder: 'Careca', cat: 'Clube', rule: 'Os outros jogaram no Palmeiras; Careca nunca.' },
+  { players: ['Rivaldo', 'Marcos', 'Zé Roberto', 'Careca'], intruder: 'Careca', cat: 'Clube', rule: 'Os outros jogaram no Palmeiras e estrearam nos anos 1990; Careca nunca jogou lá e estreou em 1978.', alsoCat: ['Era'] },
 
   // check: Romário ATA BRA (Vasco, PSV, Barça, Flamengo; 1985) | Bebeto ATA BRA (Flamengo, Vasco, Deportivo; 1983) |
   // Edmundo ATA BRA (Vasco, Palmeiras, Flamengo, Fiorentina; 1992) | Zico MEI BRA (Flamengo, Udinese; 1971).
   // Flamengo: os 4 (0-4, não isola); Copa: Romário e Bebeto (2-2); posição e década isolam só Zico (reforçam).
-  { players: ['Romário', 'Bebeto', 'Edmundo', 'Zico'], intruder: 'Zico', cat: 'Clube', rule: 'Os outros jogaram no Vasco; Zico nunca.' },
+  { players: ['Romário', 'Bebeto', 'Edmundo', 'Zico'], intruder: 'Zico', cat: 'Clube', rule: 'Os outros são atacantes que jogaram no Vasco; Zico é meia e nunca jogou lá.', alsoCat: ['Posição'] },
 
   // check: Tévez ATA ARG (Boca, Corinthians, Man Utd, Man City, Juve; 2001) | Palermo ATA ARG (Boca, Villarreal; 1992) |
   // Batistuta ATA ARG (Boca, Fiorentina, Roma, Inter; 1988) | Crespo ATA ARG (River, Parma, Lazio, Inter, Chelsea, Milan; 1993).
@@ -330,7 +344,7 @@ export const intruso: IntrusoPuzzle[] = [
   // check: Mancini ATA ITA (Bologna, Sampdoria, Lazio; 1981) | Vialli ATA ITA (Cremonese, Sampdoria, Juve, Chelsea; 1980) |
   // Schillaci ATA ITA (Messina, Juve, Inter; 1982) | Totti ATA ITA (Roma; 1993).
   // Todos atacantes italianos; Sampdoria 2-2; Juve 2-2; Copa só Totti 2006 (reforça).
-  { players: ['Mancini', 'Vialli', 'Schillaci', 'Totti'], intruder: 'Totti', cat: 'Era', rule: 'Os outros estrearam nos anos 1980; Totti estreou em 1993.' },
+  { players: ['Roberto Mancini', 'Vialli', 'Schillaci', 'Totti'], intruder: 'Totti', cat: 'Era', rule: 'Os outros estrearam nos anos 1980; Totti estreou em 1993.' },
 
   // check: Raúl ATA ESP (Real, Schalke; 1994) | Guti MEI ESP (Real, Beşiktaş; 1995) |
   // Casillas GK ESP (Real, Porto; 1999) | Ramos ZAG ESP (Sevilla, Real, PSG; 2004).
@@ -350,7 +364,7 @@ export const intruso: IntrusoPuzzle[] = [
   // check: Hagi MEI ROM (Steaua, Real, Barça, Galatasaray; 1982) | Laudrup MEI DIN (Lazio, Juve, Barça, Real, Ajax; 1981) |
   // Boban MEI CRO (Dinamo, Milan; 1985) | Nedvěd MEI TCH (Sparta, Lazio, Juve; 1991).
   // Todos meias; nacionalidades distintas; Real 2-2; Barça 2-2; Juve 2-2; Lazio 2-2; sem Copa.
-  { players: ['Hagi', 'Laudrup', 'Boban', 'Nedvěd'], intruder: 'Nedvěd', cat: 'Era', rule: 'Os outros estrearam nos anos 1980; Nedvěd estreou em 1991.' },
+  { players: ['Hagi', 'Michael Laudrup', 'Boban', 'Nedvěd'], intruder: 'Nedvěd', cat: 'Era', rule: 'Os outros estrearam nos anos 1980; Nedvěd estreou em 1991.' },
 
   // check: Cristiano Ronaldo ATA POR (Sporting, Man Utd, Real, Juve; 2002) | Messi ATA ARG (Barça, PSG; 2004) |
   // Kaká MEI BRA (São Paulo, Milan, Real; 2001) | Ronaldinho MEI BRA (Grêmio, PSG, Barça, Milan; 1998).

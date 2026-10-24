@@ -15,6 +15,7 @@ import { GameHeader, HelpModal, StatGrid, ThemePicker, TimeBar, NextUp } from '.
 import { loadTheme, poolsFor, saveTheme, themeLabel, themeSeed } from '../lib/themes'
 import { siteLink } from '../lib/site'
 import { clearRun, loadRun, saveRun } from '../lib/runSave'
+import { buzz, sfx } from '../lib/sfx'
 
 const HELP_KEY = 'encyclobol:copa:help'
 
@@ -207,6 +208,7 @@ export default function Penaltis() {
       resolve(-1)
       return
     }
+    if (timeLeft <= 3) sfx.tickHot()
     const t = setTimeout(() => setTimeLeft((s) => s - 1), 1000)
     return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -226,6 +228,8 @@ export default function Penaltis() {
         setCopaDone(true)
         setCopa(recordCopa(total, 4, true))
         confetti()
+        sfx.fanfare()
+        buzz.win()
       } else {
         setLastGain(pts)
         setCopaScore((s) => s + pts)
@@ -319,8 +323,29 @@ export default function Penaltis() {
       else label = 'TOMOU GOL'
     }
 
+    // Som do lance: chute na hora; rede/luva quando a bola chega (~600 ms).
+    sfx.kick()
+    setTimeout(() => {
+      if (isGoal && attacking) {
+        sfx.net()
+        sfx.crowd()
+        buzz.goal()
+      } else if (isGoal) {
+        sfx.net()
+        sfx.groan()
+        buzz.err()
+      } else if (!attacking) {
+        sfx.glove()
+        buzz.save()
+      } else {
+        sfx.glove()
+        sfx.groan()
+      }
+    }, 600)
+
     setShot({
-      bx: ballZone.x,
+      // Na defesa a bola para no goleiro (antes ia pro canto e o goleiro ficava longe).
+      bx: isGoal ? ballZone.x : Math.min(70, Math.max(30, ballZone.x)),
       by: isGoal ? ballZone.y : 44,
       kx: Math.min(66, Math.max(34, keeperZone.x)),
       pose: poseFor(keeperZone),
@@ -352,6 +377,7 @@ export default function Penaltis() {
 
   // Escolheu o campeonato: começa a Copa do dia (ou o treino).
   function comecar() {
+    sfx.whistle()
     saveTheme(theme)
     setStarted(true)
     startShootout(1, copaMode)
@@ -380,6 +406,7 @@ export default function Penaltis() {
   async function compartilhar() {
     const r = await shareScoreImage({
       game: 'Copa de Pênaltis',
+      stamp: champion ? 'Campeão' : undefined,
       headline: champion ? 'CAMPEÃO' : String(copaScore),
       sub: champion ? 'campeão da copa' : 'pontos hoje',
       lines: [

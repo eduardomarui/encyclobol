@@ -12,6 +12,7 @@ import { shareScoreImage } from '../lib/shareCard'
 import { GameHeader, HelpModal, StatGrid, TimeBar, NextUp } from '../components/GameShell'
 import { siteLink } from '../lib/site'
 import { loadRun, saveRun } from '../lib/runSave'
+import { buzz, sfx } from '../lib/sfx'
 
 const MAX_ATTEMPTS = 6
 const ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM']
@@ -124,6 +125,7 @@ export default function QuemSouEle() {
   const [copied, setCopied] = useState(false)
   const [timeLeft, setTimeLeft] = useState(() => run?.timeLeft ?? timeForStage(today?.stage ?? 1))
   const [timedOut, setTimedOut] = useState(run?.timedOut ?? false)
+  const [short, setShort] = useState(0) // "faltam N letras" ao dar Enter incompleto
   // Craques enfrentados na corrida de hoje (pra ficha do fim) — sobrevive ao F5.
   const [history, setHistory] = useState<{ name: string; ok: boolean; tries: number }[]>(saved?.history ?? [])
   const [showHelp, setShowHelp] = useState(() => {
@@ -187,8 +189,12 @@ export default function QuemSouEle() {
       setLastGain(gain)
       setCareerScore((s) => s + gain)
       confetti()
+      sfx.ok(8)
+      buzz.win()
     } else {
       setLastGain(0)
+      sfx.lifeLost()
+      buzz.life()
       const nl = lives - 1
       setLives(nl)
       if (nl <= 0) {
@@ -205,12 +211,22 @@ export default function QuemSouEle() {
       setTimedOut(true)
       return
     }
+    if (timeLeft <= 5) sfx.tickHot()
+    else if (timeLeft <= 10) sfx.tick()
     const t = setTimeout(() => setTimeLeft((s) => s - 1), 1000)
     return () => clearTimeout(t)
   }, [timeLeft, careerMode, careerDoneToday, over, showHelp])
 
   const submit = useCallback(() => {
-    if (current.length !== answer.length) return
+    if (current.length !== answer.length) {
+      // Antes não acontecia nada e parecia que o Enter estava quebrado.
+      sfx.nearMiss()
+      buzz.err()
+      setShort(answer.length - current.length)
+      setTimeout(() => setShort(0), 1500)
+      return
+    }
+    evaluate(current, answer).forEach((c, i) => sfx.tile(c, i * 0.06))
     setGuesses((g) => [...g, current])
     setCurrent('')
   }, [current, answer.length])
@@ -220,8 +236,10 @@ export default function QuemSouEle() {
       if (over) return
       if (k === 'ENTER') submit()
       else if (k === 'BACK') setCurrent((c) => c.slice(0, -1))
-      else if (/^[A-Z]$/.test(k) && current.length < answer.length)
+      else if (/^[A-Z]$/.test(k) && current.length < answer.length) {
+        sfx.key()
         setCurrent((c) => c + k)
+      }
     },
     [over, submit, current.length, answer.length],
   )
@@ -386,7 +404,13 @@ export default function QuemSouEle() {
                 </span>
               ))}
               <span className="px-1 font-serif text-[13px] italic text-ink-500">
-                {answer.length} letras · {MAX_ATTEMPTS} tentativas
+                {short > 0 ? (
+                  <span className="not-italic font-cond text-xs font-600 uppercase tracking-wider text-ochre-400">
+                    Faltam {short} {short === 1 ? 'letra' : 'letras'}
+                  </span>
+                ) : (
+                  <>{answer.length} letras · {MAX_ATTEMPTS} tentativas</>
+                )}
               </span>
             </div>
 

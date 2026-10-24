@@ -14,6 +14,7 @@ import { confetti } from '../lib/juice'
 import { shareScoreImage, type Sq } from '../lib/shareCard'
 import { GameHeader, GameTitle, HelpModal, StatGrid, NextUp } from '../components/GameShell'
 import { siteLink } from '../lib/site'
+import { buzz, sfx } from '../lib/sfx'
 
 const MAX_GUESSES = 8
 const HINT_COST = 75
@@ -273,8 +274,20 @@ export default function Misterioso() {
     const nextShare = [...shareRows, [sq]]
     setShareRows(nextShare)
 
-    if (p.answer === secret.answer) finish(true, nextShare, nextRows.length)
-    else if (nextRows.length >= MAX_GUESSES) finish(false, nextShare, nextRows.length)
+    if (p.answer === secret.answer) {
+      sfx.fanfare()
+      buzz.win()
+      finish(true, nextShare, nextRows.length)
+      return
+    }
+    // As quatro pistas soam em sequência: verde, quente ou não.
+    ;[row.natOk, row.contOk, row.posOk].forEach((okp, i) => sfx.tile(okp ? 'correct' : 'absent', i * 0.11))
+    sfx.tile(row.decadeOk ? 'correct' : row.close ? 'present' : 'absent', 0.33)
+    if (nextRows.length >= MAX_GUESSES) {
+      sfx.lifeLost()
+      buzz.err()
+      finish(false, nextShare, nextRows.length)
+    }
   }
 
   function praticar() {
@@ -309,6 +322,7 @@ export default function Misterioso() {
     ])
     const res = await shareScoreImage({
       game: 'Craque Misterioso',
+      stamp: newRecord ? 'Recorde' : undefined,
       headline: won ? String(points) : 'X',
       sub: won ? `${shareRows.length}/${MAX_GUESSES} chutes` : 'não desvendou',
       squares,

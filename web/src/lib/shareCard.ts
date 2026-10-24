@@ -12,20 +12,24 @@ export interface ShareOpts {
   squares?: Sq[][] // grade opcional (estilo Wordle)
   edition?: string // ex: "Edição #123"
   text?: string // texto de acompanhamento no share nativo
+  stamp?: string // selo opcional no canto: "RECORDE", "CAMPEÃO"
 }
 
 export type ShareResult = 'shared' | 'copied' | 'downloaded' | 'error'
 
+// Mesmos tokens do app (tema "estádio à noite"). Antes era creme com
+// vermelho alaranjado — a cara do 7a0, e não a nossa.
 const C = {
-  paper: '#f2ecdd',
-  paper2: '#e9e1cc',
-  ink: '#16130d',
-  ink2: '#4b4538',
-  grass: '#346b32',
-  ochre: '#c1452a',
-  corn: '#d8a51f',
+  paper: '#0b241c',
+  chalk: '#eef5f1',
+  ink2: '#9bb6ab',
+  ink3: '#bfd2c9',
+  grass: '#2c7d4f',
+  ochre: '#d24a3a',
+  corn: '#d8a72e',
+  cornHi: '#e6b73e',
 }
-const SQ: Record<Sq, string> = { g: C.grass, y: C.corn, o: C.ochre, k: '#2a2620' }
+const SQ: Record<Sq, string> = { g: C.grass, y: C.corn, o: C.ochre, k: '#3b4a44' }
 
 const S = 1080
 
@@ -78,10 +82,17 @@ async function draw(o: ShareOpts): Promise<Blob | null> {
     /* segue com fallback */
   }
 
-  // Fundo papel + leve textura de pontos
+  // Gramado à noite + dois refletores + trama de meio-tom
   ctx.fillStyle = C.paper
   ctx.fillRect(0, 0, S, S)
-  ctx.fillStyle = 'rgba(22,19,13,0.04)'
+  for (const lx of [150, S - 150]) {
+    const g = ctx.createRadialGradient(lx, -80, 0, lx, -80, 700)
+    g.addColorStop(0, 'rgba(238,245,241,0.12)')
+    g.addColorStop(1, 'rgba(238,245,241,0)')
+    ctx.fillStyle = g
+    ctx.fillRect(0, 0, S, S)
+  }
+  ctx.fillStyle = 'rgba(255,255,255,0.04)'
   for (let y = 40; y < S; y += 26) {
     for (let x = 40; x < S; x += 26) {
       ctx.beginPath()
@@ -90,10 +101,12 @@ async function draw(o: ShareOpts): Promise<Blob | null> {
     }
   }
 
-  // Moldura editorial
-  ctx.strokeStyle = C.ink
-  ctx.lineWidth = 10
+  // Moldura de giz (dupla, como a régua do almanaque)
+  ctx.strokeStyle = 'rgba(238,245,241,0.35)'
+  ctx.lineWidth = 6
   ctx.strokeRect(46, 46, S - 92, S - 92)
+  ctx.lineWidth = 2
+  ctx.strokeRect(62, 62, S - 124, S - 124)
 
   const cx = S / 2
   ctx.textAlign = 'center'
@@ -101,80 +114,109 @@ async function draw(o: ShareOpts): Promise<Blob | null> {
   // Logo (taça)
   const logo = await loadImage(`${import.meta.env.BASE_URL}logo.png`)
   if (logo && logo.height) {
-    const lh = 132
+    const lh = 104
     const lw = (logo.width * lh) / logo.height
-    ctx.drawImage(logo, cx - lw / 2, 56, lw, lh)
+    ctx.drawImage(logo, cx - lw / 2, 84, lw, lh)
   }
 
-  // Kicker
-  ctx.fillStyle = C.grass
-  ctx.font = '600 30px Oswald, sans-serif'
-  ctx.fillText('E N C Y C L O B O L', cx, 224)
-
-  // Nome do jogo
-  ctx.fillStyle = C.ink
-  ctx.font = '500 44px Oswald, sans-serif'
+  // Kicker + nome do jogo + régua
+  ctx.fillStyle = C.corn
+  ctx.font = '600 28px Oswald, sans-serif'
+  ctx.fillText('E N C Y C L O B O L', cx, 222)
+  ctx.fillStyle = C.ink3
+  ctx.font = '500 42px Oswald, sans-serif'
   ctx.fillText(o.game.toUpperCase(), cx, 270)
-
-  // Linha divisória
-  ctx.strokeStyle = 'rgba(22,19,13,0.25)'
+  ctx.strokeStyle = 'rgba(238,245,241,0.2)'
   ctx.lineWidth = 3
   ctx.beginPath()
-  ctx.moveTo(160, 304)
-  ctx.lineTo(S - 160, 304)
+  ctx.moveTo(160, 300)
+  ctx.lineTo(S - 160, 300)
   ctx.stroke()
 
-  // Headline grande
-  const hSize = fitFont(ctx, o.headline, 'Anton, sans-serif', '400', 280, S - 240)
-  ctx.fillStyle = C.ink
+  // Espaço útil entre a régua (300) e o rodapé (~S-160). Tudo é medido antes
+  // de desenhar, pra nada se sobrepor — com ou sem grade, com 1 ou 8 linhas.
+  const top = 330
+  const bottom = S - 165
+  const rows = o.squares?.length ?? 0
+  const lines = (o.lines ?? []).filter(Boolean)
+  const linesH = lines.length * 52
+  const subH = o.sub ? 56 : 0
+  const gap = 12
+  const cols = rows ? Math.max(...o.squares!.map((r) => r.length)) : 0
+  const hMax = rows ? 170 : 260
+  const hSize = fitFont(ctx, o.headline, 'Anton, sans-serif', '400', hMax, S - 260)
+  const free = bottom - top - hSize - subH - linesH - (rows ? 36 : 0)
+  const cell = rows ? Math.max(22, Math.min(60, Math.floor((free - gap * (rows - 1)) / rows), Math.floor((S - 360) / cols))) : 0
+  const gridH = rows ? rows * cell + (rows - 1) * gap : 0
+  const block = hSize + subH + (rows ? gridH + 36 : 0) + linesH
+  let y = top + Math.max(0, (bottom - top - block) / 2)
+
+  // Headline com brilho de placar eletrônico
+  ctx.fillStyle = C.chalk
   ctx.font = `400 ${hSize}px Anton, sans-serif`
   ctx.textBaseline = 'middle'
-  const headY = o.squares?.length ? 400 : 470
-  ctx.fillText(o.headline, cx, headY)
+  ctx.shadowColor = 'rgba(230,183,62,0.35)'
+  ctx.shadowBlur = 24
+  ctx.fillText(o.headline, cx, y + hSize / 2)
+  ctx.shadowBlur = 0
+  ctx.shadowColor = 'transparent'
   ctx.textBaseline = 'alphabetic'
+  y += hSize
 
-  // Subtítulo
-  let y = headY + hSize / 2 + 56
   if (o.sub) {
     ctx.fillStyle = C.ink2
-    ctx.font = '500 36px Oswald, sans-serif'
-    ctx.fillText(o.sub.toUpperCase(), cx, y)
-    y += 60
+    ctx.font = '500 34px Oswald, sans-serif'
+    ctx.fillText(o.sub.toUpperCase(), cx, y + 44)
+    y += subH
   }
 
-  // Grade de quadrados (estilo Wordle)
-  if (o.squares?.length) {
-    const cols = Math.max(...o.squares.map((r) => r.length))
-    const cell = Math.min(64, Math.floor((S - 320) / cols))
-    const gap = 12
+  // Grade (estilo Wordle)
+  if (rows) {
     const gridW = cols * cell + (cols - 1) * gap
-    let gy = y + 6
-    for (const row of o.squares) {
-      let gx = cx - gridW / 2 + (cols - row.length) * (cell + gap) / 2
-      for (const s of row) {
-        ctx.fillStyle = SQ[s]
-        roundRect(ctx, gx, gy, cell, cell, 8)
+    let gy = y + 24
+    for (const row of o.squares!) {
+      let gx = cx - gridW / 2 + ((cols - row.length) * (cell + gap)) / 2
+      for (const sq of row) {
+        ctx.fillStyle = SQ[sq]
+        roundRect(ctx, gx, gy, cell, cell, Math.max(4, cell / 8))
         ctx.fill()
         gx += cell + gap
       }
       gy += cell + gap
     }
-    y = gy + 40
+    y = gy - gap + 12
   }
 
   // Linhas de estatística
-  if (o.lines?.length) {
+  if (lines.length) {
     ctx.fillStyle = C.ink2
-    ctx.font = '500 38px Oswald, sans-serif'
-    for (const line of o.lines) {
-      if (!line) continue
-      ctx.fillText(line, cx, y)
-      y += 56
+    ctx.font = '500 36px Oswald, sans-serif'
+    for (const line of lines) {
+      y += 52
+      ctx.fillText(line, cx, y - 12)
     }
   }
 
+  // Selo (recorde, campeão)
+  if (o.stamp) {
+    ctx.save()
+    ctx.translate(S - 210, 150)
+    ctx.rotate(-0.1)
+    ctx.font = '700 34px Oswald, sans-serif'
+    const w = ctx.measureText(o.stamp.toUpperCase()).width + 44
+    ctx.fillStyle = C.cornHi
+    roundRect(ctx, -w / 2, -32, w, 64, 6)
+    ctx.fill()
+    ctx.fillStyle = C.paper
+    ctx.textBaseline = 'middle'
+    ctx.fillText(o.stamp.toUpperCase(), 0, 2)
+    ctx.restore()
+    ctx.textBaseline = 'alphabetic'
+    ctx.textAlign = 'center'
+  }
+
   // Rodapé
-  ctx.fillStyle = C.ink
+  ctx.fillStyle = C.chalk
   ctx.font = '600 34px Oswald, sans-serif'
   ctx.fillText(SITE_LABEL, cx, S - 110)
   if (o.edition) {

@@ -13,6 +13,7 @@ import { players } from '../data/players'
 import { GameHeader, GameTitle, HelpModal, Lives, StatGrid, NextUp } from '../components/GameShell'
 import { siteLink } from '../lib/site'
 import { clearRun, loadRun, saveRun } from '../lib/runSave'
+import { buzz, sfx } from '../lib/sfx'
 
 const LIVES = 3
 const REASON_BONUS = 50
@@ -115,7 +116,11 @@ export default function Intruso() {
 
   function finish() {
     setStatus('over')
-    if ((daily && points > prevBest && points > 0) || points >= 300) confetti()
+    if ((daily && points > prevBest && points > 0) || points >= 300) {
+      confetti()
+      sfx.fanfare()
+      buzz.win()
+    }
     if (daily && !recorded) {
       setCareer(recordIntrusoCareer(points, caught))
       setRecorded(true)
@@ -146,9 +151,13 @@ export default function Intruso() {
       setPoints((p) => p + gain)
       setLastGain(gain)
       setStep('reason')
+      sfx.ok(nc)
+      buzz.ok()
     } else {
       setCombo(0)
       setLives((l) => l - 1)
+      sfx.lifeLost()
+      buzz.life()
       setStep('revealed')
     }
   }
@@ -158,7 +167,10 @@ export default function Intruso() {
     setSelReason(c)
     const ok = c === current.cat
     setReasonGot(ok)
-    if (ok) setPoints((p) => p + REASON_BONUS)
+    if (ok) {
+      setPoints((p) => p + REASON_BONUS)
+      sfx.stamp()
+    } else sfx.nearMiss()
     setStep('revealed')
   }
 
@@ -189,6 +201,7 @@ export default function Intruso() {
   async function compartilhar() {
     const r = await shareScoreImage({
       game: 'O Intruso',
+      stamp: newRecord ? 'Recorde' : undefined,
       headline: String(points),
       sub: newRecord ? 'novo recorde!' : 'pontos',
       lines: [`${caught} intrusos caçados`, `Total ${career.total} pts`],

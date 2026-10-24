@@ -68,14 +68,17 @@ export const conexoes: Puzzle[] = [
       { color: 'ink', label: 'Jogaram no Barcelona', members: ['Messi', 'Ronaldinho', 'Puyol', 'Rivaldo'] },
     ],
   },
-  // 7 — CLUBE + posição + seleção misturados. Brasileiros espalhados entre
-  // Milan e Barça; Messi é argentino mas só fecha no Barça.
+  // 7 — CLUBE + posição + seleção misturados. Armadilha: Ronaldinho também
+  // jogou no Barça e Messi também é argentino, mas o Milan só fecha com
+  // Ronaldinho e os argentinos (Passarella, Batistuta, Kempes, Zanetti) nunca
+  // jogaram no Barça, então Messi fica no Barça. (Maradona saiu: jogou no
+  // Barça em 1982–84 e abria uma segunda solução.)
   {
     groups: [
       { color: 'corn', label: 'Jogaram no Milan', members: ['Cafu', 'Kaká', 'Ronaldinho', 'Maldini'] },
       { color: 'grass', label: 'Jogaram no Barcelona', members: ['Messi', 'Romário', 'Cruyff', 'Neymar'] },
       { color: 'ochre', label: 'Goleiros', members: ['Buffon', 'Yashin', 'Banks', 'Casillas'] },
-      { color: 'ink', label: 'Argentinos', members: ['Maradona', 'Batistuta', 'Kempes', 'Zanetti'] },
+      { color: 'ink', label: 'Argentinos', members: ['Passarella', 'Batistuta', 'Kempes', 'Zanetti'] },
     ],
   },
   // 8 — quatro clubes ingleses. Armadilha: Torres jogou em Liverpool E
@@ -97,11 +100,14 @@ export const conexoes: Puzzle[] = [
       { color: 'ink', label: 'Uruguaios', members: ['Suárez', 'Cavani', 'Forlán', 'Francescoli'] },
     ],
   },
-  // 10 — quatro clubes (Itália + Espanha). Figo (Real), Ronaldinho (Barça),
-  // Zidane (Real), Seedorf (Milan) só fecham de um jeito.
+  // 10 — quatro clubes (Itália + Espanha). Armadilha: Figo (Barça e Real),
+  // Zidane (Juve e Real) e Ronaldinho (Barça e Milan) têm dois clubes cada,
+  // mas o Real só fecha com Raúl, Casillas, Figo e Zidane, e aí o resto se
+  // encaixa de um jeito só. (Seedorf saiu: jogou no Real em 1996–99 e abria
+  // uma segunda solução; Shevchenko nunca jogou em Juve, Real ou Barça.)
   {
     groups: [
-      { color: 'corn', label: 'Jogaram no Milan', members: ['Maldini', 'Gattuso', 'Nesta', 'Seedorf'] },
+      { color: 'corn', label: 'Jogaram no Milan', members: ['Maldini', 'Gattuso', 'Nesta', 'Shevchenko'] },
       { color: 'grass', label: 'Jogaram na Juventus', members: ['Buffon', 'Del Piero', 'Nedvěd', 'Trezeguet'] },
       { color: 'ochre', label: 'Jogaram no Real Madrid', members: ['Raúl', 'Casillas', 'Figo', 'Zidane'] },
       { color: 'ink', label: 'Jogaram no Barcelona', members: ['Xavi', 'Iniesta', 'Messi', 'Ronaldinho'] },
@@ -152,7 +158,7 @@ export const conexoes: Puzzle[] = [
       { color: 'corn', label: 'Brasileiros', members: ['Vinícius', 'Neymar', 'Raphinha', 'Endrick'] },
       { color: 'grass', label: 'Argentinos', members: ['Lautaro', 'Julián Álvarez', 'Enzo Fernández', 'Mac Allister'] },
       { color: 'ochre', label: 'Portugueses', members: ['Bruno Fernandes', 'Bernardo Silva', 'Rafael Leão', 'Rúben Dias'] },
-      { color: 'ink', label: 'Holandeses', members: ['Van Dijk', 'De Jong', 'Gakpo', 'Depay'] },
+      { color: 'ink', label: 'Holandeses', members: ['Van Dijk', 'Frenkie de Jong', 'Gakpo', 'Depay'] },
     ],
   },
   // 16 — quatro clubes. Armadilha: Suárez jogou em Liverpool E Atlético,
@@ -271,7 +277,7 @@ export const conexoes: Puzzle[] = [
   {
     groups: [
       { color: 'corn', label: 'Jogaram no Boca Juniors', members: ['Maradona', 'Riquelme', 'Tévez', 'Palermo'] },
-      { color: 'grass', label: 'Goleiros', members: ['Fillol', 'Goycochea', 'Chilavert', 'Dibu'] },
+      { color: 'grass', label: 'Goleiros', members: ['Fillol', 'Goycochea', 'Chilavert', 'Dibu Martínez'] },
       { color: 'ochre', label: 'Campeões mundiais em 2022', members: ['Messi', 'Di María', 'Enzo Fernández', 'Julián Álvarez'] },
       { color: 'ink', label: 'Jogaram no River Plate', members: ['Crespo', 'Aimar', 'Ortega', 'Gallardo'] },
     ],
@@ -318,7 +324,7 @@ export const conexoes: Puzzle[] = [
       { color: 'corn', label: 'Ídolos do Botafogo', members: ['Garrincha', 'Jairzinho', 'Nílton Santos', 'Gérson'] },
       { color: 'grass', label: 'Ídolos do Vasco', members: ['Romário', 'Edmundo', 'Juninho Pernambucano', 'Roberto Dinamite'] },
       { color: 'ochre', label: 'Jogaram no Internacional', members: ['Falcão', 'Dunga', 'Taffarel', 'Alisson'] },
-      { color: 'ink', label: 'Jogaram no Grêmio', members: ['Renato Gaúcho', 'Ronaldinho', 'Emerson', 'Suárez'] },
+      { color: 'ink', label: 'Jogaram no Grêmio', members: ['Renato Gaúcho', 'Ronaldinho', 'Paulo Nunes', 'Suárez'] },
     ],
   },
   // 10 — carreiras fora da Europa. Armadilha: Hulk também jogou no Japão

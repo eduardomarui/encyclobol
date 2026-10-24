@@ -12,6 +12,7 @@ import { shareScoreImage, type Sq } from '../lib/shareCard'
 import { GameHeader, GameTitle, HelpModal, StatGrid, NextUp } from '../components/GameShell'
 import { siteLink } from '../lib/site'
 import { clearRun, loadRun, saveRun } from '../lib/runSave'
+import { buzz, sfx } from '../lib/sfx'
 
 const MAX_MISTAKES = 4
 const SOLVE_PTS = 100
@@ -108,6 +109,7 @@ export default function Conexoes() {
   function toggle(name: string) {
     if (over) return
     setMessage('')
+    sfx.tap()
     setSelected((sel) =>
       sel.includes(name)
         ? sel.filter((n) => n !== name)
@@ -147,6 +149,13 @@ export default function Conexoes() {
       const nextSeq = [...solveSeq, g.color]
       setSolveSeq(nextSeq)
       setSelected([])
+      if (nextSolved.length === 4) {
+        sfx.fanfare()
+        buzz.win()
+      } else {
+        sfx.ok(nextSolved.length * 2)
+        buzz.ok()
+      }
       if (nextSolved.length === 4) finish(true, mistakes, nextRows, nextSeq)
       else setSolved(nextSolved)
       return
@@ -159,6 +168,10 @@ export default function Conexoes() {
     setMistakes(m)
     setSelected([])
     setMessage(oneAway ? 'Faltou um! (cuidado com a isca)' : 'Não foi dessa vez')
+    if (m >= MAX_MISTAKES) sfx.lifeLost()
+    else if (oneAway) sfx.nearMiss()
+    else sfx.err()
+    buzz.err()
     setWrong(true)
     setTimeout(() => setWrong(false), 450)
     if (m >= MAX_MISTAKES) finish(false, m, nextRows, solveSeq)
@@ -200,6 +213,7 @@ export default function Conexoes() {
     const squares = rows.map((row) => row.map((c) => sqColor[c as GroupColor])) as Sq[][]
     const r = await shareScoreImage({
       game: 'Quarteto',
+      stamp: perfect ? 'Sem erros' : undefined,
       headline: String(points),
       sub: perfect ? 'sem erros!' : won ? 'pontos hoje' : 'não fechou',
       squares,
