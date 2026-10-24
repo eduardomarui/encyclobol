@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { players, type Player } from '../data/players'
-import { GameHeader, GameTitle, HelpModal, Lives, StatGrid, NextUp, ChallengeBanner } from '../components/GameShell'
+import { GameHeader, GameTitle, HelpModal, Lives, StatGrid, NextUp, ChallengeBanner, TreinoTag } from '../components/GameShell'
+import { treinosRestantes, usarTreino } from '../lib/treino'
 import { dayNumber, seededShuffle } from '../lib/daily'
 import {
   loadTLCareer,
@@ -359,17 +360,21 @@ export default function LinhaDoTempo() {
 
             <div className="mt-2 flex gap-2">
               <button
-                onClick={() => restart(false)}
-                className="btn-stamp flex-1 bg-grass-600 px-4 py-2.5 text-ink-900 hover:bg-grass-700"
+                onClick={() => usarTreino('tempo') && restart(false)}
+                disabled={!treinosRestantes('tempo')}
+                className="btn-stamp flex-1 bg-grass-600 px-4 py-2.5 text-ink-900 hover:bg-grass-700 disabled:opacity-40"
               >
                 {daily ? 'Treinar' : 'De novo'}
-              </button>
+              <TreinoTag game="tempo" />
+                </button>
               <button
-                onClick={() => restart(true)}
-                className="btn-stamp flex-1 border-2 border-white/20 px-4 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
+                onClick={() => usarTreino('tempo') && restart(true)}
+                disabled={!treinosRestantes('tempo')}
+                className="btn-stamp flex-1 border-2 border-white/20 px-4 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900 disabled:opacity-40"
               >
                 Difícil
-              </button>
+              <TreinoTag game="tempo" />
+                </button>
             </div>
             <NextUp current="tempo" />
           </div>

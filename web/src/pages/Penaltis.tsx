@@ -11,7 +11,8 @@ import {
 import { PenaltyScene, REVEAL_MS, makeShot, type Outcome, type Shot } from '../components/PenaltyScene'
 import { confetti } from '../lib/juice'
 import { shareScoreImage } from '../lib/shareCard'
-import { GameHeader, HelpModal, StatGrid, ThemePicker, TimeBar, NextUp, ChallengeBanner } from '../components/GameShell'
+import { GameHeader, HelpModal, StatGrid, ThemePicker, TimeBar, NextUp, ChallengeBanner, TreinoTag } from '../components/GameShell'
+import { treinosRestantes, usarTreino } from '../lib/treino'
 import { loadTheme, poolsFor, saveTheme, themeLabel, themeSeed } from '../lib/themes'
 import { clearRun, loadRun, saveRun } from '../lib/runSave'
 import { buzz, sfx } from '../lib/sfx'
@@ -627,9 +628,11 @@ export default function Penaltis() {
               {my} <span className="text-ink-500">×</span> {opp}
             </p>
             <p className="mt-1 font-serif text-base italic text-ink-600">Treino não conta pontos.</p>
-            <button onClick={treinar} className="btn-stamp mt-5 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700">
+            <button onClick={() => usarTreino('copa') && treinar()}
+                disabled={!treinosRestantes('copa')} className="btn-stamp mt-5 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700 disabled:opacity-40">
               Outra disputa
-            </button>
+            <TreinoTag game="copa" />
+                </button>
             <NextUp current="copa" />
           </div>
         )}
@@ -670,11 +673,13 @@ export default function Penaltis() {
               {copied ? 'Imagem pronta!' : 'Compartilhar imagem'}
             </button>
             <button
-              onClick={treinar}
-              className="btn-stamp mt-2 w-full border-2 border-white/20 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
+              onClick={() => usarTreino('copa') && treinar()}
+                disabled={!treinosRestantes('copa')}
+              className="btn-stamp mt-2 w-full border-2 border-white/20 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900 disabled:opacity-40"
             >
               Treinar (sem pontos)
-            </button>
+            <TreinoTag game="copa" />
+                </button>
             <div className="mt-2 grid grid-cols-2 gap-2">
               <Link to="/jogos/penaltis/ranqueada" className="btn-stamp bg-corn-500 px-3 text-xs text-paper hover:bg-corn-400">
                 Ranqueada

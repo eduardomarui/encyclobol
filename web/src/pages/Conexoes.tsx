@@ -9,7 +9,8 @@ import {
 } from '../lib/conexoesStats'
 import { confetti } from '../lib/juice'
 import { shareScoreImage, type Sq } from '../lib/shareCard'
-import { GameHeader, GameTitle, HelpModal, StatGrid, NextUp, ChallengeBanner } from '../components/GameShell'
+import { GameHeader, GameTitle, HelpModal, StatGrid, NextUp, ChallengeBanner, TreinoTag } from '../components/GameShell'
+import { treinosRestantes, usarTreino } from '../lib/treino'
 import { clearRun, loadRun, saveRun } from '../lib/runSave'
 import { buzz, sfx } from '../lib/sfx'
 import { challengeLink } from '../lib/challenge'
@@ -403,11 +404,13 @@ export default function Conexoes() {
               )}
 
               <button
-                onClick={treinar}
-                className="btn-stamp mt-2 w-full border-2 border-white/20 px-6 py-2.5 text-ink-900 hover:bg-grass-700"
+                onClick={() => usarTreino('quarteto') && treinar()}
+                disabled={!treinosRestantes('quarteto')}
+                className="btn-stamp mt-2 w-full border-2 border-white/20 px-6 py-2.5 text-ink-900 hover:bg-grass-700 disabled:opacity-40"
               >
                 {daily ? 'Treinar (sem pontos)' : 'Outro puzzle'}
-              </button>
+              <TreinoTag game="quarteto" />
+                </button>
               <NextUp current="quarteto" />
             </div>
           )}

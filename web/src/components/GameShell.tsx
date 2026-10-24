@@ -6,6 +6,7 @@ import { gatherGames } from '../lib/profile'
 import { getStreak, hoursUntilMidnight } from '../lib/streak'
 import { Flame } from './Streak'
 import { challengeLink, readChallenge } from '../lib/challenge'
+import { treinosRestantes } from '../lib/treino'
 import { confetti } from '../lib/juice'
 import { dayNumber } from '../lib/daily'
 
@@ -316,4 +317,10 @@ function ChallengeResult({ game, mine, from, pts, won, tie }: { game: string; mi
       </button>
     </div>
   )
+}
+
+// Quantos treinos sobram hoje (3 por jogo), dentro do botão de treinar.
+export function TreinoTag({ game }: { game: string }) {
+  const n = treinosRestantes(game)
+  return <span className="ml-1.5 opacity-60">· {n ? `${n} hoje` : 'esgotado'}</span>
 }

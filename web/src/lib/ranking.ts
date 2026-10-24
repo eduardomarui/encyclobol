@@ -122,11 +122,13 @@ export async function globalBoard(
     p_game: game,
     p_since: since,
   })
-  return (data as BoardRow[]) ?? []
+  // Contas sem nenhum ponto (testes, quem só criou apelido) não entram na tabela.
+  return ((data as BoardRow[]) ?? []).filter((r) => r.total > 0 || r.is_me)
 }
 
 export async function friendsBoard(game: string | null = null, since = 0): Promise<BoardRow[]> {
   if (!supabase) return []
   const { data } = await supabase.rpc('friends_leaderboard', { p_game: game, p_since: since })
-  return (data as BoardRow[]) ?? []
+  // Contas sem nenhum ponto (testes, quem só criou apelido) não entram na tabela.
+  return ((data as BoardRow[]) ?? []).filter((r) => r.total > 0 || r.is_me)
 }

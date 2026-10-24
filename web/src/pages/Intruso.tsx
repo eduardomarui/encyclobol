@@ -10,7 +10,8 @@ import {
 import { confetti } from '../lib/juice'
 import { shareScoreImage } from '../lib/shareCard'
 import { players } from '../data/players'
-import { GameHeader, GameTitle, HelpModal, Lives, StatGrid, NextUp, TimeBar, ChallengeBanner } from '../components/GameShell'
+import { GameHeader, GameTitle, HelpModal, Lives, StatGrid, NextUp, TimeBar, ChallengeBanner, TreinoTag } from '../components/GameShell'
+import { treinosRestantes, usarTreino } from '../lib/treino'
 import { clearRun, loadRun, saveRun } from '../lib/runSave'
 import { buzz, sfx } from '../lib/sfx'
 import { buildElos, tierOf, type EloOptions } from '../lib/intrusoElos'
@@ -469,11 +470,13 @@ export default function Intruso() {
             )}
 
             <button
-              onClick={jogarTreino}
-              className="btn-stamp mt-2 w-full border-2 border-white/20 px-6 py-2.5 text-ink-900 hover:bg-grass-700"
+              onClick={() => usarTreino('intruso') && jogarTreino()}
+                disabled={!treinosRestantes('intruso')}
+              className="btn-stamp mt-2 w-full border-2 border-white/20 px-6 py-2.5 text-ink-900 hover:bg-grass-700 disabled:opacity-40"
             >
               {daily ? 'Treinar (sem pontos)' : 'Outra caçada'}
-            </button>
+            <TreinoTag game="intruso" />
+                </button>
             <NextUp current="intruso" />
           </div>
         )}

@@ -10,7 +10,8 @@ import {
 } from '../lib/stats'
 import { confetti } from '../lib/juice'
 import { shareScoreImage } from '../lib/shareCard'
-import { GameHeader, HelpModal, StatGrid, TimeBar, NextUp, ChallengeBanner } from '../components/GameShell'
+import { GameHeader, HelpModal, StatGrid, TimeBar, NextUp, ChallengeBanner, TreinoTag } from '../components/GameShell'
+import { treinosRestantes, usarTreino } from '../lib/treino'
 import { loadRun, saveRun } from '../lib/runSave'
 import { buzz, sfx } from '../lib/sfx'
 import { challengeLink } from '../lib/challenge'
@@ -579,10 +580,12 @@ export default function QuemSouEle() {
                   {copied ? 'Imagem pronta!' : 'Compartilhar imagem'}
                 </button>
                 <button
-                  onClick={praticar}
-                  className="btn-stamp mt-2 w-full border-2 border-white/20 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
+                  onClick={() => usarTreino('tira') && praticar()}
+                disabled={!treinosRestantes('tira')}
+                  className="btn-stamp mt-2 w-full border-2 border-white/20 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900 disabled:opacity-40"
                 >
                   Treinar (sem pontos)
+                <TreinoTag game="tira" />
                 </button>
                 <NextUp current="tira" />
               </>
@@ -621,10 +624,12 @@ export default function QuemSouEle() {
                   {player.nat} · {player.pos} · {player.era}
                 </p>
                 <button
-                  onClick={praticar}
-                  className="btn-stamp mt-4 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700"
+                  onClick={() => usarTreino('tira') && praticar()}
+                disabled={!treinosRestantes('tira')}
+                  className="btn-stamp mt-4 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700 disabled:opacity-40"
                 >
                   Sortear outro
+                <TreinoTag game="tira" />
                 </button>
                 <button
                   onClick={voltarCarreira}

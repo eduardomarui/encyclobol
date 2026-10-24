@@ -6,6 +6,7 @@ import { siteLink } from '../lib/site'
 import { dailyPick, dayNumber } from '../lib/daily'
 import { clearRun, loadRun, saveRun } from '../lib/runSave'
 import { loadEscToday, recordEscalacao } from '../lib/escalacaoStats'
+import { treinosRestantes, usarTreino } from '../lib/treino'
 import { confetti } from '../lib/juice'
 import { buzz, sfx } from '../lib/sfx'
 
@@ -20,9 +21,9 @@ const DAILY_IDX = dailyPick(ESCALACOES.length, 7711, -1)
 const pontosDe = (found: number, total: number, dicas: number, left: number) =>
   Math.max(0, found * 100 - dicas * 30 + (found === total ? left : 0))
 
-// Treino: elenco sorteado (sem escolher), no máximo 3 por dia, e nunca o do
-// dia nem os das próximas duas semanas — senão o treino gastava as edições.
-const TREINOS_DIA = 3
+// Treino: elenco sorteado (sem escolher), 3 por dia (lib/treino), sem repetir
+// no dia e nunca o do dia nem os das próximas duas semanas — senão o treino
+// gastava as edições.
 const TREINO_KEY = 'encyclobol:escalacao:treinos'
 const RESERVADOS = new Set(
   Array.from({ length: 15 }, (_, k) => dailyPick(ESCALACOES.length, 7711, -1, new Date(Date.now() + k * 864e5))),
@@ -44,7 +45,7 @@ function marcarTreino(id: string) {
 }
 function sortearTreino(): number | null {
   const usados = treinosHoje()
-  if (usados.length >= TREINOS_DIA) return null
+  if (!treinosRestantes('escalacao')) return null
   const pool = ESCALACOES.map((_, i) => i).filter((i) => !RESERVADOS.has(i) && !usados.includes(ESCALACOES[i].id))
   return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null
 }
@@ -208,7 +209,7 @@ export default function Escalacao() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [left, fase, showHelp])
 
-  const [restam, setRestam] = useState(() => TREINOS_DIA - treinosHoje().length)
+  const [restam, setRestam] = useState(() => treinosRestantes('escalacao'))
   function treinar() {
     const i = sortearTreino()
     if (i === null) return
@@ -227,8 +228,9 @@ export default function Escalacao() {
 
   function comecar() {
     if (!dia) {
+      if (!usarTreino('escalacao')) return
       marcarTreino(esc.id)
-      setRestam(TREINOS_DIA - treinosHoje().length)
+      setRestam(treinosRestantes('escalacao'))
     }
     sfx.whistle()
     setAchados([])
