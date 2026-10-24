@@ -1,0 +1,64 @@
+name: Deploy para Cloudflare Pages
+
+# Roda junto com o deploy do GitHub Pages. Só publica quando os segredos
+# CLOUDFLARE_API_TOKEN e CLOUDFLARE_ACCOUNT_ID existirem no repositório;
+# sem eles, o job termina sem fazer nada (não quebra a esteira atual).
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Segredos do Cloudflare configurados?
+        id: cf
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -n "$TOKEN" ] && [ -n "$ACCOUNT" ]; then echo "ok=true" >> "$GITHUB_OUTPUT"; else echo "ok=false" >> "$GITHUB_OUTPUT"; echo "Sem segredos do Cloudflare: pulando."; fi
+      - uses: actions/checkout@v4
+        if: steps.cf.outputs.ok == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.cf.outputs.ok == 'true'
+        with:
+          node-version: 22
+      - name: Instalar dependências
+        if: steps.cf.outputs.ok == 'true'
+        run: npm install
+        working-directory: web
+      - name: Build (na raiz do domínio)
+        if: steps.cf.outputs.ok == 'true'
+        run: npm run build
+        working-directory: web
+        env:
+          VITE_BASE: /
+          VITE_SITE_URL: ${{ vars.SITE_URL || 'https://encyclobol.com.br' }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+      - name: Ajustes do Cloudflare
+        if: steps.cf.outputs.ok == 'true'
+        # O 404.html é o truque de rotas do GitHub Pages; sem ele o Cloudflare
+        # serve o index.html em qualquer rota (fallback de página única).
+        run: rm -f web/dist/404.html
+      - name: Criar o projeto no Cloudflare (se ainda não existir)
+        if: steps.cf.outputs.ok == 'true'
+        run: npx --yes wrangler@3 pages project create encyclobol --production-branch=master || true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Publicar
+        if: steps.cf.outputs.ok == 'true'
+        run: npx --yes wrangler@3 pages deploy web/dist --project-name=encyclobol --branch=master --commit-dirty=true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
