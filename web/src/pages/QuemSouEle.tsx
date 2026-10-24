@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { players } from '../data/players'
+import { famous } from '../data/famous'
 import { dayNumber } from '../lib/daily'
 import {
   loadCareer,
@@ -83,9 +84,18 @@ function lenWindow(stage: number): [number, number] {
 // Escada determinística do dia (mesma sequência pra todos).
 function ladderPick(stage: number, used: number[]): number {
   const [lo, hi] = lenWindow(stage)
+  // Estágios 1 a 4 só com craques que o torcedor reconhece de cara (antes o
+  // aquecimento podia cair em KROL ou MUTU); depois, a enciclopédia inteira.
+  const onlyFamous = stage <= 4
   const pool = players
     .map((_, i) => i)
-    .filter((i) => !used.includes(i) && players[i].answer.length >= lo && players[i].answer.length <= hi)
+    .filter(
+      (i) =>
+        !used.includes(i) &&
+        players[i].answer.length >= lo &&
+        players[i].answer.length <= hi &&
+        (!onlyFamous || famous.has(players[i].answer)),
+    )
   const notUsed = players.map((_, i) => i).filter((i) => !used.includes(i))
   const arr = pool.length ? pool : notUsed.length ? notUsed : players.map((_, i) => i)
   const h = (dayNumber() * 131 + stage * 977 + 7) >>> 0

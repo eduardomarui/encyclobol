@@ -20,7 +20,8 @@ const REASON_BONUS = 50
 const CATS: IntrusoCat[] = ['Posição', 'Nacionalidade', 'Clube', 'Era']
 const HELP_KEY = 'encyclobol:intruso:help'
 
-type Round = { players: string[]; intruderIdx: number; rule: string; cat: IntrusoCat }
+// `cats`: todos os elos verdadeiros dos outros três (qualquer um vale o bônus).
+type Round = { players: string[]; intruderIdx: number; rule: string; cat: IntrusoCat; cats: IntrusoCat[] }
 
 // Ficha curta (seleção · posição · época) mostrada na revelação, pra ficar
 // claro o que cada um é — e por que o intruso não pertence ao grupo.
@@ -43,6 +44,7 @@ function makeRounds(picks: number[], seedBase: number): Round[] {
       intruderIdx: players.indexOf(base.intruder),
       rule: base.rule,
       cat: base.cat,
+      cats: [base.cat, ...((base as { alsoCat?: IntrusoCat[] }).alsoCat ?? [])],
     }
   })
 }
@@ -165,7 +167,7 @@ export default function Intruso() {
   function pickReason(c: IntrusoCat) {
     if (step !== 'reason' || !current) return
     setSelReason(c)
-    const ok = c === current.cat
+    const ok = current.cats.includes(c)
     setReasonGot(ok)
     if (ok) {
       setPoints((p) => p + REASON_BONUS)
@@ -300,7 +302,7 @@ export default function Intruso() {
                   {CATS.map((c) => {
                     let cls = 'border-ink-900/25 bg-paper hover:border-white/20 hover:bg-paper-100'
                     if (step === 'revealed') {
-                      if (c === current.cat) cls = 'border-grass-700 bg-grass-600 text-ink-900'
+                      if (current.cats.includes(c)) cls = 'border-grass-700 bg-grass-600 text-ink-900'
                       else if (c === selReason) cls = 'border-ochre-600 bg-ochre-500 text-ink-900'
                       else cls = 'border-ink-900/15 bg-paper opacity-60'
                     }

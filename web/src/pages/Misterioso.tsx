@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { players, type Player } from '../data/players'
+import { famous } from '../data/famous'
 import { clubHint } from '../data/clubs'
 import PlayerInput from '../components/PlayerInput'
 import { dailyPick, dayNumber } from '../lib/daily'
@@ -164,7 +165,10 @@ function compare(p: Player, secret: Player): Row {
 }
 
 type MystRun = { guesses: string[]; hints: number }
-const dailySecret = () => players[dailyPick(players.length, 90210)]
+// O craque do dia sai da lista de famosos (o treino continua com a enciclopédia toda).
+const FAMOUS = players.filter((p) => famous.has(p.answer))
+const dailySecret = () =>
+  dayNumber() <= 295 ? players[dailyPick(players.length, 90210)] : FAMOUS[dailyPick(FAMOUS.length, 90210)]
 
 export default function Misterioso() {
   // Estado do dia lido a cada montagem; chutes do dia salvos (F5 retoma e o
