@@ -111,6 +111,19 @@ export function sinceForPeriod(period: Period): number {
   return 0
 }
 
+// Fora da tabela: contas sem nenhum ponto (testes, quem só criou apelido) e
+// contas da equipe (código de amigo), pra não competir com os jogadores.
+const HIDDEN_CODES = new Set(['BFHBPZ'])
+// A posição é recontada depois do filtro (senão o 1º visível aparecia como 2º).
+function visible(rows: BoardRow[]): BoardRow[] {
+  const kept = rows.filter((r) => (r.total > 0 || r.is_me) && !(r.friend_code && HIDDEN_CODES.has(r.friend_code) && !r.is_me))
+  let rank = 0
+  return kept.map((r, i) => {
+    if (i === 0 || r.total !== kept[i - 1].total) rank = i + 1
+    return { ...r, rank }
+  })
+}
+
 export async function globalBoard(
   game: string | null = null,
   since = 0,
@@ -122,13 +135,11 @@ export async function globalBoard(
     p_game: game,
     p_since: since,
   })
-  // Contas sem nenhum ponto (testes, quem só criou apelido) não entram na tabela.
-  return ((data as BoardRow[]) ?? []).filter((r) => r.total > 0 || r.is_me)
+  return visible((data as BoardRow[]) ?? [])
 }
 
 export async function friendsBoard(game: string | null = null, since = 0): Promise<BoardRow[]> {
   if (!supabase) return []
   const { data } = await supabase.rpc('friends_leaderboard', { p_game: game, p_since: since })
-  // Contas sem nenhum ponto (testes, quem só criou apelido) não entram na tabela.
-  return ((data as BoardRow[]) ?? []).filter((r) => r.total > 0 || r.is_me)
+  return visible((data as BoardRow[]) ?? [])
 }
