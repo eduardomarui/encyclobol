@@ -55,8 +55,16 @@ export function gatherAchievements(games: GameStat[]): Achievement[] {
   const cups = loadCopaStats().cups
   const bestCartas = loadTLCareer().bestScore
   const bestCaca = loadIntrusoCareer().bestRun
-  const a = (id: string, title: string, desc: string, unlocked: boolean): Achievement => ({ id, title, desc, unlocked })
-  return [
+  // Conquista é pra sempre: o que já desbloqueou fica guardado (antes era
+  // recalculado dos números atuais e "Fechei o dia" sumia no dia seguinte).
+  const kept = loadUnlocked()
+  const a = (id: string, title: string, desc: string, unlocked: boolean): Achievement => ({
+    id,
+    title,
+    desc,
+    unlocked: unlocked || kept.has(id),
+  })
+  const list = [
     a('estreante', 'Estreante', 'Jogue qualquer jogo', playedAny),
     a('colecionador', 'Colecionador', 'Jogue os 6 jogos ao menos uma vez', playedAll),
     a('fechou-dia', 'Fechei o dia', 'Jogue os 6 jogos no mesmo dia', playedAllToday),
@@ -70,4 +78,23 @@ export function gatherAchievements(games: GameStat[]): Achievement[] {
     a('viajante', 'Viajante do tempo', 'Empilhe 15 cartas na Linha do Tempo', bestCartas >= 15),
     a('cacador', 'Caçador de craques', 'Cace 10 intrusos numa só corrida', bestCaca >= 10),
   ]
+  saveUnlocked(list)
+  return list
+}
+
+const UNLOCK_KEY = 'encyclobol:achievements'
+function loadUnlocked(): Set<string> {
+  try {
+    return new Set(JSON.parse(localStorage.getItem(UNLOCK_KEY) ?? '[]') as string[])
+  } catch {
+    return new Set()
+  }
+}
+function saveUnlocked(list: Achievement[]) {
+  try {
+    const ids = list.filter((x) => x.unlocked).map((x) => x.id)
+    localStorage.setItem(UNLOCK_KEY, JSON.stringify(ids))
+  } catch {
+    /* ignore */
+  }
 }

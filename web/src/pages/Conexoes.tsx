@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { conexoes, type ConGroup, type GroupColor } from '../data/conexoes'
 import { dailyIndex, dayNumber, seededShuffle } from '../lib/daily'
 import {
@@ -10,7 +9,7 @@ import {
 } from '../lib/conexoesStats'
 import { confetti } from '../lib/juice'
 import { shareScoreImage, type Sq } from '../lib/shareCard'
-import { GameHeader, GameTitle, HelpModal, StatGrid } from '../components/GameShell'
+import { GameHeader, GameTitle, HelpModal, StatGrid, NextUp } from '../components/GameShell'
 import { siteLink } from '../lib/site'
 import { clearRun, loadRun, saveRun } from '../lib/runSave'
 
@@ -369,12 +368,7 @@ export default function Conexoes() {
               >
                 {daily ? 'Treinar (sem pontos)' : 'Outro puzzle'}
               </button>
-              <Link
-                to="/"
-                className="btn-stamp mt-2 block border-2 border-white/20 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
-              >
-                Voltar pro almanaque
-              </Link>
+              <NextUp current="quarteto" />
             </div>
           )}
         </div>

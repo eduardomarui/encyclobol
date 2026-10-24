@@ -9,7 +9,7 @@ import {
 } from '../lib/stats'
 import { confetti } from '../lib/juice'
 import { shareScoreImage } from '../lib/shareCard'
-import { GameHeader, HelpModal, StatGrid, TimeBar } from '../components/GameShell'
+import { GameHeader, HelpModal, StatGrid, TimeBar, NextUp } from '../components/GameShell'
 import { siteLink } from '../lib/site'
 import { loadRun, saveRun } from '../lib/runSave'
 
@@ -507,6 +507,7 @@ export default function QuemSouEle() {
                 >
                   Treinar (sem pontos)
                 </button>
+                <NextUp current="tira" />
               </>
             ) : careerMode ? (
               <>

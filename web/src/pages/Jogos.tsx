@@ -13,8 +13,8 @@ import {
 import { dayNumber } from '../lib/daily'
 import { shareScoreImage, type Sq } from '../lib/shareCard'
 import { StreakPanel } from '../components/Streak'
-import { loadCareer, loadCareerToday } from '../lib/stats'
-import { loadCopaStats, loadCopaToday } from '../lib/penaltisStats'
+import { loadCareerToday } from '../lib/stats'
+import { loadCopaToday } from '../lib/penaltisStats'
 import { loadConCareer, loadConToday } from '../lib/conexoesStats'
 import { loadTLCareer, loadTLToday } from '../lib/timelineStats'
 import { loadIntrusoCareer, loadIntrusoToday } from '../lib/intrusoStats'
@@ -41,10 +41,9 @@ const games: GameInfo[] = [
     Icon: PlayerIcon,
     result: () => {
       const t = loadCareerToday()
-      const c = loadCareer()
       return {
         played: !!t,
-        streak: c.days,
+        streak: 0, // esses dois não têm sequência própria (antes mostrava o total de dias)
         detail: t ? `${t.score} pts` : '—',
         good: !!t,
       }
@@ -58,10 +57,9 @@ const games: GameInfo[] = [
     Icon: GoalIcon,
     result: () => {
       const t = loadCopaToday()
-      const c = loadCopaStats()
       return {
         played: !!t,
-        streak: c.days,
+        streak: 0, // esses dois não têm sequência própria (antes mostrava o total de dias)
         detail: t ? `${t.points} pts` : '—',
         good: !!t && t.champion,
       }

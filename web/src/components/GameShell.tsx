@@ -1,6 +1,9 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { availableThemes, themeSize } from '../lib/themes'
+import { gatherGames } from '../lib/profile'
+import { getStreak, hoursUntilMidnight } from '../lib/streak'
+import { Flame } from './Streak'
 
 // Peças compartilhadas pelas seis páginas de jogo: cabeçalho fixo, modal
 // "Como jogar" e a grade de números do fim de rodada.
@@ -69,7 +72,7 @@ export function HelpModal({
   children: ReactNode
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-paper/95 p-4 backdrop-blur-md" onClick={onClose}>
       <div
         className="max-h-[92vh] w-full max-w-sm overflow-y-auto border-2 border-white/20 bg-paper p-6"
         onClick={(e) => e.stopPropagation()}
@@ -150,6 +153,53 @@ export function TimeBar({ left, total, danger = 10 }: { left: number; total: num
         className={`h-full transition-[width] duration-1000 ease-linear ${hot ? 'bg-ochre-500' : 'bg-grass-600'}`}
         style={{ width: `${Math.max(0, Math.min(100, (left / total) * 100))}%` }}
       />
+    </div>
+  )
+}
+
+// Fim de rodada: chama o próximo jogo do dia e mostra a ofensiva — no lugar do
+// antigo "Voltar pro almanaque", que levava pra landing e encerrava a sessão.
+export function NextUp({ current }: { current: string }) {
+  const games = gatherGames()
+  const done = games.filter((g) => g.playedToday).length
+  const order = games.map((g) => g.key)
+  const start = Math.max(0, order.indexOf(current))
+  const next = [...games.slice(start + 1), ...games.slice(0, start)].find((g) => !g.playedToday)
+  const st = getStreak()
+  const hours = hoursUntilMidnight()
+  return (
+    <div className="mt-4 border-t border-white/10 pt-4 text-left">
+      <div className="flex items-center justify-between gap-3">
+        <span className="flex items-center gap-1.5 font-cond text-xs font-700 uppercase tracking-wider text-ink-900">
+          <Flame on={st.playedToday} className="h-4 w-4" />
+          {st.current > 0 ? `Ofensiva: ${st.current} ${st.current === 1 ? 'dia' : 'dias'}` : 'Ofensiva começa hoje'}
+        </span>
+        <span className="font-cond text-[11px] font-600 uppercase tracking-wider text-ink-500">{done} de {games.length} hoje</span>
+      </div>
+      <div className="mt-2 flex gap-1" aria-hidden>
+        {games.map((g) => (
+          <span key={g.key} className={`h-1.5 flex-1 rounded-full ${g.playedToday ? 'bg-corn-500' : 'bg-ink-900/15'}`} />
+        ))}
+      </div>
+      {next ? (
+        <Link
+          to={next.route}
+          className="btn-stamp mt-3 flex w-full items-center justify-between bg-grass-600 px-5 py-3 text-ink-900 hover:bg-grass-700"
+        >
+          <span>Próximo: {next.name}</span>
+          <span aria-hidden>→</span>
+        </Link>
+      ) : (
+        <p className="mt-3 font-serif text-sm italic text-ink-600">
+          Fechou o caderno de hoje. A próxima edição sai em {hours} {hours === 1 ? 'hora' : 'horas'}.
+        </p>
+      )}
+      <Link
+        to="/jogos"
+        className="mt-2 block text-center font-cond text-xs font-600 uppercase tracking-wider text-ink-500 hover:text-corn-500"
+      >
+        Todos os jogos
+      </Link>
     </div>
   )
 }

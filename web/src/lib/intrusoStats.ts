@@ -49,7 +49,10 @@ export function loadIntrusoToday(): IntrusoToday | null {
 }
 
 export function loadIntrusoCareer(): IntrusoCareer {
-  return { ...emptyCareer, ...(read<IntrusoCareer>(CAREER_KEY) ?? {}) }
+  const c: IntrusoCareer = { ...emptyCareer, ...(read<IntrusoCareer>(CAREER_KEY) ?? {}) }
+  // Sequência parada há mais de um dia deixa de valer (antes ficava congelada pra sempre na tela).
+  if (c.lastDay === null || c.lastDay < dayNumber() - 1) c.streak = 0
+  return c
 }
 
 export function recordIntrusoCareer(points: number, run: number): IntrusoCareer {

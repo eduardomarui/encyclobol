@@ -11,7 +11,7 @@ import {
 import { PenaltyScene, ZONES, poseFor, type Zone, type Shot } from '../components/PenaltyScene'
 import { confetti } from '../lib/juice'
 import { shareScoreImage } from '../lib/shareCard'
-import { GameHeader, HelpModal, StatGrid, ThemePicker, TimeBar } from '../components/GameShell'
+import { GameHeader, HelpModal, StatGrid, ThemePicker, TimeBar, NextUp } from '../components/GameShell'
 import { loadTheme, poolsFor, saveTheme, themeLabel, themeSeed } from '../lib/themes'
 import { siteLink } from '../lib/site'
 import { clearRun, loadRun, saveRun } from '../lib/runSave'
@@ -566,12 +566,7 @@ export default function Penaltis() {
             <button onClick={treinar} className="btn-stamp mt-5 w-full bg-grass-600 px-6 py-2.5 text-ink-900 hover:bg-grass-700">
               Outra disputa
             </button>
-            <Link
-              to="/"
-              className="btn-stamp mt-2 block border-2 border-white/20 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
-            >
-              Voltar pro almanaque
-            </Link>
+            <NextUp current="copa" />
           </div>
         )}
 
@@ -616,6 +611,7 @@ export default function Penaltis() {
             >
               Treinar (sem pontos)
             </button>
+            <NextUp current="copa" />
           </div>
         )}
       </main>

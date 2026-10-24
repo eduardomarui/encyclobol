@@ -20,7 +20,7 @@ type State = {
   played: number[] // dias (dayNumber) em que jogou algo
   frozen: number[] // dias salvos por congelamento
   freezes: number // congelamentos disponíveis
-  granted: number[] // marcos (7, 14, ...) que já deram congelamento
+  granted: number[] // dias em que um marco de 7 rendeu congelamento
   best: number
 }
 
@@ -85,10 +85,15 @@ export function getStreak(): Streak {
 
   const has = (d: number) => s.played.includes(d) || s.frozen.includes(d)
 
-  // Faltou ontem, mas a sequência vinha de antes? Congela ontem automaticamente.
-  if (!has(today - 1) && has(today - 2) && s.freezes > 0) {
-    s.frozen.push(today - 1)
-    s.freezes -= 1
+  // Faltou um ou mais dias, mas a sequência vinha de antes? Os congelamentos
+  // guardados cobrem o buraco inteiro, se forem suficientes (antes só cobriam
+  // ontem, e só quando anteontem tinha jogo — dois dias fora quebrava tudo).
+  let gap = 0
+  while (gap < MAX_FREEZES + 1 && !has(today - 1 - gap)) gap++
+  const chainBefore = has(today - 1 - gap)
+  if (gap > 0 && chainBefore && gap <= s.freezes) {
+    for (let g = 1; g <= gap; g++) s.frozen.push(today - g)
+    s.freezes -= gap
     dirty = true
   }
 
@@ -97,9 +102,12 @@ export function getStreak(): Streak {
   let current = 0
   for (let d = anchor; has(d); d--) current++
 
-  // Marcos de 7 em 7 dias rendem um congelamento (até 2 guardados).
-  if (current > 0 && current % 7 === 0 && !s.granted.includes(current)) {
-    s.granted.push(current)
+  // Marcos de 7 em 7 dias rendem um congelamento (até 2 guardados). O marco é
+  // identificado pelo dia em que foi atingido, então uma sequência nova volta a
+  // render (antes `granted` guardava 7, 14... e uma segunda sequência de 7 dias
+  // nunca dava congelamento).
+  if (current > 0 && current % 7 === 0 && !s.granted.includes(anchor)) {
+    s.granted.push(anchor)
     s.freezes = Math.min(MAX_FREEZES, s.freezes + 1)
     dirty = true
   }

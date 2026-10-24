@@ -50,7 +50,10 @@ export function loadTLToday(): TLToday | null {
 }
 
 export function loadTLCareer(): TLCareer {
-  return { ...emptyCareer, ...(read<TLCareer>(CAREER_KEY) ?? {}) }
+  const c: TLCareer = { ...emptyCareer, ...(read<TLCareer>(CAREER_KEY) ?? {}) }
+  // Sequência parada há mais de um dia deixa de valer (antes ficava congelada pra sempre na tela).
+  if (c.lastDay === null || c.lastDay < dayNumber() - 1) c.streak = 0
+  return c
 }
 
 export function recordTLCareer(points: number, score: number): TLCareer {

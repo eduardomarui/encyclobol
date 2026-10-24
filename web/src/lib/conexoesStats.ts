@@ -53,7 +53,10 @@ export function loadConToday(): ConToday | null {
 }
 
 export function loadConCareer(): ConCareer {
-  return read<ConCareer>(CAREER_KEY) ?? { ...emptyCareer }
+  const c: ConCareer = read<ConCareer>(CAREER_KEY) ?? { ...emptyCareer }
+  // Sequência parada há mais de um dia deixa de valer (antes ficava congelada pra sempre na tela).
+  if (c.lastDayWon === null || c.lastDayWon < dayNumber() - 1) c.streak = 0
+  return c
 }
 
 export function recordConCareer(today: Omit<ConToday, 'day'>): ConCareer {

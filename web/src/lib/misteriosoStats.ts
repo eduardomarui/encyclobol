@@ -53,7 +53,10 @@ export function loadMystToday(): MystToday | null {
 }
 
 export function loadMystCareer(): MystCareer {
-  return { ...emptyCareer, ...(read<MystCareer>(CAREER_KEY) ?? {}) }
+  const c: MystCareer = { ...emptyCareer, ...(read<MystCareer>(CAREER_KEY) ?? {}) }
+  // Sequência parada há mais de um dia deixa de valer (antes ficava congelada pra sempre na tela).
+  if (c.lastDayWon === null || c.lastDayWon < dayNumber() - 1) c.streak = 0
+  return c
 }
 
 export function recordMystCareer(today: Omit<MystToday, 'day'>): MystCareer {

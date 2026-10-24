@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { players, type Player } from '../data/players'
 import { clubHint } from '../data/clubs'
 import PlayerInput from '../components/PlayerInput'
@@ -13,7 +12,7 @@ import {
 } from '../lib/misteriosoStats'
 import { confetti } from '../lib/juice'
 import { shareScoreImage, type Sq } from '../lib/shareCard'
-import { GameHeader, GameTitle, HelpModal, StatGrid } from '../components/GameShell'
+import { GameHeader, GameTitle, HelpModal, StatGrid, NextUp } from '../components/GameShell'
 import { siteLink } from '../lib/site'
 
 const MAX_GUESSES = 8
@@ -530,12 +529,7 @@ export default function Misterioso() {
               >
                 {daily ? 'Treinar (sem pontos)' : 'Outro mistério'}
               </button>
-              <Link
-                to="/"
-                className="btn-stamp mt-2 block border-2 border-white/20 px-6 py-2.5 text-ink-900 hover:bg-grass-700 hover:text-ink-900"
-              >
-                Voltar pro almanaque
-              </Link>
+              <NextUp current="misterioso" />
             </div>
           )}
         </div>
