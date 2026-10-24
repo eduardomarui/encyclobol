@@ -43,6 +43,9 @@ function lowerBound(placed: Card[], year: number): number {
 }
 
 const DAILY_SEED = (dayNumber() + 1) * 40503
+// Modo do dia tem fim: 12 cartas pra encaixar. O infinito fica no treino.
+const DAILY_CARDS = 12
+const COMBO_CAP = 3
 
 type TLRun = { placed: string[]; cursor: number; lives: number; score: number; points: number; combo: number; bestCombo: number }
 
@@ -131,7 +134,7 @@ export default function LinhaDoTempo() {
     let newLives = lives
     if (ok) {
       const c = combo + 1
-      const gain = c * 10
+      const gain = Math.min(c, COMBO_CAP) * 10
       newScore = score + 1
       newPoints = points + gain
       setScore(newScore)
@@ -154,7 +157,7 @@ export default function LinhaDoTempo() {
 
     const nextCursor = cursor + 1
     setCursor(nextCursor)
-    if (newLives <= 0 || nextCursor >= deck.length) finish(newScore, newPoints)
+    if (newLives <= 0 || nextCursor >= deck.length || (daily && nextCursor > DAILY_CARDS)) finish(newScore, newPoints)
   }
 
   function restart(isHard: boolean) {
@@ -266,7 +269,7 @@ export default function LinhaDoTempo() {
         <div className="mt-6 w-full max-w-3xl">
           <div className="flex items-center justify-between font-cond text-[10px] font-600 uppercase tracking-[0.16em] text-ink-500">
             <span>← mais antigo</span>
-            <span>{placed.length} na linha</span>
+            <span>{daily ? `carta ${Math.min(cursor, DAILY_CARDS)} de ${DAILY_CARDS}` : `${placed.length} na linha`}</span>
             <span>mais recente →</span>
           </div>
           <div className="mt-1 overflow-x-auto pb-3">
@@ -371,8 +374,8 @@ export default function LinhaDoTempo() {
                 valendo cada vez mais. Errou a época, <strong>perde uma vida</strong>.
               </li>
               <li>
-                É <strong>infinito</strong>: empilhe o máximo que conseguir até acabarem as 3 vidas.
-                O objetivo é <strong>bater seu recorde</strong>.
+                A linha do dia tem <strong>{DAILY_CARDS} cartas</strong> e 3 vidas. O combo vale até{' '}
+                <strong>x{COMBO_CAP}</strong>. No treino é infinito, pra bater recorde à vontade.
               </li>
               <li>
                 Empate é justo: craques do <strong>mesmo ano</strong> encaixam de qualquer lado. Os

@@ -16,6 +16,9 @@ import { clearRun, loadRun, saveRun } from '../lib/runSave'
 import { buzz, sfx } from '../lib/sfx'
 
 const LIVES = 3
+// Caçada do dia tem fim: 10 rodadas. O infinito fica no treino.
+const DAILY_ROUNDS = 10
+const COMBO_CAP = 3
 const REASON_BONUS = 50
 const CATS: IntrusoCat[] = ['Posição', 'Nacionalidade', 'Clube', 'Era']
 const HELP_KEY = 'encyclobol:intruso:help'
@@ -112,7 +115,7 @@ export default function Intruso() {
 
   // Voltou com a corrida já sem vidas (fechou antes do "Ver resultado"): encerra e grava.
   useEffect(() => {
-    if (saved && saved.lives <= 0) finish()
+    if (saved && (saved.lives <= 0 || saved.index >= DAILY_ROUNDS)) finish()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -131,7 +134,7 @@ export default function Intruso() {
 
   // Avança a rodada (ou encerra se acabaram as vidas) — no clique do jogador.
   function advance() {
-    if (lives <= 0) {
+    if (lives <= 0 || (daily && index + 1 >= DAILY_ROUNDS)) {
       finish()
       return
     }
@@ -146,7 +149,7 @@ export default function Intruso() {
     setSelIntruder(i)
     if (i === current.intruderIdx) {
       const nc = combo + 1
-      const gain = 80 + nc * 20
+      const gain = 80 + Math.min(nc, COMBO_CAP) * 20
       setCombo(nc)
       setBestCombo((b) => Math.max(b, nc))
       setCaught((c) => c + 1)
@@ -260,7 +263,7 @@ export default function Intruso() {
           <div className="mt-6 w-full max-w-xl">
             <div className="flex items-baseline justify-between">
               <span className="font-cond text-[11px] font-600 uppercase tracking-[0.16em] text-ink-500">
-                Rodada {String(index + 1).padStart(2, '0')}
+                Rodada {String(index + 1).padStart(2, '0')}{daily ? ` de ${DAILY_ROUNDS}` : ''}
               </span>
               <p className="font-serif text-lg italic text-ink-700">Quem não pertence ao grupo?</p>
             </div>
@@ -340,7 +343,7 @@ export default function Intruso() {
                   onClick={advance}
                   className="btn-stamp mt-4 bg-grass-600 px-8 py-2.5 text-ink-900 hover:bg-grass-700"
                 >
-                  {lives <= 0 ? 'Ver resultado →' : 'Continuar →'}
+                  {lives <= 0 || (daily && index + 1 >= DAILY_ROUNDS) ? 'Ver resultado →' : 'Continuar →'}
                 </button>
               </div>
             )}
@@ -403,11 +406,11 @@ export default function Intruso() {
                 vale <strong>+{REASON_BONUS}</strong>. Isso é dedução, não chute.
               </li>
               <li>
-                <strong>Acertos seguidos viram combo</strong> e valem cada vez mais. Errar o intruso
+                <strong>Acertos seguidos viram combo</strong> (até x{COMBO_CAP}). Errar o intruso
                 <strong> custa uma vida</strong> — são {LIVES}.
               </li>
               <li>
-                É <strong>sobrevivência</strong>: cace o máximo de intrusos até acabarem as vidas. Os
+                A caçada do dia tem <strong>{DAILY_ROUNDS} rodadas</strong>. No treino é infinito. Os
                 pontos do dia somam num <strong>total</strong> que cresce sempre.
               </li>
         </HelpModal>

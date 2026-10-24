@@ -9,14 +9,20 @@ export type Profile = { nick: string; friend_code: string }
 export type BoardRow = { nick: string; total: number; rank: number; is_me?: boolean; friend_code?: string }
 
 // Mapa: cada jogo guarda o resultado do dia no localStorage com o campo de pontos.
-const TODAY_KEYS: { game: string; key: string; field: string }[] = [
-  { game: 'Tira-Teima', key: 'encyclobol:qse:career-today', field: 'score' },
-  { game: 'Copa de Pênaltis', key: 'encyclobol:copa:today', field: 'points' },
-  { game: 'Quarteto', key: 'encyclobol:quarteto:today', field: 'points' },
-  { game: 'Linha do Tempo', key: 'encyclobol:timeline:today', field: 'points' },
-  { game: 'O Intruso', key: 'encyclobol:intruso:today', field: 'points' },
-  { game: 'Craque Misterioso', key: 'encyclobol:misterioso:today', field: 'points' },
+// `full`: pontos de uma partida excelente no jogo, que viram nota 1.000 no
+// ranking. Assim cada jogo pesa igual — antes Intruso e Linha do Tempo, sem
+// teto, decidiam o ranking sozinhos.
+const TODAY_KEYS: { game: string; key: string; field: string; full: number }[] = [
+  { game: 'Tira-Teima', key: 'encyclobol:qse:career-today', field: 'score', full: 2400 },
+  { game: 'Copa de Pênaltis', key: 'encyclobol:copa:today', field: 'points', full: 1840 },
+  { game: 'Quarteto', key: 'encyclobol:quarteto:today', field: 'points', full: 960 },
+  { game: 'Linha do Tempo', key: 'encyclobol:timeline:today', field: 'points', full: 330 },
+  { game: 'O Intruso', key: 'encyclobol:intruso:today', field: 'points', full: 1840 },
+  { game: 'Craque Misterioso', key: 'encyclobol:misterioso:today', field: 'points', full: 800 },
 ]
+
+// Nota de 0 a 1.000 que vai pro ranking.
+export const rankNote = (points: number, full: number) => Math.max(0, Math.min(1000, Math.round((points / full) * 1000)))
 
 export async function ensureSession() {
   if (!supabase) return null
@@ -70,7 +76,7 @@ export async function syncToday() {
       if (!raw) continue
       const obj = JSON.parse(raw) as Record<string, unknown>
       if (obj.day !== day) continue
-      const pts = Number(obj[t.field] ?? 0)
+      const pts = rankNote(Number(obj[t.field] ?? 0), t.full)
       if (!pts) continue
       rows.push({ user_id: u.user.id, game: t.game, day, points: pts })
     } catch {
