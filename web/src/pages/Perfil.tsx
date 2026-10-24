@@ -3,6 +3,7 @@ import Nav from '../components/landing/Nav'
 import Footer from '../components/landing/Footer'
 import { gatherGames, gatherAchievements, grandTotal } from '../lib/profile'
 import { StreakPanel } from '../components/Streak'
+import { SaveProgress } from '../components/SaveProgress'
 
 function Medal({ on }: { on: boolean }) {
   return (
@@ -56,6 +57,10 @@ export default function Perfil() {
         >
           Ver o ranking →
         </Link>
+
+        <div className="mt-6 max-w-md">
+          <SaveProgress />
+        </div>
 
         {/* Ofensiva */}
         <h2 className="mt-10 font-display text-2xl uppercase tracking-tight text-ink-900">Ofensiva</h2>
@@ -116,7 +121,7 @@ export default function Perfil() {
         </div>
 
         <p className="mt-8 font-serif text-sm italic text-ink-500">
-          Seus números ficam guardados neste aparelho. Entre no ranking pra disputar com os amigos.
+          Os números desta página ficam guardados neste aparelho. Apelido, divisão, time e ranking vão com a conta salva.
         </p>
       </main>
       <Footer />

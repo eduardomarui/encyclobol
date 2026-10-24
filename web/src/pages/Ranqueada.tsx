@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { GameHeader, HelpModal, TimeBar } from '../components/GameShell'
 import { PenaltyScene, makeShot, type Outcome, type Shot } from '../components/PenaltyScene'
 import { duelDefense, duelShot, type PQ } from '../lib/duel'
+import { SaveProgress } from '../components/SaveProgress'
+import { getStreak } from '../lib/streak'
 import { ensureSession, getProfile, rankingEnabled, setNick as apiSetNick } from '../lib/ranking'
 import {
   DIVISIONS,
@@ -46,6 +48,14 @@ function DivisionBadge({ rating, big = false }: { rating: number; big?: boolean 
       {d.name}
     </span>
   )
+}
+
+// Quando lembrar de salvar o progresso: só quando já há algo a perder.
+function saveWhy(rating: number): string | null {
+  if (rating >= DIVISIONS[1].min) return `Você já está na ${divisionOf(rating).name}.`
+  if (getStreak().current >= 3) return `São ${getStreak().current} dias de ofensiva.`
+  if (daysLeftInSeason() <= 3) return 'A temporada está acabando.'
+  return null
 }
 
 export default function Ranqueada() {
@@ -359,6 +369,11 @@ export default function Ranqueada() {
               )}
             </div>
             {msg && <p className="mt-2 text-center font-cond text-xs uppercase tracking-wider text-ochre-400">{msg}</p>}
+            {me && saveWhy(me.rating) && (
+              <div className="mt-3">
+                <SaveProgress nudge why={saveWhy(me.rating)!} />
+              </div>
+            )}
             <button onClick={treinarRobo} className="mt-2 w-full text-center font-cond text-xs font-600 uppercase tracking-wider text-ink-500 hover:text-corn-500">
               Treinar contra o robô (não vale pontos)
             </button>
@@ -485,6 +500,11 @@ export default function Ranqueada() {
                 <div className="mt-3">
                   <DivisionBadge rating={final.rating} big />
                 </div>
+                {final.rating > final.before && divisionOf(final.rating).id !== divisionOf(final.before).id && (
+                  <div className="mt-4">
+                    <SaveProgress nudge why={`Você subiu pra ${divisionOf(final.rating).name}.`} />
+                  </div>
+                )}
               </>
             ) : (
               <p className="mt-3 font-serif italic text-ink-600">{msg || 'Lançando o resultado na súmula…'}</p>

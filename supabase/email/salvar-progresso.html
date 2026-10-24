@@ -1,0 +1,9 @@
+<!-- Supabase → Authentication → Emails → Change email address. Assunto: Seu código pra salvar o progresso no Encyclobol -->
+<div style="background:#0f2a1c;padding:32px 16px;font-family:Arial,Helvetica,sans-serif;color:#eef5f1;text-align:center">
+  <p style="margin:0;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#e6b93b">Encyclobol</p>
+  <h1 style="margin:12px 0 8px;font-size:22px">Salvar meu progresso</h1>
+  <p style="margin:0 0 20px;font-size:15px;color:#bfd2c9">Digite este código no jogo pra guardar seu apelido, divisão e time neste e-mail:</p>
+  <p style="margin:0 auto;display:inline-block;padding:14px 22px;border:2px solid #e6b93b;font-size:32px;letter-spacing:8px;font-weight:bold;color:#eef5f1">{{ .Token }}</p>
+  <p style="margin:24px 0 0;font-size:13px;color:#9bb6ab">Ou, se estiver no mesmo navegador do jogo: <a href="{{ .ConfirmationURL }}" style="color:#e6b93b">confirmar por link</a></p>
+  <p style="margin:24px 0 0;font-size:12px;color:#84a094">Não pediu isso? Pode ignorar este e-mail.</p>
+</div>
